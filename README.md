@@ -47,17 +47,17 @@ Run one workspace with `npx turbo run test --filter=@rimss/api`.
 
 ## API summary
 
-| Method and path                                                                      | Description                                                                          |
-| ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
-| `GET /api/health`                                                                    | Liveness                                                                             |
-| `GET /api/products`                                                                  | Search: `q`, `category`, `color`, `maxPrice`, `discountedOnly`                       |
-| `GET /api/products/:id`, `/api/categories`, `/api/colors`                            | Catalog                                                                              |
-| `POST /api/cart/quote`                                                               | Server-side pricing for `{ items: [{ productId, quantity }] }`                       |
-| `POST /api/orders`, `GET /api/orders/:id`                                            | Create and read an order (status `PENDING_PAYMENT`; payment gateway is out of scope) |
-| `GET /api/push/public-key`, `POST /api/push/subscribe`, `POST /api/push/unsubscribe` | Web Push subscription                                                                |
-| `POST /api/push/send`                                                                | Broadcast; requires header `x-api-key` matching `ADMIN_API_KEY`                      |
+| Method and path                                                                                                               | Description                                                                          |
+| ----------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `GET /api/health`                                                                                                             | Liveness                                                                             |
+| `GET /api/products`                                                                                                           | Search: `q`, `category`, `color`, `maxPrice`, `discountedOnly`                       |
+| `GET /api/products/:id`, `/api/categories`, `/api/colors`                                                                     | Catalog                                                                              |
+| `POST /api/cart/quote`                                                                                                        | Server-side pricing for `{ items: [{ productId, quantity }] }`                       |
+| `POST /api/orders` (optional `Idempotency-Key` header; a replay returns `200` with the original order), `GET /api/orders/:id` | Create and read an order (status `PENDING_PAYMENT`; payment gateway is out of scope) |
+| `GET /api/push/public-key`, `POST /api/push/subscribe`, `POST /api/push/unsubscribe`                                          | Web Push subscription                                                                |
+| `POST /api/push/send`                                                                                                         | Broadcast; requires header `x-api-key` matching `ADMIN_API_KEY`                      |
 
-Configuration (environment variables): `PORT`, `CORS_ORIGINS` (comma-separated), `ADMIN_API_KEY`, `VAPID_SUBJECT`, `DATA_DIR`, `DATABASE_URL`, `DATABASE_SSL`, `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` (see [rimss-api/.env.example](rimss-api/.env.example)).
+Configuration (environment variables): `PORT`, `CORS_ORIGINS` (comma-separated), `ADMIN_API_KEY`, `VAPID_SUBJECT`, `DATA_DIR`, `DATABASE_URL`, `DATABASE_SSL`, `DATABASE_SSL_CA`, `DATABASE_SSL_INSECURE`, `LOG_LEVEL`, `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` (see [rimss-api/.env.example](rimss-api/.env.example)).
 
 ## Postgres
 
@@ -73,3 +73,10 @@ npm run dev
 `GET /api/ready` checks the database connection (503 when it is down). API tests run the Postgres code against an in-process emulator (pg-mem), so no database is needed for `npm test`.
 
 Errors use one envelope: `{ "error": { "code": "...", "message": "..." } }`.
+
+## Containers
+
+- `docker compose up -d postgres` starts only the database (as above).
+- `docker compose --profile full up --build` also builds [rimss-api/Dockerfile](rimss-api/Dockerfile) and [rimss-app/Dockerfile](rimss-app/Dockerfile) (nginx serving the SPA and proxying `/api`) and serves the app on http://localhost:8080. Both images run as non-root and define healthchecks.
+- Logs are JSON (pino) with an `x-request-id` per request; set `LOG_LEVEL` to change verbosity.
+- Postgres TLS verifies certificates by default; provide `DATABASE_SSL_CA` for a private CA.

@@ -5,6 +5,8 @@ import { rateLimit } from 'express-rate-limit';
 import helmet from 'helmet';
 import type { Config } from './config.js';
 import { errorHandler, notFound } from './errors.js';
+import { createLogger, requestLogger } from './logger.js';
+import type { Logger } from './logger.js';
 import type { OrderStore } from './orders.js';
 import type { ProductRepository } from './products.js';
 import type { PushService } from './push.js';
@@ -18,17 +20,19 @@ export interface AppDeps {
   products: ProductRepository;
   orders: OrderStore;
   push: PushService;
+  logger?: Logger;
   /** Optional dependency probe (e.g. database ping) used by /api/ready. */
   ping?: () => Promise<void>;
 }
 
 // Composition root: wires middleware and feature routers; all dependencies are injected.
 export function createApp(
-  { config, products, orders, push, ping }: AppDeps,
+  { config, products, orders, push, ping, logger }: AppDeps,
   opts: { rateLimitMax?: number } = {},
 ): Express {
   const app = express();
   app.disable('x-powered-by');
+  app.use(requestLogger(logger ?? createLogger(config.logLevel)));
   app.use(helmet());
   app.use(cors({ origin: config.corsOrigins }));
   app.use(express.json({ limit: '20kb' }));

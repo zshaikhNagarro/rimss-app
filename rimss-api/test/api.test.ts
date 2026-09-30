@@ -17,7 +17,7 @@ const makePush = (): PushService => ({
 });
 
 function build(env: Record<string, string> = {}, opts?: { rateLimitMax?: number }) {
-  const config = loadConfig({ DATA_DIR: dataDir, ...env });
+  const config = loadConfig({ DATA_DIR: dataDir, LOG_LEVEL: 'silent', ...env });
   const push = makePush();
   const app = createApp(
     {
@@ -215,5 +215,43 @@ describe('platform hardening', () => {
     const blocked = await request(app).get('/api/health').set('Origin', 'https://evil.example');
     expect(allowed.headers['access-control-allow-origin']).toBe('https://shop.example');
     expect(blocked.headers['access-control-allow-origin']).toBeUndefined();
+  });
+});
+
+describe('order idempotency', () => {
+  const body = { items: [{ productId: 'p001', quantity: 1 }] };
+
+  it('replays the original order for a repeated key', async () => {
+    const { app } = build();
+    const first = await request(app)
+      .post('/api/orders')
+      .set('Idempotency-Key', 'key-12345678')
+      .send(body);
+    const second = await request(app)
+      .post('/api/orders')
+      .set('Idempotency-Key', 'key-12345678')
+      .send(body);
+    expect(first.status).toBe(201);
+    expect(second.status).toBe(200);
+    expect(second.body.id).toBe(first.body.id);
+  });
+
+  it('creates distinct orders without a key', async () => {
+    const { app } = build();
+    const a = await request(app).post('/api/orders').send(body);
+    const b = await request(app).post('/api/orders').send(body);
+    expect(a.body.id).not.toBe(b.body.id);
+  });
+
+  it('rejects a malformed key', async () => {
+    const { app } = build();
+    const res = await request(app).post('/api/orders').set('Idempotency-Key', 'x').send(body);
+    expect(res.status).toBe(400);
+  });
+
+  it('sets a request id header', async () => {
+    const { app } = build();
+    const res = await request(app).get('/api/health');
+    expect(res.headers['x-request-id']).toBeTruthy();
   });
 });

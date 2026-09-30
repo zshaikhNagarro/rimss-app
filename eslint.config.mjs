@@ -1,4 +1,6 @@
 import js from '@eslint/js';
+import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript';
+import { importX } from 'eslint-plugin-import-x';
 import globals from 'globals';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
@@ -17,6 +19,15 @@ export default tseslint.config(
     ],
   },
   js.configs.recommended,
+  {
+    files: ['rimss-api/src/**/*.ts', 'rimss-app/src/**/*.{ts,tsx}', 'packages/*/src/**/*.ts'],
+    plugins: { 'import-x': importX },
+    settings: {
+      'import-x/extensions': ['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs'],
+      'import-x/resolver-next': [createTypeScriptImportResolver()],
+    },
+    rules: { 'import-x/no-cycle': 'error' },
+  },
   tseslint.configs.recommended,
   {
     languageOptions: { globals: { ...globals.node } },

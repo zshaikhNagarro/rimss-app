@@ -1,0 +1,15 @@
+**/node_modules
+**/dist
+**/coverage
+**/test-results
+**/playwright-report
+**/storybook-static
+.git
+.turbo
+**/.env
+**/.env.*
+!**/.env.example
+Req_Doc
+deliverables/output
+rimss-api/data/vapid.json
+rimss-api/data/subscriptions.json

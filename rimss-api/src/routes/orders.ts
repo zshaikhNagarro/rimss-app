@@ -1,9 +1,18 @@
 import { orderRequestSchema } from '@rimss/shared';
 import { Router } from 'express';
+import { z } from 'zod';
 import { HttpError } from '../errors.js';
 import { buildQuote } from '../orders.js';
 import type { OrderStore } from '../orders.js';
 import type { ProductRepository } from '../products.js';
+
+// Optional client-generated key that makes retried POST /orders safe.
+const idempotencyKeySchema = z
+  .string()
+  .min(8)
+  .max(100)
+  .regex(/^[\w.:-]+$/)
+  .optional();
 
 export function orderRoutes(products: ProductRepository, orders: OrderStore): Router {
   const router = Router();
@@ -16,7 +25,10 @@ export function orderRoutes(products: ProductRepository, orders: OrderStore): Ro
 
   router.post('/orders', async (req, res) => {
     const { items } = orderRequestSchema.parse(req.body);
-    res.status(201).json(await orders.create(await buildQuote(products, items)));
+    const key = idempotencyKeySchema.parse(req.header('idempotency-key'));
+    const replay = key ? await orders.findByIdempotencyKey(key) : undefined;
+    if (replay) return res.status(200).json(replay);
+    res.status(201).json(await orders.create(await buildQuote(products, items), key));
   });
 
   router.get('/orders/:id', async (req, res) => {

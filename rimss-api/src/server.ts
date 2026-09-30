@@ -2,6 +2,7 @@ import path from 'node:path';
 import pg from 'pg';
 import { createApp } from './app.js';
 import { loadConfig } from './config.js';
+import { createLogger } from './logger.js';
 import {
   createPgOrderStore,
   createPgProductRepository,
@@ -16,6 +17,7 @@ import type { AppDeps } from './app.js';
 
 async function main() {
   const config = loadConfig();
+  const logger = createLogger(config.logLevel);
   const keys = resolveVapidKeys(
     { publicKey: config.vapidPublicKey, privateKey: config.vapidPrivateKey },
     config.databaseUrl ? undefined : path.join(config.dataDir, 'vapid.json'),
@@ -27,24 +29,28 @@ async function main() {
   if (config.databaseUrl) {
     const pool = new pg.Pool({
       connectionString: config.databaseUrl,
-      ssl: config.databaseSsl ? { rejectUnauthorized: false } : undefined,
+      ssl: config.databaseSsl
+        ? { ca: config.databaseSslCa, rejectUnauthorized: !config.databaseSslInsecure }
+        : undefined,
       max: 10,
     });
     await migrate(pool, config.migrationsDir);
     const seeded = await seedProducts(pool, config.dataDir);
-    console.log(`Postgres ready (${seeded} products seeded)`);
+    logger.info({ seeded }, 'postgres ready');
     closeDb = () => pool.end();
     deps = {
       config,
+      logger,
       products: createPgProductRepository(pool),
       orders: createPgOrderStore(pool),
       push: createPushService(keys, createPgSubscriptionStore(pool), config.vapidSubject),
       ping: async () => void (await pool.query('SELECT 1')),
     };
   } else {
-    console.warn('DATABASE_URL not set: using in-memory orders and JSON files (dev only)');
+    logger.warn('DATABASE_URL not set: using in-memory orders and JSON files (dev only)');
     deps = {
       config,
+      logger,
       products: createFileProductRepository(config.dataDir),
       orders: createMemoryOrderStore(),
       push: createPushService(
@@ -56,7 +62,7 @@ async function main() {
   }
 
   const server = createApp(deps).listen(config.port, () => {
-    console.log(`RIMSS API listening on http://localhost:${config.port}`);
+    logger.info({ port: config.port }, 'RIMSS API listening');
   });
 
   for (const signal of ['SIGINT', 'SIGTERM'] as const) {
@@ -65,6 +71,6 @@ async function main() {
 }
 
 main().catch((err) => {
-  console.error('Failed to start', err);
+  createLogger('error').fatal({ err }, 'failed to start');
   process.exit(1);
 });

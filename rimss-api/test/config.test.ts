@@ -10,6 +10,7 @@ describe('loadConfig', () => {
     expect(c.isProduction).toBe(false);
     expect(c.adminApiKey).toBeUndefined();
     expect(c.databaseUrl).toBeUndefined();
+    expect(c.databaseSslInsecure).toBe(false);
   });
 
   it('parses env overrides', () => {

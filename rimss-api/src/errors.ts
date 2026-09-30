@@ -16,7 +16,7 @@ export function notFound(_req: Request, _res: Response, next: NextFunction) {
 }
 
 // Consistent error envelope: { error: { code, message, details? } }
-export function errorHandler(err: unknown, _req: Request, res: Response, _next: NextFunction) {
+export function errorHandler(err: unknown, req: Request, res: Response, _next: NextFunction) {
   if (err instanceof ZodError) {
     return res.status(400).json({
       error: { code: 'VALIDATION_ERROR', message: 'Invalid request', details: err.issues },
@@ -30,6 +30,6 @@ export function errorHandler(err: unknown, _req: Request, res: Response, _next: 
       .status(400)
       .json({ error: { code: 'INVALID_JSON', message: 'Malformed JSON body' } });
   }
-  console.error(err);
+  req.log.error({ err }, 'unhandled error');
   res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: 'Unexpected server error' } });
 }

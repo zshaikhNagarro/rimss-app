@@ -7,6 +7,11 @@ export interface Config {
   adminApiKey?: string;
   databaseUrl?: string;
   databaseSsl: boolean;
+  /** PEM of the CA that signed the database certificate. */
+  databaseSslCa?: string;
+  /** Explicit opt-out of certificate verification; leave false in production. */
+  databaseSslInsecure: boolean;
+  logLevel: string;
   migrationsDir: string;
   vapidPublicKey?: string;
   vapidPrivateKey?: string;
@@ -28,6 +33,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     adminApiKey: env.ADMIN_API_KEY || undefined,
     databaseUrl: env.DATABASE_URL || undefined,
     databaseSsl: env.DATABASE_SSL === 'true',
+    databaseSslCa: env.DATABASE_SSL_CA?.replace(/\\n/g, '\n') || undefined,
+    databaseSslInsecure: env.DATABASE_SSL_INSECURE === 'true',
+    logLevel: env.LOG_LEVEL ?? (env.NODE_ENV === 'test' ? 'silent' : 'info'),
     migrationsDir: path.resolve(import.meta.dirname, '..', 'migrations'),
     vapidPublicKey: env.VAPID_PUBLIC_KEY || undefined,
     vapidPrivateKey: env.VAPID_PRIVATE_KEY || undefined,
