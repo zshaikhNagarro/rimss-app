@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useDeferredValue, useMemo, useState } from 'react';
 import { productService } from '../../../services/productService';
+import { useAsyncResource } from '../../../hooks/useAsyncResource';
 import type { Product, ProductFilters } from '../../../types/product';
 import { ProductCard } from '../../../components/ProductCard';
 import { ProductGridSkeleton } from '../../../components/Skeleton';
@@ -7,45 +8,36 @@ import { ErrorFallback } from '../../../components/ErrorFallback';
 import { filterProducts, sortByPrice } from '../filterProducts';
 import './ProductSearchModule.css';
 
+// Stable reference so memoized values don't recompute on every render while loading.
+const EMPTY_CATALOG: [Product[], string[], string[]] = [[], [], []];
+
 export function ProductSearchModule() {
-  const [allProducts, setAllProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<string[]>([]);
-  const [colors, setColors] = useState<string[]>([]);
   const [filters, setFilters] = useState<ProductFilters>({});
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
-  const [reloadKey, setReloadKey] = useState(0);
 
-  useEffect(() => {
-    let cancelled = false;
-    setStatus('loading');
+  const { data, status, retry } = useAsyncResource(
+    () =>
+      Promise.all([
+        productService.search(),
+        productService.getCategories(),
+        productService.getColors(),
+      ]),
+    [],
+  );
+  const [allProducts, categories, colors] = data ?? EMPTY_CATALOG;
 
-    Promise.all([
-      productService.search(),
-      productService.getCategories(),
-      productService.getColors(),
-    ])
-      .then(([products, cats, cols]) => {
-        if (cancelled) return;
-        setAllProducts(products);
-        setCategories(cats);
-        setColors(cols);
-        setStatus('ready');
-      })
-      .catch(() => {
-        if (!cancelled) setStatus('error');
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [reloadKey]);
+  // Empty and false values clear the filter; 0 is kept as a valid max price.
+  const setFilter = <K extends keyof ProductFilters>(key: K, value: ProductFilters[K] | '') =>
+    setFilters((f) => ({ ...f, [key]: value === '' || value === false ? undefined : value }));
 
   // Filtering happens client-side against the already-fetched catalog so
   // results update instantly as the user types/toggles filters.
+  // Inputs stay responsive; the grid re-filters at lower priority.
+  const deferredFilters = useDeferredValue(filters);
+  const deferredSort = useDeferredValue(sortDirection);
   const visibleProducts = useMemo(
-    () => sortByPrice(filterProducts(allProducts, filters), sortDirection),
-    [allProducts, filters, sortDirection],
+    () => sortByPrice(filterProducts(allProducts, deferredFilters), deferredSort),
+    [allProducts, deferredFilters, deferredSort],
   );
 
   return (
@@ -59,7 +51,7 @@ export function ProductSearchModule() {
             type="search"
             placeholder="e.g. sweater"
             value={filters.q ?? ''}
-            onChange={(e) => setFilters((f) => ({ ...f, q: e.target.value || undefined }))}
+            onChange={(e) => setFilter('q', e.target.value)}
           />
         </label>
 
@@ -67,7 +59,7 @@ export function ProductSearchModule() {
           Category
           <select
             value={filters.category ?? ''}
-            onChange={(e) => setFilters((f) => ({ ...f, category: e.target.value || undefined }))}
+            onChange={(e) => setFilter('category', e.target.value)}
           >
             <option value="">All categories</option>
             {categories.map((c) => (
@@ -80,10 +72,7 @@ export function ProductSearchModule() {
 
         <label className="product-search__field">
           Color
-          <select
-            value={filters.color ?? ''}
-            onChange={(e) => setFilters((f) => ({ ...f, color: e.target.value || undefined }))}
-          >
+          <select value={filters.color ?? ''} onChange={(e) => setFilter('color', e.target.value)}>
             <option value="">All colors</option>
             {colors.map((c) => (
               <option key={c} value={c}>
@@ -101,7 +90,7 @@ export function ProductSearchModule() {
             max={300}
             step={10}
             value={filters.maxPrice ?? 300}
-            onChange={(e) => setFilters((f) => ({ ...f, maxPrice: Number(e.target.value) }))}
+            onChange={(e) => setFilter('maxPrice', Number(e.target.value))}
           />
         </label>
 
@@ -109,9 +98,7 @@ export function ProductSearchModule() {
           <input
             type="checkbox"
             checked={Boolean(filters.discountedOnly)}
-            onChange={(e) =>
-              setFilters((f) => ({ ...f, discountedOnly: e.target.checked || undefined }))
-            }
+            onChange={(e) => setFilter('discountedOnly', e.target.checked)}
           />
           Discounted products only
         </label>
@@ -138,7 +125,7 @@ export function ProductSearchModule() {
           <ErrorFallback
             title="Unable to load products"
             message="Check your connection and try again."
-            onRetry={() => setReloadKey((k) => k + 1)}
+            onRetry={retry}
           />
         )}
         {status === 'ready' && visibleProducts.length === 0 && (

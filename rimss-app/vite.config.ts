@@ -64,6 +64,17 @@ export default defineConfig({
       },
     }),
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        // Long-cached vendor chunk, separate from frequently changing app code.
+        manualChunks: (id) =>
+          /node_modules[\\/](react|react-dom|react-router|react-router-dom|scheduler)[\\/]/.test(id)
+            ? 'react'
+            : undefined,
+      },
+    },
+  },
   test: {
     environment: 'jsdom',
     globals: true,

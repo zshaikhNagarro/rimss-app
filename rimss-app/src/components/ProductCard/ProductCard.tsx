@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { Product } from '../../types/product';
+import { formatPrice, getDiscountedPrice } from '../../utils/price';
 import './ProductCard.css';
 import '../Skeleton/Skeleton.css';
 
-export function ProductCard({ product }: { product: Product }) {
-  const discountedPrice = product.price * (1 - product.discountPercent / 100);
+export const ProductCard = memo(function ProductCard({ product }: { product: Product }) {
+  const discountedPrice = getDiscountedPrice(product.price, product.discountPercent);
   const [imgState, setImgState] = useState<'loading' | 'loaded' | 'error'>('loading');
 
   return (
@@ -18,6 +19,7 @@ export function ProductCard({ product }: { product: Product }) {
             src={product.image}
             alt={product.name}
             loading="lazy"
+            decoding="async"
             style={{ opacity: imgState === 'loaded' ? 1 : 0 }}
             onLoad={() => setImgState('loaded')}
             onError={() => setImgState('error')}
@@ -34,12 +36,12 @@ export function ProductCard({ product }: { product: Product }) {
         <p className="product-card__category">{product.category}</p>
         <h3 className="product-card__name">{product.name}</h3>
         <div className="product-card__price">
-          <span className="product-card__price--current">${discountedPrice.toFixed(2)}</span>
+          <span className="product-card__price--current">{formatPrice(discountedPrice)}</span>
           {product.discountPercent > 0 && (
-            <span className="product-card__price--original">${product.price.toFixed(2)}</span>
+            <span className="product-card__price--original">{formatPrice(product.price)}</span>
           )}
         </div>
       </div>
     </Link>
   );
-}
+});
