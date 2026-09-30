@@ -4,7 +4,6 @@
  */
 
 const ACCENT = '#C65B3C';
-const ACCENT_DARK = '#8f4128';
 const GREY_BORDER = '#B9C0C7';
 const GREY_FILL = '#F4F6F8';
 const BLUE_FILL = '#DCEBFA';

@@ -8,7 +8,6 @@ const {
   TableRow,
   TableCell,
   WidthType,
-  BorderStyle,
   AlignmentType,
   ShadingType,
   PageBreak,

@@ -1,6 +1,6 @@
 // Imported into the generated Workbox service worker (see workbox.importScripts in vite.config.ts).
 self.addEventListener('push', (event) => {
-  let data = {};
+  let data;
   try {
     data = event.data ? event.data.json() : {};
   } catch {
