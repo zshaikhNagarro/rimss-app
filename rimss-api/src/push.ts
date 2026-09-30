@@ -16,15 +16,6 @@ export interface PushService {
   broadcast(payload: { title: string; body: string; url: string }): Promise<number>;
 }
 
-export function createMemorySubscriptionStore(): SubscriptionStore {
-  const subs = new Map<string, PushSubscription>();
-  return {
-    add: async (s) => void subs.set(s.endpoint, s),
-    remove: async (e) => void subs.delete(e),
-    all: async () => [...subs.values()],
-  };
-}
-
 // JSON-file store for running without a database.
 export function createFileSubscriptionStore(file: string): SubscriptionStore {
   const read = (): PushSubscription[] =>

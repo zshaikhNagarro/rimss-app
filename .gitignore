@@ -25,3 +25,14 @@ playwright-report
 # Generated at runtime by the API (VAPID keys, push subscriptions)
 rimss-api/data/vapid.json
 rimss-api/data/subscriptions.json
+
+# Editor / tooling
+*.local
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*

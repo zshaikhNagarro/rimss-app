@@ -14,7 +14,7 @@ export function readSeedProducts(dataDir: string): Product[] {
   return JSON.parse(fs.readFileSync(path.join(dataDir, 'products.json'), 'utf8'));
 }
 
-export function filterProducts(products: Product[], f: ProductFilters): Product[] {
+function filterProducts(products: Product[], f: ProductFilters): Product[] {
   const q = f.q?.trim().toLowerCase();
   return products.filter(
     (p) =>

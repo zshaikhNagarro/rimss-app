@@ -196,16 +196,11 @@ function contentsPage() {
 }
 
 module.exports = {
-  ACCENT,
-  GREY,
   h1,
   h2,
-  h3,
   p,
   bullet,
   pageBreak,
-  cell,
-  row,
   table,
   coverPage,
   darCoverPage,
