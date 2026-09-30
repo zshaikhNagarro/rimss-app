@@ -1,0 +1,20 @@
+{
+  "name": "gen",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "docs": "node render-diagrams.js && node generate-solution-approach.js && node generate-estimation-sheet.js && node generate-strategy-onepager.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "docx": "^9.8.0",
+    "exceljs": "^4.4.0",
+    "jszip": "^3.10.2",
+    "mammoth": "^1.13.0",
+    "sharp": "^0.35.5"
+  }
+}

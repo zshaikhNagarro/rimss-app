@@ -1,0 +1,15 @@
+node_modules
+dist
+.turbo
+coverage
+storybook-static
+test-results
+playwright-report
+package-lock.json
+deliverables/output
+deliverables/gen/assets
+Req_Doc
+rimss-api/data
+*.pdf
+*.docx
+*.xlsx

@@ -1,0 +1,53 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 1.5rem;
+  border-bottom: 1px solid #eee;
+  background: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.header__brand {
+  font-weight: 700;
+  font-size: 1.1rem;
+  text-decoration: none;
+  color: #c65b3c;
+}
+
+.header__brand span {
+  color: #999;
+  font-weight: 400;
+  font-size: 0.85rem;
+  margin-left: 0.3rem;
+}
+
+.header__nav {
+  display: flex;
+  gap: 1.2rem;
+}
+
+.header__nav a {
+  text-decoration: none;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+.header__cart-btn {
+  border: 1px solid #c65b3c;
+  background: none;
+  color: #c65b3c;
+  border-radius: 4px;
+  padding: 0.45rem 0.9rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 560px) {
+  .header {
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+}

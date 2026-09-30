@@ -1,0 +1,27 @@
+node_modules
+dist
+dist-ssr
+.turbo
+*.tsbuildinfo
+coverage
+storybook-static
+blob-report
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.sw?
+.env.*
+!.env.example
+logs
+npm-debug.log*
+*.log
+.DS_Store
+test-results
+playwright-report
+.env
+.env.local
+
+# Generated at runtime by the API (VAPID keys, push subscriptions)
+rimss-api/data/vapid.json
+rimss-api/data/subscriptions.json

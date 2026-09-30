@@ -1,0 +1,98 @@
+[
+  {
+    "id": "p001",
+    "name": "Heritage Wool Sweater",
+    "category": "Sweaters",
+    "color": "Charcoal",
+    "price": 129.0,
+    "discountPercent": 15,
+    "image": "https://picsum.photos/seed/p001/480/480",
+    "description": "Classic heritage wool sweater with ribbed cuffs, crafted for the modern countryside look.",
+    "sizes": ["S", "M", "L", "XL"],
+    "inStock": true
+  },
+  {
+    "id": "p002",
+    "name": "Moleskin Field Jacket",
+    "category": "Jackets",
+    "color": "Olive",
+    "price": 249.0,
+    "discountPercent": 0,
+    "image": "https://picsum.photos/seed/p002/480/480",
+    "description": "Durable moleskin field jacket built for all-weather countryside wear.",
+    "sizes": ["M", "L", "XL"],
+    "inStock": true
+  },
+  {
+    "id": "p003",
+    "name": "Corduroy Trousers",
+    "category": "Trousers",
+    "color": "Tan",
+    "price": 89.0,
+    "discountPercent": 20,
+    "image": "https://picsum.photos/seed/p003/480/480",
+    "description": "Timeless corduroy trousers with a tailored, comfortable fit.",
+    "sizes": ["30", "32", "34", "36"],
+    "inStock": true
+  },
+  {
+    "id": "p004",
+    "name": "Tattersall Check Shirt",
+    "category": "Shirts",
+    "color": "Blue",
+    "price": 69.0,
+    "discountPercent": 10,
+    "image": "https://picsum.photos/seed/p004/480/480",
+    "description": "Signature tattersall check shirt, a brand staple since inception.",
+    "sizes": ["S", "M", "L", "XL"],
+    "inStock": true
+  },
+  {
+    "id": "p005",
+    "name": "Leather Chelsea Boots",
+    "category": "Shoes",
+    "color": "Brown",
+    "price": 189.0,
+    "discountPercent": 0,
+    "image": "https://picsum.photos/seed/p005/480/480",
+    "description": "Handcrafted leather Chelsea boots for a versatile, polished look.",
+    "sizes": ["7", "8", "9", "10", "11"],
+    "inStock": false
+  },
+  {
+    "id": "p006",
+    "name": "Cashmere Scarf",
+    "category": "Accessories",
+    "color": "Grey",
+    "price": 59.0,
+    "discountPercent": 25,
+    "image": "https://picsum.photos/seed/p006/480/480",
+    "description": "Soft cashmere scarf, a lightweight layer for cooler days.",
+    "sizes": ["One Size"],
+    "inStock": true
+  },
+  {
+    "id": "p007",
+    "name": "Kids Corduroy Dungarees",
+    "category": "Kids",
+    "color": "Mustard",
+    "price": 45.0,
+    "discountPercent": 0,
+    "image": "https://picsum.photos/seed/p007/480/480",
+    "description": "Playful corduroy dungarees sized for younger customers.",
+    "sizes": ["2-3Y", "4-5Y", "6-7Y"],
+    "inStock": true
+  },
+  {
+    "id": "p008",
+    "name": "Quilted Gilet",
+    "category": "Jackets",
+    "color": "Navy",
+    "price": 99.0,
+    "discountPercent": 30,
+    "image": "https://picsum.photos/seed/p008/480/480",
+    "description": "Lightweight quilted gilet ideal for layering across seasons.",
+    "sizes": ["S", "M", "L", "XL"],
+    "inStock": true
+  }
+]

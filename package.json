@@ -1,0 +1,31 @@
+{
+  "name": "rimss",
+  "private": true,
+  "version": "1.0.0",
+  "description": "RIMSS monorepo: web app, API and shared contract",
+  "packageManager": "npm@11.17.0",
+  "workspaces": [
+    "packages/*",
+    "rimss-api",
+    "rimss-app",
+    "deliverables/gen"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "oxlint && turbo run lint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "turbo run test",
+    "test:e2e": "turbo run test:e2e",
+    "storybook": "turbo run storybook",
+    "docs": "turbo run docs",
+    "verify": "npm run format:check && npm run lint && turbo run test build"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "oxlint": "^1.81.0",
+    "prettier": "^3.6.2",
+    "turbo": "^2.5.0"
+  }
+}
