@@ -20,3 +20,19 @@ export function track(event: TelemetryEvent): void {
     // Telemetry must never break the app.
   }
 }
+
+/** Ships events to `endpoint` (when set) and captures uncaught errors. Call once at startup. */
+export function initTelemetry(endpoint?: string, target: Window = window): void {
+  if (endpoint) {
+    setTelemetrySink((event) => {
+      const body = JSON.stringify({ ...event, route: target.location.pathname, ts: Date.now() });
+      if (!target.navigator.sendBeacon?.(endpoint, body)) {
+        void fetch(endpoint, { method: 'POST', body, keepalive: true }).catch(() => {});
+      }
+    });
+  }
+  target.addEventListener('error', (e) => track({ type: 'error', message: e.message }));
+  target.addEventListener('unhandledrejection', (e) =>
+    track({ type: 'error', message: String(e.reason) }),
+  );
+}

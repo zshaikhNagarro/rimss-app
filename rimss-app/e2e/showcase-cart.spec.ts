@@ -43,6 +43,23 @@ test.describe('Product showcase and cart', () => {
     await expect(page.getByRole('button', { name: /Proceed to Payment/ })).toBeDisabled();
   });
 
+  test('keeps the cart after a reload', async ({ page }) => {
+    await page.goto('/product/p001');
+    await page.getByRole('button', { name: 'Add to Cart' }).click();
+    await page.reload();
+    await expect(page.getByRole('button', { name: 'Open cart' })).toContainText('Cart (1)');
+  });
+
+  test('places an order from the cart drawer', async ({ page }) => {
+    await page.goto('/product/p001');
+    await page.getByRole('button', { name: 'Add to Cart' }).click();
+    await page.getByRole('button', { name: 'Open cart' }).click();
+    await page.getByRole('button', { name: /Proceed to Payment/ }).click();
+
+    await expect(page.getByRole('status')).toContainText(/Order .+ placed\. Total \$109\.65/);
+    await expect(page.getByRole('button', { name: 'Open cart' })).toContainText('Cart (0)');
+  });
+
   test('closes the cart drawer', async ({ page }) => {
     await page.goto('/');
     await page.getByRole('button', { name: 'Open cart' }).click();

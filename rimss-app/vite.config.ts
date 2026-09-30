@@ -64,6 +64,14 @@ export default defineConfig({
       },
     }),
   ],
+  preview: {
+    // CSP is set by the production host (public/_headers); these are safe for any host.
+    headers: {
+      'X-Content-Type-Options': 'nosniff',
+      'X-Frame-Options': 'DENY',
+      'Referrer-Policy': 'strict-origin-when-cross-origin',
+    },
+  },
   build: {
     rollupOptions: {
       output: {

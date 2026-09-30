@@ -36,3 +36,21 @@ export async function getJson<T>(
   }
   throw lastError instanceof Error ? lastError : new Error('Request failed');
 }
+
+/** POST JSON once with a timeout; never retried because the request is not idempotent. */
+export async function postJson<T>(url: string, body: unknown, timeoutMs = 8000): Promise<T> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+    if (!response.ok) throw new Error(`Request failed with status ${response.status}`);
+    return (await response.json()) as T;
+  } finally {
+    clearTimeout(timer);
+  }
+}

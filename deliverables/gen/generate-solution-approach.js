@@ -217,17 +217,17 @@ const doc = new Document({
             ],
             [
               'State/Business Layer',
-              'Cart logic, filtering/search logic, pricing & discount calculation',
+              'Cart logic, filtering/search logic, pricing & discount calculation, cart persistence (localStorage), URL-synced filters',
               'React Context + pure TypeScript functions (unit tested)',
             ],
             [
               'Service/Integration Layer',
-              'Talks to backend REST APIs with timeout, bounded retry/backoff; manages Web Push subscriptions',
-              'Fetch-based clients (productService, httpClient, pushService)',
+              'Talks to backend REST APIs with timeout, bounded retry/backoff (reads only), short-lived response cache; creates orders; manages Web Push subscriptions',
+              'Fetch-based clients (productService, orderService, httpClient, pushService)',
             ],
             [
               'Cross-cutting Concerns',
-              'Feature flags, telemetry sink, per-module error boundaries, skeleton/fallback UI, service worker (offline cache + push)',
+              'Feature flags, telemetry (beacon + global error capture), per-module error boundaries, skeleton/fallback UI, accessibility (focus-managed dialog, axe checks), CSP/security headers, service worker (offline cache + push)',
               'Config, ModuleErrorBoundary, telemetry, Workbox service worker',
             ],
           ],
@@ -253,14 +253,14 @@ const doc = new Document({
           'User lands on Home/Search screen -> ProductSearchModule fetches catalog + facets from productService',
         ),
         bullet(
-          'User applies filters (category, price, color, discount, name) -> pure filterProducts() re-filters client-side instantly',
+          'User applies filters (category, price, color, discount, name) -> pure filterProducts() re-filters client-side instantly; the name box is debounced and all filters are mirrored into the URL so views are shareable',
         ),
         bullet('User clicks a product -> ProductShowcaseModule fetches product detail by id'),
         bullet(
-          'User clicks Add to Cart -> CartContext dispatches to pure cartLogic functions (addToCart, getCartTotal)',
+          'User clicks Add to Cart -> CartContext dispatches to pure cartLogic functions (addToCart, getCartTotal) and persists the cart to localStorage',
         ),
         bullet(
-          'User opens cart drawer -> reviews items, quantities, discounted totals -> proceeds to Payment Gateway (integration point, out of scope)',
+          'User opens cart drawer -> reviews items, quantities, discounted totals -> places the order (orderService posts ids and quantities; the API prices it and returns an order id). The real payment gateway remains an integration point, out of scope',
         ),
 
         new Paragraph({ children: [new PageBreak()] }),

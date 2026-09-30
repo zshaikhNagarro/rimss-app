@@ -164,7 +164,8 @@ function architectureDiagramSvg() {
   const layers = [
     {
       title: 'Presentation Layer',
-      detail: 'Home, Product Search, Product Showcase, Cart Drawer screens (React + CSS)',
+      detail:
+        'Home, Product Search (URL-synced filters), Product Showcase, accessible Cart Drawer with checkout (React + CSS)',
       fill: BLUE_FILL,
       border: BLUE_BORDER,
     },
@@ -184,21 +185,21 @@ function architectureDiagramSvg() {
     {
       title: 'State / Business Layer',
       detail:
-        'Cart logic, product filtering & pricing - pure, framework-agnostic, unit-tested functions',
+        'Cart logic + localStorage persistence, product filtering & pricing - pure, framework-agnostic, unit-tested functions',
       fill: GREEN_FILL,
       border: GREEN_BORDER,
     },
     {
       title: 'Service / Integration Layer',
       detail:
-        'productService + pushService - fetch client with timeout/retry (httpClient); Web Push subscription management',
+        'productService (60s cache, in-flight de-dup) + orderService + pushService - fetch client with timeout/retry (httpClient)',
       fill: BLUE_FILL,
       border: BLUE_BORDER,
     },
     {
       title: 'Cross-Cutting Concerns',
       detail:
-        'Config & feature flags, telemetry sink, module error boundaries, service worker caching & push - available to every layer',
+        'Config & feature flags, telemetry (beacon + global error capture), error boundaries, CSP/security headers, service worker - available to every layer',
       fill: GREY_FILL,
       border: GREY_BORDER,
     },
@@ -272,12 +273,12 @@ function dataFlowDiagramSvg() {
   ${label(645, 315, '(review & totals)', { size: 11, weight: '400', color: TEXT_MUTED })}
 
   ${box(920, 260, 220, 80, { fill: GREY_FILL, stroke: GREY_BORDER, dashed: true })}
-  ${label(945, 290, 'Payment Gateway', { size: 13 })}
-  ${label(945, 310, '(backend, out of scope)', { size: 11, weight: '400', color: TEXT_MUTED })}
+  ${label(945, 290, 'Orders API', { size: 13 })}
+  ${label(945, 310, 'POST /orders, server-priced', { size: 11, weight: '400', color: TEXT_MUTED })}
 
   ${box(320, 410, 520, 80, { fill: GREEN_FILL, stroke: GREEN_BORDER })}
   ${label(345, 445, 'Order Confirmation', { size: 13 })}
-  ${label(345, 465, 'rendered back to the Web Browser', { size: 11, weight: '400', color: TEXT_MUTED })}
+  ${label(345, 465, 'order id + total shown in the cart drawer; cart cleared (payment gateway out of scope)', { size: 11, weight: '400', color: TEXT_MUTED })}
 
   <!-- flow -->
   ${arrow(240, 150, 320, 150)}
@@ -309,7 +310,7 @@ function dataFlowDiagramSvg() {
 
   <!-- legend -->
   ${box(40, 510, 1120, 40, { fill: '#ffffff', stroke: GREY_BORDER })}
-  ${label(60, 535, '1-3 search & fetch  ·  4-5 add to cart  ·  6-7 checkout & pay  ·  8-9 confirmation returned to user', { size: 11, weight: '400', color: TEXT_MUTED })}
+  ${label(60, 535, '1-3 search & fetch (cached)  ·  4-5 add to cart (persisted)  ·  6-7 place order  ·  8-9 confirmation returned to user', { size: 11, weight: '400', color: TEXT_MUTED })}
 </svg>`;
 }
 
@@ -427,28 +428,28 @@ function componentArchitectureDiagramSvg() {
   ${box(60, 260, 340, 160, { fill: GREEN_FILL, stroke: GREEN_BORDER })}
   ${label(80, 288, 'Product Search Module', { size: 14, weight: '700' })}
   ${box(80, 300, 300, 40, { fill: '#ffffff' })}
-  ${label(95, 325, 'ProductSearchModule.tsx (UI)', { size: 11 })}
+  ${label(95, 325, 'ProductSearchModule.tsx (UI, URL-synced)', { size: 11 })}
   ${box(80, 345, 300, 40, { fill: '#ffffff' })}
-  ${label(95, 370, 'filterProducts.ts (business logic)', { size: 11 })}
+  ${label(95, 370, 'filterProducts.ts + searchParams.ts', { size: 11 })}
 
   ${box(430, 260, 340, 160, { fill: GREEN_FILL, stroke: GREEN_BORDER })}
   ${label(450, 288, 'Product Showcase Module', { size: 14, weight: '700' })}
   ${box(450, 300, 300, 40, { fill: '#ffffff' })}
   ${label(465, 325, 'ProductShowcaseModule.tsx (UI)', { size: 11 })}
   ${box(450, 345, 300, 40, { fill: '#ffffff' })}
-  ${label(465, 370, 'useCart() + productService', { size: 11 })}
+  ${label(465, 370, 'useAsyncResource + useCart()', { size: 11 })}
 
   ${box(800, 260, 340, 160, { fill: GREEN_FILL, stroke: GREEN_BORDER })}
   ${label(820, 288, 'Cart Module', { size: 14, weight: '700' })}
   ${box(820, 300, 300, 40, { fill: '#ffffff' })}
-  ${label(835, 325, 'CartContext.tsx (state)', { size: 11 })}
+  ${label(835, 325, 'CartContext.tsx + cartStorage.ts', { size: 11 })}
   ${box(820, 345, 300, 40, { fill: '#ffffff' })}
   ${label(835, 370, 'cartLogic.ts (pure, unit-tested)', { size: 11 })}
 
   <!-- Service layer -->
   ${box(60, 470, 1080, 90, { fill: BLUE_FILL, stroke: BLUE_BORDER })}
   ${label(80, 500, 'Service Layer', { size: 14, weight: '700' })}
-  ${label(80, 522, 'productService.ts - fetch-based client shared by every module (single integration point to backend APIs)', { size: 12, weight: '400', color: TEXT_MUTED })}
+  ${label(80, 522, 'productService (cached) / orderService / pushService over httpClient - single integration point to backend APIs', { size: 12, weight: '400', color: TEXT_MUTED })}
 
   <!-- Backend -->
   ${box(60, 610, 1080, 70, { fill: GREY_FILL, stroke: GREY_BORDER, dashed: true })}

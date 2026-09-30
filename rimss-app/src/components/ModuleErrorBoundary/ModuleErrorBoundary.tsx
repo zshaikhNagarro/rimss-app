@@ -20,7 +20,11 @@ export class ModuleErrorBoundary extends Component<Props, { failed: boolean }> {
     track({
       type: 'error',
       message: error.message,
-      context: { module: this.props.label, stack: info.componentStack },
+      context: {
+        module: this.props.label,
+        route: window.location.pathname,
+        stack: info.componentStack,
+      },
     });
   }
 

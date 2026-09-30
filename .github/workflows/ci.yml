@@ -14,6 +14,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm audit --omit=dev --audit-level=high
       - run: npm run verify
+      - run: npm run check:size --workspace rimss-app
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e

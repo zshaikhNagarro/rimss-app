@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { productService } from './productService';
 
 const json = (body: unknown) => new Response(JSON.stringify(body), { status: 200 });
@@ -8,9 +8,18 @@ const stubFetch = (impl: () => Promise<Response> = () => Promise.resolve(json([]
   return fn;
 };
 
+beforeEach(() => productService.clearCache());
 afterEach(() => vi.unstubAllGlobals());
 
 describe('productService', () => {
+  it('caches repeated identical requests', async () => {
+    const fetchMock = stubFetch();
+    await productService.search({ q: 'a' });
+    await productService.search({ q: 'a' });
+    await productService.search({ q: 'b' });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
   it('builds a query string from filters', async () => {
     const fetchMock = stubFetch();
     await productService.search({

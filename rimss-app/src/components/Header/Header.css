@@ -14,11 +14,11 @@
   font-weight: 700;
   font-size: 1.1rem;
   text-decoration: none;
-  color: #c65b3c;
+  color: #b04a2d;
 }
 
 .header__brand span {
-  color: #999;
+  color: #6b6b6b;
   font-weight: 400;
   font-size: 0.85rem;
   margin-left: 0.3rem;
@@ -36,9 +36,9 @@
 }
 
 .header__cart-btn {
-  border: 1px solid #c65b3c;
+  border: 1px solid #b04a2d;
   background: none;
-  color: #c65b3c;
+  color: #b04a2d;
   border-radius: 4px;
   padding: 0.45rem 0.9rem;
   cursor: pointer;

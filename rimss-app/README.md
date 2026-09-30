@@ -1,32 +1,29 @@
-# React + TypeScript + Vite
+# rimss-app
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+React 19 + TypeScript + Vite single-page app for YCompany RIMSS. See [ASSIGNMENT_README.md](ASSIGNMENT_README.md) for the module layout and the [root README](../README.md) for monorepo commands.
 
-Currently, two official plugins are available:
+## Scripts
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+| Command              | Purpose                                                    |
+| -------------------- | ---------------------------------------------------------- |
+| `npm run dev`        | Vite dev server (http://localhost:5173)                    |
+| `npm test`           | Vitest unit and component tests                            |
+| `npm run test:e2e`   | Playwright end-to-end tests, including axe accessibility   |
+| `npm run build`      | Type-check and production build                            |
+| `npm run check:size` | Fails when gzipped JS exceeds the budget (run after build) |
+| `npm run storybook`  | Component explorer on http://localhost:6006                |
 
-## React Compiler
+## Configuration
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| Variable                | Purpose                                                        |
+| ----------------------- | -------------------------------------------------------------- |
+| `VITE_API_BASE_URL`     | API base URL (default `http://localhost:4000/api`)             |
+| `VITE_DISABLED_MODULES` | Comma-separated plugin ids to switch off                       |
+| `VITE_TELEMETRY_URL`    | Endpoint that receives error and retry events via `sendBeacon` |
 
-## Expanding the Oxlint configuration
+## Behaviour worth knowing
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
-```
-
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+- Cart contents persist in `localStorage` (`rimss.cart.v1`); malformed entries are discarded on load.
+- Search state (`q`, `category`, `color`, `maxPrice`, `discountedOnly`, `sort`) is mirrored into the URL; the name box is debounced by 250 ms.
+- Catalog GETs are cached for 60 s and de-duplicated; failures are never cached. Order creation is never retried.
+- `public/_headers` carries the production CSP and security headers for Netlify/Cloudflare-style hosts.

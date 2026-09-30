@@ -27,9 +27,21 @@ npm run dev          # shared build, then API (http://localhost:4000) and web (h
 | `npm run test:e2e`  | Playwright end-to-end tests (starts its own API on 4199 and web on 5199) |
 | `npm run storybook` | Storybook on http://localhost:6006                                       |
 | `npm run docs`      | Regenerates the deliverable documents                                    |
-| `npm run verify`    | lint + test + build                                                      |
+| `npm run verify`    | format check + lint + test + build                                       |
 
 Run one workspace with `npx turbo run test --filter=@rimss/api`.
+
+## Code quality
+
+- Git hooks (Husky, installed by `npm install` once the folder is a git repo): `pre-commit` runs lint-staged (oxlint and Prettier on staged files); `commit-msg` enforces [Conventional Commits](https://www.conventionalcommits.org) via commitlint.
+- `.editorconfig` and Prettier keep formatting consistent; `engines` requires Node 22 or newer.
+- CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)): `verify`, `npm audit`, the bundle-size budget (`npm run check:size --workspace rimss-app`) and Playwright e2e including axe accessibility checks.
+
+## Web app behaviour
+
+- The cart persists in `localStorage`; checkout posts ids and quantities to `POST /api/orders` and shows the order id.
+- Search filters and sort live in the URL (for example `/?category=Jackets&sort=desc`).
+- Optional `rimss-app` environment variables: `VITE_API_BASE_URL`, `VITE_DISABLED_MODULES`, `VITE_TELEMETRY_URL`.
 
 ## API summary
 

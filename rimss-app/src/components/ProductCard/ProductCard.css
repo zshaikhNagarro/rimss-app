@@ -34,7 +34,7 @@
   position: absolute;
   top: 0.5rem;
   left: 0.5rem;
-  background: #c65b3c;
+  background: #b04a2d;
   color: #fff;
   font-size: 0.75rem;
   padding: 0.2rem 0.5rem;
@@ -44,7 +44,7 @@
 .product-card__badge--muted {
   left: auto;
   right: 0.5rem;
-  background: #777;
+  background: #666;
 }
 
 .product-card__body {
@@ -55,7 +55,7 @@
   margin: 0 0 0.15rem;
   font-size: 0.75rem;
   text-transform: uppercase;
-  color: #999;
+  color: #6b6b6b;
   letter-spacing: 0.03em;
 }
 
@@ -75,7 +75,7 @@
 }
 
 .product-card__price--original {
-  color: #999;
+  color: #6b6b6b;
   text-decoration: line-through;
   font-size: 0.85rem;
 }
@@ -85,6 +85,6 @@
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: #999;
+  color: #6b6b6b;
   font-size: 0.85rem;
 }

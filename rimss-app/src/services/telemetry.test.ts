@@ -1,5 +1,26 @@
 import { describe, expect, it, vi } from 'vitest';
-import { setTelemetrySink, track } from './telemetry';
+import { initTelemetry, setTelemetrySink, track } from './telemetry';
+
+describe('initTelemetry', () => {
+  it('beacons events with the route and captures uncaught errors', () => {
+    const sendBeacon = vi.fn().mockReturnValue(true);
+    const listeners: Record<string, (e: unknown) => void> = {};
+    const target = {
+      location: { pathname: '/product/p1' },
+      navigator: { sendBeacon },
+      addEventListener: (type: string, fn: (e: unknown) => void) => (listeners[type] = fn),
+    } as unknown as Window;
+
+    initTelemetry('https://t.example/in', target);
+    listeners.error({ message: 'boom' });
+    listeners.unhandledrejection({ reason: 'nope' });
+
+    expect(sendBeacon).toHaveBeenCalledTimes(2);
+    const [url, body] = sendBeacon.mock.calls[0];
+    expect(url).toBe('https://t.example/in');
+    expect(JSON.parse(body)).toMatchObject({ message: 'boom', route: '/product/p1' });
+  });
+});
 
 describe('telemetry', () => {
   it('forwards events to the configured sink', () => {

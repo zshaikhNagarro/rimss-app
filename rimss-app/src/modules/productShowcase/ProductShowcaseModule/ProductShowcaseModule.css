@@ -22,7 +22,7 @@
 
 .product-showcase__category {
   text-transform: uppercase;
-  color: #999;
+  color: #6b6b6b;
   font-size: 0.8rem;
   letter-spacing: 0.04em;
   margin: 0;
@@ -42,11 +42,11 @@
 
 .product-showcase__price--original {
   text-decoration: line-through;
-  color: #999;
+  color: #6b6b6b;
 }
 
 .product-showcase__discount-tag {
-  background: #c65b3c;
+  background: #b04a2d;
   color: #fff;
   border-radius: 4px;
   padding: 0.15rem 0.5rem;
@@ -77,8 +77,8 @@
 }
 
 .product-showcase__size-options button.selected {
-  border-color: #c65b3c;
-  color: #c65b3c;
+  border-color: #b04a2d;
+  color: #b04a2d;
   font-weight: 600;
 }
 
@@ -91,7 +91,7 @@
 }
 
 .product-showcase__add-to-cart {
-  background: #c65b3c;
+  background: #b04a2d;
   color: #fff;
   border: none;
   border-radius: 4px;

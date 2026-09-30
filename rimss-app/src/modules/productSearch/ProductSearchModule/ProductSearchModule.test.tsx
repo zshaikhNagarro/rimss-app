@@ -18,9 +18,9 @@ const products = [
   makeProduct({ id: '2', name: 'Blue Coat', price: 200, category: 'Coats' }),
 ];
 
-const renderModule = () =>
+const renderModule = (initialEntry = '/') =>
   render(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={[initialEntry]}>
       <ProductSearchModule />
     </MemoryRouter>,
   );
@@ -44,15 +44,32 @@ describe('ProductSearchModule', () => {
     renderModule();
     await screen.findByText('Red Hat');
     fireEvent.change(screen.getByPlaceholderText('e.g. sweater'), { target: { value: 'coat' } });
-    expect(screen.queryByText('Red Hat')).toBeNull();
+    await waitFor(() => expect(screen.queryByText('Red Hat')).toBeNull());
     expect(screen.getByText('Blue Coat')).toBeInTheDocument();
+  });
+
+  it('initialises filters from the URL and announces the result count', async () => {
+    renderModule('/?category=Coats&sort=desc');
+    await screen.findByText('Blue Coat');
+    expect(screen.queryByText('Red Hat')).toBeNull();
+    expect(screen.getByLabelText('Category')).toHaveValue('Coats');
+    expect(screen.getByRole('status')).toHaveTextContent('1 products found');
+  });
+
+  it('clears filters', async () => {
+    renderModule('/?q=coat');
+    await screen.findByText('Blue Coat');
+    expect(screen.queryByText('Red Hat')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Clear filters' }));
+    expect(await screen.findByText('Red Hat')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('e.g. sweater')).toHaveValue('');
   });
 
   it('shows an empty state when nothing matches', async () => {
     renderModule();
     await screen.findByText('Red Hat');
     fireEvent.change(screen.getByPlaceholderText('e.g. sweater'), { target: { value: 'zzz' } });
-    expect(screen.getByText('No products match the selected filters.')).toBeInTheDocument();
+    expect(await screen.findByText('No products match the selected filters.')).toBeInTheDocument();
   });
 
   it('shows the error fallback and retries', async () => {

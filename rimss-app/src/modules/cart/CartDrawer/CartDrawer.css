@@ -35,7 +35,7 @@
 
 .cart-drawer__empty {
   margin-top: 1rem;
-  color: #777;
+  color: #666;
 }
 
 .cart-drawer__list {
@@ -84,7 +84,7 @@
 }
 
 .cart-drawer__checkout {
-  background: #c65b3c;
+  background: #b04a2d;
   color: #fff;
   border: none;
   border-radius: 4px;
