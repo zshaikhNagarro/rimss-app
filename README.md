@@ -35,7 +35,9 @@ Run one workspace with `npx turbo run test --filter=@rimss/api`.
 
 - Git hooks (Husky, installed by `npm install` once the folder is a git repo): `pre-commit` runs lint-staged (ESLint and Prettier on staged files); `commit-msg` enforces [Conventional Commits](https://www.conventionalcommits.org) via commitlint.
 - `.editorconfig` and Prettier keep formatting consistent; `engines` requires Node 22 or newer.
-- CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)): `verify`, `npm audit`, the bundle-size budget (`npm run check:size --workspace rimss-app`) and Playwright e2e including axe accessibility checks.
+- Architecture rules are enforced by ESLint (
+  o-restricted-imports, type-aware promise rules); decisions are recorded in [docs/adr](docs/adr).
+- CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)): `verify`, `npm audit`, the bundle-size budget (`npm run check:size --workspace rimss-app`) and Playwright e2e including axe accessibility checks (separate erify and e2e jobs, Turbo cache, concurrency cancel).
 
 ## Web app behaviour
 

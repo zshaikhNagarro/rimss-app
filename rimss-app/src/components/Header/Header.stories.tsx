@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { fn } from 'storybook/test';
-import { CartProvider } from '../../modules/cart/CartContext';
+import { CartProvider } from '../../modules/cart';
 import { Header } from './Header';
 
 const Stub = () => null;

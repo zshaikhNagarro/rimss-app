@@ -5,7 +5,7 @@ import { useAsyncResource } from '../../../hooks/useAsyncResource';
 import { formatPrice, getDiscountedPrice } from '../../../utils/price';
 import { ProductDetailSkeleton } from '../../../components/Skeleton';
 import { ErrorFallback } from '../../../components/ErrorFallback';
-import { useCart } from '../../cart/CartContext';
+import { useCart } from '../../cart';
 import './ProductShowcaseModule.css';
 
 const ADDED_MESSAGE_MS = 2000;

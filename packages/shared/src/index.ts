@@ -1,3 +1,4 @@
+﻿import { z } from 'zod';
 // Contract shared by the web app and the API. Single file so no relative-import extensions are needed.
 
 export interface Product {
@@ -69,3 +70,37 @@ export function discountedUnitPrice(price: number, discountPercent: number): num
 }
 
 export { round2 };
+
+// Request schemas: single source of truth for API validation and client typing.
+export const productFiltersQuerySchema = z.object({
+  q: z.string().max(100).optional(),
+  category: z.string().max(50).optional(),
+  color: z.string().max(50).optional(),
+  maxPrice: z.coerce.number().nonnegative().optional(),
+  discountedOnly: z.enum(['true', 'false']).optional(),
+});
+
+export const orderRequestSchema = z.object({
+  items: z
+    .array(
+      z.object({
+        productId: z.string().min(1).max(50),
+        quantity: z.number().int().min(1).max(99),
+      }),
+    )
+    .min(1)
+    .max(50),
+});
+export type OrderRequest = z.infer<typeof orderRequestSchema>;
+
+export const pushSubscriptionSchema = z.object({
+  endpoint: z.url().refine((u) => u.startsWith('https://'), 'endpoint must be https'),
+  expirationTime: z.number().nullable().optional(),
+  keys: z.object({ p256dh: z.string().min(1), auth: z.string().min(1) }),
+});
+
+export const pushBroadcastSchema = z.object({
+  title: z.string().min(1).max(100).default('RIMSS'),
+  body: z.string().max(300).default(''),
+  url: z.string().startsWith('/').max(200).default('/'),
+});

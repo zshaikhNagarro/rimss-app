@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import type { ModulePlugin } from '../../plugins/PluginRegistry';
-import { useCart } from '../../modules/cart/CartContext';
+import { useCart } from '../../modules/cart';
 import { NotificationToggle } from '../NotificationToggle';
 import './Header.css';
 

@@ -9,7 +9,7 @@ export function UpdatePrompt() {
     updateServiceWorker,
   } = useRegisterSW({
     onRegisteredSW(_url, registration) {
-      registration?.update();
+      void registration?.update();
     },
   });
 

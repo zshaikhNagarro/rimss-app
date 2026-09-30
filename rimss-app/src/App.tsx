@@ -2,8 +2,7 @@ import { Suspense, useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import './modules'; // registers all pluggable functional modules
 import { pluginRegistry } from './plugins/PluginRegistry';
-import { CartProvider } from './modules/cart/CartContext';
-import { CartDrawer } from './modules/cart/CartDrawer';
+import { CartDrawer, CartProvider } from './modules/cart';
 import { Header } from './components/Header';
 import { Loader } from './components/Loader';
 import { ModuleErrorBoundary } from './components/ModuleErrorBoundary';
