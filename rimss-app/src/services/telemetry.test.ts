@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { initTelemetry, setTelemetrySink, track } from './telemetry';
+import { initTelemetry, setTelemetrySink, track, trackEvent } from './telemetry';
 
 describe('initTelemetry', () => {
   it('beacons events with the route and captures uncaught errors', () => {
@@ -23,6 +23,17 @@ describe('initTelemetry', () => {
 });
 
 describe('telemetry', () => {
+  it('trackEvent emits an analytics event with its props', () => {
+    const sink = vi.fn();
+    setTelemetrySink(sink);
+    trackEvent('add_to_cart', { productId: 'p1', quantity: 2 });
+    expect(sink).toHaveBeenCalledWith({
+      type: 'analytics',
+      message: 'add_to_cart',
+      context: { productId: 'p1', quantity: 2 },
+    });
+  });
+
   it('forwards events to the configured sink', () => {
     const sink = vi.fn();
     setTelemetrySink(sink);

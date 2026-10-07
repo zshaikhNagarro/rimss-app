@@ -14,6 +14,7 @@ import { catalogRoutes } from './routes/catalog.js';
 import { healthRoutes } from './routes/health.js';
 import { orderRoutes } from './routes/orders.js';
 import { pushRoutes } from './routes/push.js';
+import { telemetryRoutes } from './routes/telemetry.js';
 
 export interface AppDeps {
   config: Config;
@@ -23,11 +24,13 @@ export interface AppDeps {
   logger?: Logger;
   /** Optional dependency probe (e.g. database ping) used by /api/ready. */
   ping?: () => Promise<void>;
+  /** JSON file receiving frontend telemetry; the endpoint is disabled when unset. */
+  telemetryFile?: string;
 }
 
 // Composition root: wires middleware and feature routers; all dependencies are injected.
 export function createApp(
-  { config, products, orders, push, ping, logger }: AppDeps,
+  { config, products, orders, push, ping, logger, telemetryFile }: AppDeps,
   opts: { rateLimitMax?: number } = {},
 ): Express {
   const app = express();
@@ -49,6 +52,7 @@ export function createApp(
   app.use('/api', catalogRoutes(products));
   app.use('/api', orderRoutes(products, orders));
   app.use('/api', pushRoutes(push, config.adminApiKey));
+  if (telemetryFile) app.use('/api', telemetryRoutes(telemetryFile));
 
   app.use(notFound);
   app.use(errorHandler);

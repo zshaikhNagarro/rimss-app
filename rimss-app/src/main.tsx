@@ -5,7 +5,10 @@ import './index.css';
 import App from './App.tsx';
 import { initTelemetry } from './services/telemetry';
 
-initTelemetry(import.meta.env.VITE_TELEMETRY_URL);
+initTelemetry(
+  import.meta.env.VITE_TELEMETRY_URL ||
+    `${import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000/api'}/telemetry`,
+);
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

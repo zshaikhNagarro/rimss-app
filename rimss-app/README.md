@@ -15,11 +15,11 @@ React 19 + TypeScript + Vite single-page app for YCompany RIMSS. See [ASSIGNMENT
 
 ## Configuration
 
-| Variable                | Purpose                                                        |
-| ----------------------- | -------------------------------------------------------------- |
-| `VITE_API_BASE_URL`     | API base URL (default `http://localhost:4000/api`)             |
-| `VITE_DISABLED_MODULES` | Comma-separated plugin ids to switch off                       |
-| `VITE_TELEMETRY_URL`    | Endpoint that receives error and retry events via `sendBeacon` |
+| Variable                | Purpose                                                                                                                                                        |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `VITE_API_BASE_URL`     | API base URL (default `http://localhost:4000/api`)                                                                                                             |
+| `VITE_DISABLED_MODULES` | Comma-separated plugin ids to switch off                                                                                                                       |
+| `VITE_TELEMETRY_URL`    | Endpoint receiving error, retry and analytics events via `sendBeacon`; defaults to `<VITE_API_BASE_URL>/telemetry` (stored in `rimss-api/data/telemetry.json`) |
 
 ## Behaviour worth knowing
 

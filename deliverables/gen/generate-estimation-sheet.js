@@ -270,10 +270,10 @@ async function main() {
     ],
     [
       'Development Phase',
-      'Telemetry beacon and global error capture; CSP/security headers',
+      'Telemetry/analytics events stored locally via API JSON file; global error capture; log masking; CSP/security headers',
       'Frontend Dev',
       6,
-      'VITE_TELEMETRY_URL, public/_headers',
+      'VITE_TELEMETRY_URL (optional), public/_headers',
     ],
     [
       'Development Phase',
@@ -428,7 +428,7 @@ async function main() {
     ['Assumption', 'Application is served over HTTPS (required for service workers and Web Push)'],
     [
       'Assumption',
-      'Telemetry backend (Sentry/App Insights) is provided by client; only the integration hook is estimated',
+      'Production telemetry/analytics collector (Sentry/App Insights) is provided by client; the sample stores events in a local JSON file via the API',
     ],
   ];
   assumptionRows.forEach((r) => assumptionsSheet.addRow(r));

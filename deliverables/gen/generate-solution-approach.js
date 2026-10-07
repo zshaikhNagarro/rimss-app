@@ -302,7 +302,7 @@ const doc = new Document({
             ],
             [
               'Logging / debuggability / observability',
-              'Single telemetry sink (setTelemetrySink) receives module crashes and HTTP retries; pluggable to Sentry/App Insights without changing call sites.',
+              'Single telemetry sink (setTelemetrySink) receives module crashes, HTTP retries and analytics events (page views, add to cart, checkout); events are stored locally via POST /api/telemetry in a JSON file and the sink is pluggable to Sentry/App Insights without changing call sites. API logs are structured (pino) with request ids and masked credentials.',
             ],
             [
               'Resilience / graceful degradation',

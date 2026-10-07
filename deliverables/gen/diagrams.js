@@ -113,11 +113,12 @@ function technicalDiagramSvg() {
   ${label(1030, 416, 'Search Service', { size: 11 })}
 
   <!-- Mock server used for this working sample -->
-  ${box(620, 480, 320, 90, { fill: GREEN_FILL, stroke: GREEN_BORDER, dashed: true })}
+  ${box(620, 480, 320, 110, { fill: GREEN_FILL, stroke: GREEN_BORDER, dashed: true })}
   ${label(640, 505, 'Mock API Server (this sample)', { size: 13 })}
   ${label(640, 525, 'Node.js + Express + static JSON + Web Push,', { size: 11, weight: '400', color: TEXT_MUTED })}
-  ${label(640, 542, 'stands in for backend during dev/demo', { size: 11, weight: '400', color: TEXT_MUTED })}
-  ${label(640, 559, '(replaced by real APIs above in production)', { size: 11, weight: '400', color: TEXT_MUTED })}
+  ${label(640, 542, 'POST /api/telemetry -> data/telemetry.json,', { size: 11, weight: '400', color: TEXT_MUTED })}
+  ${label(640, 559, 'pino logs with masked credentials', { size: 11, weight: '400', color: TEXT_MUTED })}
+  ${label(640, 576, '(replaced by real APIs above in production)', { size: 11, weight: '400', color: TEXT_MUTED })}
 
   <!-- Arrows -->
   ${arrow(340, 210, 400, 210)}
@@ -198,7 +199,7 @@ function architectureDiagramSvg() {
     {
       title: 'Cross-Cutting Concerns',
       detail:
-        'Config & feature flags, telemetry (beacon + global error capture), error boundaries, CSP/security headers, service worker - available to every layer',
+        'Config & feature flags, telemetry & analytics (local JSON store), masked logging, error boundaries, CSP/security headers, service worker - available to every layer',
       fill: GREY_FILL,
       border: GREY_BORDER,
     },

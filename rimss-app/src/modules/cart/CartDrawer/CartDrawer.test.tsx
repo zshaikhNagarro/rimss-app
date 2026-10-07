@@ -1,6 +1,7 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { makeProduct } from '../../../test/fixtures';
+import { setTelemetrySink } from '../../../services/telemetry';
 import { CartProvider, useCart } from '../CartContext';
 
 const orders = vi.hoisted(() => ({ createOrder: vi.fn() }));
@@ -84,11 +85,19 @@ describe('CartDrawer', () => {
   });
 
   it('places an order, clears the cart and confirms', async () => {
+    const sink = vi.fn();
+    setTelemetrySink(sink);
     orders.createOrder.mockResolvedValue({ id: 'ord-1', total: 100 });
     renderDrawer();
     fireEvent.click(screen.getByText('seed'));
     fireEvent.click(screen.getByRole('button', { name: /Proceed to Payment/ }));
     expect(await screen.findByRole('status')).toHaveTextContent('Order ord-1 placed');
+    expect(sink).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'analytics', message: 'add_to_cart' }),
+    );
+    expect(sink).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'analytics', message: 'checkout_success' }),
+    );
     expect(orders.createOrder).toHaveBeenCalledTimes(1);
     expect(screen.queryByText('Wool Sweater')).toBeNull();
   });

@@ -61,7 +61,10 @@ async function main() {
     };
   }
 
-  const server = createApp(deps).listen(config.port, () => {
+  const server = createApp({
+    ...deps,
+    telemetryFile: path.join(config.dataDir, 'telemetry.json'),
+  }).listen(config.port, () => {
     logger.info({ port: config.port }, 'RIMSS API listening');
   });
 

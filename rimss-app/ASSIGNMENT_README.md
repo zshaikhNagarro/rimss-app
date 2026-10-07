@@ -54,7 +54,7 @@ changes to shell code are required to add or remove a module. See
 
 - Resilient HTTP: src/services/httpClient.ts adds timeout and bounded retry with backoff (5xx and network errors only).
 - Fault isolation: each module route is wrapped in ModuleErrorBoundary so one crash cannot take down the shell.
-- Observability: src/services/telemetry.ts is a single sink (setTelemetrySink) receiving errors and retries; plug in Sentry or App Insights there. Set VITE_TELEMETRY_URL to beacon events (with the current route) to your collector; uncaught errors and unhandled rejections are captured globally.
+- Observability: src/services/telemetry.ts is a single sink (setTelemetrySink) receiving errors, retries and analytics events (`trackEvent`: page_view, add_to_cart, checkout_success/failed); plug in Sentry or App Insights there. By default events are beaconed to the API's `/telemetry` endpoint, which stores them in rimss-api/data/telemetry.json; set VITE_TELEMETRY_URL to use another collector. uncaught errors and unhandled rejections are captured globally.
 - Feature flags: set VITE_DISABLED_MODULES=id1,id2 to disable modules per environment without code changes.
 - Accessibility: the cart drawer is a modal dialog (focus trap, Escape to close, focus restored); Playwright runs axe against WCAG 2.1 A/AA.
 - Security headers: public/_headers ships a Content-Security-Policy and related headers for Netlify/Cloudflare-style hosts; review its connect-src for your API origin.
