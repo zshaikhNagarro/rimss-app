@@ -6,7 +6,25 @@ import { pinoHttp } from 'pino-http';
 
 export type { Logger };
 
-export const createLogger = (level: string): Logger => pino({ level });
+// Masks credentials and push-subscription secrets wherever they appear in log objects.
+export const REDACT_PATHS = [
+  'req.headers.authorization',
+  'req.headers["x-api-key"]',
+  'req.headers.cookie',
+  'res.headers["set-cookie"]',
+  'req.body.endpoint',
+  'req.body.keys',
+  '*.endpoint',
+  '*.keys',
+  '*.p256dh',
+  '*.auth',
+  '*.password',
+  '*.token',
+  '*.apiKey',
+];
+
+export const createLogger = (level: string): Logger =>
+  pino({ level, redact: { paths: REDACT_PATHS, censor: '[REDACTED]' } });
 
 // Reuses a well-formed inbound x-request-id so traces span proxy and API.
 export function requestLogger(logger: Logger) {
@@ -19,6 +37,6 @@ export function requestLogger(logger: Logger) {
       res.setHeader('x-request-id', id);
       return id;
     },
-    redact: ['req.headers.authorization', 'req.headers["x-api-key"]', 'req.headers.cookie'],
+    redact: { paths: REDACT_PATHS, censor: '[REDACTED]' },
   });
 }

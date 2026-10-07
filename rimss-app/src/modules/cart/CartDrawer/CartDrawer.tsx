@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { orderService } from '../../../services/orderService';
+import { trackEvent } from '../../../services/telemetry';
 import { formatPrice } from '../../../utils/price';
 import type { Order } from '../../../types/order';
 import { useCart } from '../CartContext';
@@ -54,10 +55,13 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
   const handleCheckout = async () => {
     setCheckout('submitting');
     try {
-      setOrder(await orderService.createOrder(cart));
+      const created = await orderService.createOrder(cart);
+      trackEvent('checkout_success', { items: cart.items.length, total });
+      setOrder(created);
       clearCart();
       setCheckout('idle');
     } catch {
+      trackEvent('checkout_failed');
       setCheckout('error');
     }
   };

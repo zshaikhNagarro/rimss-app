@@ -9,6 +9,7 @@ import {
 } from 'react';
 import type { CartState } from '../../../types/cart';
 import type { Product } from '../../../types/product';
+import { trackEvent } from '../../../services/telemetry';
 import { loadCart, saveCart } from '../cartStorage';
 import {
   addToCart,
@@ -35,10 +36,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => saveCart(cart), [cart]);
 
-  const addProduct = useCallback<CartContextValue['addProduct']>(
-    (product, quantity = 1) => setCart((prev) => addToCart(prev, product, quantity)),
-    [],
-  );
+  const addProduct = useCallback<CartContextValue['addProduct']>((product, quantity = 1) => {
+    trackEvent('add_to_cart', { productId: product.id, quantity });
+    setCart((prev) => addToCart(prev, product, quantity));
+  }, []);
   const removeProduct = useCallback<CartContextValue['removeProduct']>(
     (productId) => setCart((prev) => removeFromCart(prev, productId)),
     [],

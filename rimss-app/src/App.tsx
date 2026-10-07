@@ -1,5 +1,6 @@
-import { Suspense, useState } from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { Suspense, useEffect, useState } from 'react';
+import { Route, Routes, useLocation } from 'react-router-dom';
+import { trackEvent } from './services/telemetry';
 import './modules'; // registers all pluggable functional modules
 import { pluginRegistry } from './plugins/PluginRegistry';
 import { CartDrawer, CartProvider } from './modules/cart';
@@ -12,6 +13,9 @@ import './App.css';
 function App() {
   const [cartOpen, setCartOpen] = useState(false);
   const modules = pluginRegistry.getAll();
+  const { pathname } = useLocation();
+
+  useEffect(() => trackEvent('page_view', { path: pathname }), [pathname]);
 
   return (
     <CartProvider>

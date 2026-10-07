@@ -1,5 +1,5 @@
 export interface TelemetryEvent {
-  type: 'error' | 'http_retry';
+  type: 'error' | 'http_retry' | 'analytics';
   message: string;
   context?: Record<string, unknown>;
 }
@@ -19,6 +19,11 @@ export function track(event: TelemetryEvent): void {
   } catch {
     // Telemetry must never break the app.
   }
+}
+
+/** Product analytics event (page_view, add_to_cart, checkout, ...). */
+export function trackEvent(name: string, props?: Record<string, unknown>): void {
+  track({ type: 'analytics', message: name, context: props });
 }
 
 /** Ships events to `endpoint` (when set) and captures uncaught errors. Call once at startup. */
