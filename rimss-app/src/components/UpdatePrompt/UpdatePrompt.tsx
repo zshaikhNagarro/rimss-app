@@ -1,5 +1,6 @@
 import { useRegisterSW } from 'virtual:pwa-register/react';
-import './UpdatePrompt.css';
+import { Button } from '../ui';
+import './UpdatePrompt.scss';
 
 /** Surfaces the PWA's offline-ready and new-version-available states to the user. */
 export function UpdatePrompt() {
@@ -26,10 +27,14 @@ export function UpdatePrompt() {
         {needRefresh ? 'A new version of RIMSS is available.' : 'RIMSS is ready to work offline.'}
       </span>
       <div className="update-prompt__actions">
-        {needRefresh && <button onClick={() => updateServiceWorker(true)}>Reload</button>}
-        <button className="update-prompt__dismiss" onClick={close}>
+        {needRefresh && (
+          <Button size="sm" onClick={() => updateServiceWorker(true)}>
+            Reload
+          </Button>
+        )}
+        <Button variant="ghost" size="sm" className="update-prompt__dismiss" onClick={close}>
           Dismiss
-        </button>
+        </Button>
       </div>
     </div>
   );

@@ -1,14 +1,15 @@
 import { Suspense, useEffect, useState } from 'react';
-import { Route, Routes, useLocation } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { trackEvent } from './services/telemetry';
 import './modules'; // registers all pluggable functional modules
 import { pluginRegistry } from './plugins/PluginRegistry';
 import { CartDrawer, CartProvider } from './modules/cart';
+import { Chatbot } from './components/Chatbot';
 import { Header } from './components/Header';
 import { Loader } from './components/Loader';
 import { ModuleErrorBoundary } from './components/ModuleErrorBoundary';
 import { UpdatePrompt } from './components/UpdatePrompt';
-import './App.css';
+import './App.scss';
 
 function App() {
   const [cartOpen, setCartOpen] = useState(false);
@@ -36,12 +37,16 @@ function App() {
                   }
                 />
               ))}
+              <Route path="/product" element={<Navigate to="/" replace />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Suspense>
         </main>
 
         <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
         <UpdatePrompt />
+        <Chatbot />
       </div>
     </CartProvider>
   );

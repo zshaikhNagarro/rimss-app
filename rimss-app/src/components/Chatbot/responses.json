@@ -1,0 +1,77 @@
+{
+  "greeting": "Hi! I'm the RIMSS assistant. Ask me to find a product, or pick an option below.",
+  "fallback": "I'm not sure I understood. Try asking about jackets, sweaters, shoes, gifts, budget picks, or say \"support\" to reach customer care.",
+  "support": "I'll connect you with customer care. Email support@rimss.example or call +1 800 555 0199 (Mon-Fri, 9am-6pm).",
+  "suggestions": ["Best jackets", "Gift ideas", "Budget picks", "Contact support"],
+  "intents": [
+    {
+      "keywords": [
+        "support",
+        "help",
+        "agent",
+        "human",
+        "customer care",
+        "contact",
+        "complaint",
+        "refund",
+        "order status"
+      ],
+      "type": "support"
+    },
+    {
+      "keywords": ["hi", "hello", "hey"],
+      "reply": "Hello! What are you shopping for today?"
+    },
+    {
+      "keywords": ["jacket", "coat", "outerwear"],
+      "reply": "Our top outerwear picks:",
+      "products": [
+        { "name": "Moleskin Field Jacket", "price": 249, "note": "Durable all-season favourite" },
+        { "name": "Quilted Gilet", "price": 99, "note": "Light layering option" }
+      ]
+    },
+    {
+      "keywords": ["sweater", "knit", "wool", "warm", "winter"],
+      "reply": "For warmth, try these:",
+      "products": [
+        { "name": "Heritage Wool Sweater", "price": 129, "note": "Classic wool knit" },
+        { "name": "Cashmere Scarf", "price": 59, "note": "Soft and cosy" }
+      ]
+    },
+    {
+      "keywords": ["shoe", "boot", "footwear"],
+      "reply": "Best footwear:",
+      "products": [{ "name": "Leather Chelsea Boots", "price": 189, "note": "Handcrafted leather" }]
+    },
+    {
+      "keywords": ["shirt", "trouser", "pants", "work", "office"],
+      "reply": "Smart everyday picks:",
+      "products": [
+        { "name": "Tattersall Check Shirt", "price": 69, "note": "Easy to dress up or down" },
+        { "name": "Corduroy Trousers", "price": 89, "note": "Comfortable and durable" }
+      ]
+    },
+    {
+      "keywords": ["kid", "child", "baby", "son", "daughter"],
+      "reply": "For little ones:",
+      "products": [{ "name": "Kids Corduroy Dungarees", "price": 45, "note": "Tough and playful" }]
+    },
+    {
+      "keywords": ["gift", "present", "birthday"],
+      "reply": "Popular gifts:",
+      "products": [
+        { "name": "Cashmere Scarf", "price": 59, "note": "Always a hit" },
+        { "name": "Heritage Wool Sweater", "price": 129, "note": "Timeless choice" }
+      ]
+    },
+    {
+      "keywords": ["cheap", "budget", "affordable", "under", "sale", "best", "recommend"],
+      "reply": "Best value picks:",
+      "products": [
+        { "name": "Kids Corduroy Dungarees", "price": 45, "note": "Lowest price" },
+        { "name": "Cashmere Scarf", "price": 59, "note": "Premium for less" },
+        { "name": "Tattersall Check Shirt", "price": 69, "note": "Great all-rounder" }
+      ]
+    }
+  ]
+}

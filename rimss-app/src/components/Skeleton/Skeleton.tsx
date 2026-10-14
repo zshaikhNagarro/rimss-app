@@ -1,5 +1,7 @@
 import type { CSSProperties } from 'react';
-import './Skeleton.css';
+import { Card } from '../ui';
+import '../ProductCard/ProductCard.scss';
+import './Skeleton.scss';
 
 export function Skeleton({
   width,
@@ -15,14 +17,14 @@ export function Skeleton({
 
 export function ProductCardSkeleton() {
   return (
-    <div className="product-card skeleton-card" aria-hidden="true">
+    <Card className="product-card skeleton-card" aria-hidden="true">
       <div className="product-card__image-wrap skeleton" />
       <div className="product-card__body">
         <Skeleton width="40%" height="0.7rem" />
         <Skeleton width="80%" height="1rem" style={{ marginTop: '0.5rem' }} />
         <Skeleton width="30%" height="1rem" style={{ marginTop: '0.5rem' }} />
       </div>
-    </div>
+    </Card>
   );
 }
 

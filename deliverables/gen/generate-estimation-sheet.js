@@ -1,6 +1,6 @@
 const ExcelJS = require('exceljs');
-const path = require('path');
-const fs = require('fs');
+const path = require('node:path');
+const fs = require('node:fs');
 
 const OUT_DIR = path.join(__dirname, '..', 'output');
 fs.mkdirSync(OUT_DIR, { recursive: true });
@@ -232,6 +232,41 @@ async function main() {
       'Backend Dev',
       8,
       'VAPID, admin-key protected broadcast',
+    ],
+    [
+      'Development Phase',
+      'Backend: PostgreSQL persistence, migrations, idempotent orders, TLS options',
+      'Backend Dev',
+      16,
+      'Idempotency-Key header; JSON fallback without DATABASE_URL',
+    ],
+    [
+      'Development Phase',
+      'Structured logging (pino) with masking, telemetry and analytics endpoint',
+      'Backend Dev',
+      8,
+      'NFR: observability',
+    ],
+    [
+      'Development Phase',
+      'SCSS design tokens and shared ui/ components',
+      'Frontend Dev',
+      12,
+      'Button, Card, Field, Heading, Table',
+    ],
+    [
+      'Development Phase',
+      'Rule-based Chatbot assistant',
+      'Frontend Dev',
+      8,
+      'responses.json intents; localStorage history',
+    ],
+    [
+      'Development Phase',
+      'Dockerfiles and docker-compose (postgres, api, web)',
+      'DevOps',
+      8,
+      'Multi-stage, non-root images',
     ],
     [
       'Development Phase',

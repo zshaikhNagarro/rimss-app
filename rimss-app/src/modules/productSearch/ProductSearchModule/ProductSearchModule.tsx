@@ -7,6 +7,7 @@ import type { Product, ProductFilters } from '../../../types/product';
 import { ProductCard } from '../../../components/ProductCard';
 import { ProductGridSkeleton } from '../../../components/Skeleton';
 import { ErrorFallback } from '../../../components/ErrorFallback';
+import { Button, Card, Field, Heading, Input, Select } from '../../../components/ui';
 import { filterProducts, sortByPrice } from '../filterProducts';
 import {
   parseSearchParams,
@@ -14,7 +15,7 @@ import {
   type SearchState,
   type SortDirection,
 } from '../searchParams';
-import './ProductSearchModule.css';
+import './ProductSearchModule.scss';
 
 // Stable reference so memoized values don't recompute on every render while loading.
 const EMPTY_CATALOG: [Product[], string[], string[]] = [[], [], []];
@@ -91,22 +92,22 @@ export function ProductSearchModule() {
 
   return (
     <section className="product-search">
-      <aside className="product-search__filters">
-        <h2>Filters</h2>
+      <Card as="aside" variant="filled" padding="md" className="product-search__filters">
+        <Heading level={2}>Filters</Heading>
 
-        <label className="product-search__field">
+        <Field>
           Search by name
-          <input
+          <Input
             type="search"
             placeholder="e.g. sweater"
             value={qInput}
             onChange={(e) => setQInput(e.target.value)}
           />
-        </label>
+        </Field>
 
-        <label className="product-search__field">
+        <Field>
           Category
-          <select
+          <Select
             value={filters.category ?? ''}
             onChange={(e) => setFilter('category', e.target.value)}
           >
@@ -116,24 +117,24 @@ export function ProductSearchModule() {
                 {c}
               </option>
             ))}
-          </select>
-        </label>
+          </Select>
+        </Field>
 
-        <label className="product-search__field">
+        <Field>
           Color
-          <select value={filters.color ?? ''} onChange={(e) => setFilter('color', e.target.value)}>
+          <Select value={filters.color ?? ''} onChange={(e) => setFilter('color', e.target.value)}>
             <option value="">All colors</option>
             {colors.map((c) => (
               <option key={c} value={c}>
                 {c}
               </option>
             ))}
-          </select>
-        </label>
+          </Select>
+        </Field>
 
-        <label className="product-search__field">
+        <Field>
           Max price: ${filters.maxPrice ?? 300}
-          <input
+          <Input
             type="range"
             min={0}
             max={300}
@@ -141,29 +142,29 @@ export function ProductSearchModule() {
             value={filters.maxPrice ?? 300}
             onChange={(e) => setFilter('maxPrice', Number(e.target.value))}
           />
-        </label>
+        </Field>
 
-        <label className="product-search__checkbox">
+        <Field inline>
           <input
             type="checkbox"
             checked={Boolean(filters.discountedOnly)}
             onChange={(e) => setFilter('discountedOnly', e.target.checked)}
           />
           Discounted products only
-        </label>
+        </Field>
 
-        <label className="product-search__field">
+        <Field>
           Sort by price
-          <select value={sortDirection} onChange={(e) => setSort(e.target.value as SortDirection)}>
+          <Select value={sortDirection} onChange={(e) => setSort(e.target.value as SortDirection)}>
             <option value="asc">Low to high</option>
             <option value="desc">High to low</option>
-          </select>
-        </label>
+          </Select>
+        </Field>
 
-        <button className="product-search__clear" onClick={clearFilters}>
+        <Button variant="outline" onClick={clearFilters}>
           Clear filters
-        </button>
-      </aside>
+        </Button>
+      </Card>
 
       <div className="product-search__results">
         <p className="visually-hidden" role="status" aria-live="polite">
@@ -178,7 +179,7 @@ export function ProductSearchModule() {
           />
         )}
         {status === 'ready' && visibleProducts.length === 0 && (
-          <p>No products match the selected filters.</p>
+          <p className="product-search__empty">No products match the selected filters.</p>
         )}
         {status === 'ready' && visibleProducts.length > 0 && (
           <div className="product-search__grid">

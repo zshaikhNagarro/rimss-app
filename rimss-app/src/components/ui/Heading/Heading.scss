@@ -1,0 +1,43 @@
+@use '../../../styles' as *;
+
+.ui-heading {
+  font-family: var(--heading);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: normal;
+  margin: 0 0 0.5rem;
+  color: $color-text;
+  overflow-wrap: anywhere;
+
+  &--xl {
+    font-size: 2rem;
+
+    @include down($bp-md) {
+      font-size: 1.5rem;
+    }
+  }
+
+  &--lg {
+    font-size: 1.5rem;
+
+    @include down($bp-md) {
+      font-size: 1.25rem;
+    }
+  }
+
+  &--md {
+    font-size: 1.15rem;
+  }
+
+  &--sm {
+    font-size: 1rem;
+  }
+
+  &--left {
+    text-align: left;
+  }
+
+  &--center {
+    text-align: center;
+  }
+}

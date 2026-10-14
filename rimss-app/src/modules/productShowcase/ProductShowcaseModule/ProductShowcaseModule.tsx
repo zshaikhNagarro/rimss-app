@@ -5,8 +5,9 @@ import { useAsyncResource } from '../../../hooks/useAsyncResource';
 import { formatPrice, getDiscountedPrice } from '../../../utils/price';
 import { ProductDetailSkeleton } from '../../../components/Skeleton';
 import { ErrorFallback } from '../../../components/ErrorFallback';
+import { Button, Heading } from '../../../components/ui';
 import { useCart } from '../../cart';
-import './ProductShowcaseModule.css';
+import './ProductShowcaseModule.scss';
 
 const ADDED_MESSAGE_MS = 2000;
 
@@ -51,7 +52,7 @@ export function ProductShowcaseModule() {
 
       <div className="product-showcase__details">
         <p className="product-showcase__category">{product.category}</p>
-        <h1>{product.name}</h1>
+        <Heading level={1}>{product.name}</Heading>
 
         <div className="product-showcase__price">
           <span className="product-showcase__price--current">{formatPrice(discountedPrice)}</span>
@@ -72,13 +73,15 @@ export function ProductShowcaseModule() {
             <span>Size</span>
             <div className="product-showcase__size-options">
               {product.sizes.map((s) => (
-                <button
+                <Button
                   key={s}
-                  className={s === size ? 'selected' : ''}
+                  variant="secondary"
+                  size="sm"
+                  selected={s === size}
                   onClick={() => setSelectedSize(s)}
                 >
                   {s}
-                </button>
+                </Button>
               ))}
             </div>
           </div>
@@ -88,8 +91,8 @@ export function ProductShowcaseModule() {
           {product.inStock ? 'In stock' : 'Out of stock'}
         </p>
 
-        <button
-          className="product-showcase__add-to-cart"
+        <Button
+          size="lg"
           disabled={!product.inStock}
           onClick={() => {
             addProduct(product, 1);
@@ -97,7 +100,7 @@ export function ProductShowcaseModule() {
           }}
         >
           Add to Cart
-        </button>
+        </Button>
 
         {addedMessage && <p className="product-showcase__added">Added to cart!</p>}
       </div>

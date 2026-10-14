@@ -1,31 +1,32 @@
+@use '../../styles' as *;
+
 .skeleton {
   display: block;
   background: linear-gradient(90deg, #eee 25%, #f7f7f7 50%, #eee 75%);
   background-size: 200% 100%;
   animation: skeleton-shimmer 1.2s ease-in-out infinite;
-  border-radius: 4px;
+  border-radius: $radius-sm;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
 }
 
 .skeleton-card {
   pointer-events: none;
-}
 
-.skeleton-card:hover {
-  box-shadow: none;
-  transform: none;
+  &:hover {
+    box-shadow: none;
+    transform: none;
+  }
 }
 
 @keyframes skeleton-shimmer {
   from {
     background-position: 200% 0;
   }
+
   to {
     background-position: -200% 0;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .skeleton {
-    animation: none;
   }
 }

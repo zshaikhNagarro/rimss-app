@@ -13,8 +13,8 @@ const {
   PageBreak,
   ImageRun,
 } = require('docx');
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 
 const OUT_DIR = path.join(__dirname, '..', 'output');
 const ASSETS_DIR = path.join(__dirname, 'assets');
@@ -33,6 +33,7 @@ const DIAGRAMS = {
   architecture: { file: 'architecture-diagram.png', w: 1200, h: 640 },
   componentArchitecture: { file: 'component-architecture-diagram.png', w: 1200, h: 720 },
   comparison: { file: 'comparison-diagram.png', w: 1200, h: 620 },
+  folderStructure: { file: 'folder-structure-diagram.png', w: 1200, h: 700 },
 };
 
 function diagram(key, { caption } = {}) {
@@ -164,7 +165,7 @@ const doc = new Document({
         new Paragraph({ children: [new PageBreak()] }),
         h1('2. Technical Diagram'),
         p(
-          'The diagram below depicts the client-server topology: Web/Mobile browsers communicate over HTTPS with a CDN-fronted static SPA bundle, which calls backend REST APIs (assumed provided by client per assignment scope) for product, cart and payment operations. A Node.js/Express mock server stands in for those APIs during development and demo.',
+          'The diagram below depicts the client-server topology: Web/Mobile browsers communicate over HTTPS with a CDN-fronted static SPA bundle, which calls backend REST APIs (assumed provided by client per assignment scope) for product, cart and payment operations. A Node.js/Express API (PostgreSQL-backed, with a JSON-file fallback for local use) stands in for those APIs during development and demo.',
         ),
         ...diagram('technical', { caption: 'Figure 1 - RIMSS technical / solution diagram' }),
         p('Diagram legend:'),
@@ -205,8 +206,8 @@ const doc = new Document({
           [
             [
               'Presentation Layer',
-              'Renders UI screens (Home, Search, Showcase, Cart)',
-              'React 19 + TypeScript, CSS Modules',
+              'Renders UI screens (Home, Search, Showcase, Cart, rule-based Chatbot assistant with persisted conversation)',
+              'React 19 + TypeScript, SCSS design tokens, shared ui/ primitives',
             ],
             ['Routing Layer', 'Maps URLs to functional modules', 'React Router'],
             [
@@ -260,6 +261,29 @@ const doc = new Document({
         ),
         bullet(
           'User opens cart drawer -> reviews items, quantities, discounted totals -> places the order (orderService posts ids and quantities; the API prices it and returns an order id). The real payment gateway remains an integration point, out of scope',
+        ),
+
+        h2('4.5 Repository & Application Folder Structure'),
+        p(
+          'The repository is a Turborepo monorepo. The diagram shows where each concern lives so new team members can navigate the code: feature modules under modules/, shared UI primitives under components/ui, integration code under services/, and API routes, repositories and migrations in rimss-api. Both apps depend on the shared contract package @rimss/shared.',
+        ),
+        ...diagram('folderStructure', {
+          caption: 'Figure 7 - Repository and application folder structure',
+        }),
+        bullet(
+          'Chatbot (components/Chatbot): rule-based assistant driven by responses.json; keyword intents return canned replies and product suggestions, and the conversation is persisted in localStorage. No backend dependency.',
+        ),
+        bullet(
+          'Design system (styles/ + components/ui): SCSS variables/mixins and reusable Button, Card, Field, Heading and Table primitives keep modules visually consistent.',
+        ),
+        bullet(
+          'Persistence (rimss-api): PostgreSQL with versioned SQL migrations (001_init, 002_order_idempotency) and seed-on-empty catalog; falls back to JSON files when DATABASE_URL is unset.',
+        ),
+        bullet(
+          'Orders are idempotent: an optional Idempotency-Key header makes checkout retries return the original order.',
+        ),
+        bullet(
+          'Delivery: multi-stage non-root Dockerfiles for web (nginx proxying /api) and API, plus docker-compose with a Postgres service and a full-stack profile.',
         ),
 
         new Paragraph({ children: [new PageBreak()] }),
@@ -414,7 +438,7 @@ const doc = new Document({
   ],
 });
 
-Packer.toBuffer(doc).then((buffer) => {
+void Packer.toBuffer(doc).then((buffer) => {
   fs.writeFileSync(path.join(OUT_DIR, 'RIMSS - Solution Approach - v1.0.docx'), buffer);
   console.log('Solution Approach document generated.');
 });

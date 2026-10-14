@@ -1,0 +1,123 @@
+@use '../../../styles' as *;
+
+.ui-button {
+  font: inherit;
+  font-size: 0.9rem;
+  line-height: 1.3;
+  border: 1px solid transparent;
+  border-radius: var(--ui-radius);
+  padding: 0.45rem 0.9rem;
+  cursor: pointer;
+  text-align: center;
+  // Comfortable touch target on phones.
+  min-height: 2.25rem;
+  transition:
+    background-color $transition-fast,
+    border-color $transition-fast,
+    color $transition-fast,
+    box-shadow $transition-fast,
+    transform $transition-fast;
+
+  @include focus-ring;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: none;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+
+  &--sm {
+    font-size: 0.85rem;
+    padding: 0.35rem 0.7rem;
+    min-height: 2rem;
+  }
+
+  &--lg {
+    font-size: 1rem;
+    padding: 0.7rem 1.25rem;
+    min-height: 2.75rem;
+  }
+
+  &--block {
+    width: 100%;
+  }
+
+  &--primary {
+    background: var(--ui-accent);
+    color: #fff;
+
+    &:hover:not(:disabled) {
+      background: $color-accent-dark;
+    }
+
+    &:disabled {
+      background: var(--ui-accent-disabled);
+    }
+  }
+
+  &--outline {
+    background: #fff;
+    border-color: var(--ui-accent);
+    color: var(--ui-accent);
+
+    &:hover:not(:disabled) {
+      background: $color-accent-tint;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+    }
+  }
+
+  &--secondary {
+    background: #fff;
+    border-color: var(--ui-border);
+    color: $color-text;
+
+    &:hover:not(:disabled) {
+      border-color: var(--ui-accent);
+      color: var(--ui-accent);
+      background: $color-accent-tint;
+    }
+
+    &.selected {
+      border-color: var(--ui-accent);
+      color: var(--ui-accent);
+      font-weight: 600;
+    }
+  }
+
+  &--ghost {
+    background: transparent;
+    color: inherit;
+
+    &:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.12);
+      box-shadow: none;
+    }
+  }
+
+  &--icon {
+    background: none;
+    border: none;
+    padding: 0.25rem;
+    font-size: 1.5rem;
+    line-height: 1;
+    min-width: 2.25rem;
+    color: inherit;
+
+    &:hover:not(:disabled) {
+      color: var(--ui-accent);
+      box-shadow: none;
+      transform: rotate(90deg);
+    }
+  }
+}

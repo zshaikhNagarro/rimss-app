@@ -22,7 +22,7 @@ function box(x, y, w, h, { fill = GREY_FILL, stroke = GREY_BORDER, rx = 8, dashe
 }
 
 function escapeXml(text) {
-  return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return String(text).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
 }
 
 function label(
@@ -114,10 +114,10 @@ function technicalDiagramSvg() {
 
   <!-- Mock server used for this working sample -->
   ${box(620, 480, 320, 110, { fill: GREEN_FILL, stroke: GREEN_BORDER, dashed: true })}
-  ${label(640, 505, 'Mock API Server (this sample)', { size: 13 })}
-  ${label(640, 525, 'Node.js + Express + static JSON + Web Push,', { size: 11, weight: '400', color: TEXT_MUTED })}
-  ${label(640, 542, 'POST /api/telemetry -> data/telemetry.json,', { size: 11, weight: '400', color: TEXT_MUTED })}
-  ${label(640, 559, 'pino logs with masked credentials', { size: 11, weight: '400', color: TEXT_MUTED })}
+  ${label(640, 505, 'RIMSS API (this sample)', { size: 13 })}
+  ${label(640, 525, 'Express + TypeScript, PostgreSQL (JSON fallback), Web Push,', { size: 11, weight: '400', color: TEXT_MUTED })}
+  ${label(640, 542, 'idempotent POST /api/orders, POST /api/telemetry,', { size: 11, weight: '400', color: TEXT_MUTED })}
+  ${label(640, 559, 'pino logs with masked credentials, Docker images', { size: 11, weight: '400', color: TEXT_MUTED })}
   ${label(640, 576, '(replaced by real APIs above in production)', { size: 11, weight: '400', color: TEXT_MUTED })}
 
   <!-- Arrows -->
@@ -165,7 +165,7 @@ function architectureDiagramSvg() {
     {
       title: 'Presentation Layer',
       detail:
-        'Home, Product Search (URL-synced filters), Product Showcase, accessible Cart Drawer with checkout (React + CSS)',
+        'Home, Product Search (URL-synced filters), Product Showcase, Cart Drawer with checkout, Chatbot assistant, shared ui/ primitives (React + SCSS tokens)',
       fill: BLUE_FILL,
       border: BLUE_BORDER,
     },
@@ -542,7 +542,95 @@ function comparisonDiagramSvg() {
 </svg>`;
 }
 
+// ---------------------------------------------------------------------------
+// Diagram 7: Repository & application folder structure
+// ---------------------------------------------------------------------------
+function folderStructureDiagramSvg() {
+  const width = 1200;
+  const height = 700;
+
+  const mono = (x, y, text, { color = TEXT_DARK, weight = '400' } = {}) =>
+    `<text x="${x}" y="${y}" font-family="Consolas, 'Courier New', monospace" font-size="12" xml:space="preserve" font-weight="${weight}" fill="${color}">${escapeXml(text)}</text>`;
+
+  const column = (x, y, w, title, fill, border, lines) => {
+    let out = box(x, y, w, 30 + lines.length * 20 + 14, { fill, stroke: border });
+    out += label(x + 14, y + 22, title, { size: 14, weight: '700' });
+    lines.forEach(([text, note], i) => {
+      const ly = y + 46 + i * 20;
+      out += mono(x + 14, ly, text, { weight: text.endsWith('/') ? '700' : '400' });
+      if (note)
+        out += label(x + 14 + 8 * 29, ly, note, { size: 11, weight: '400', color: TEXT_MUTED });
+    });
+    return out;
+  };
+
+  const app = [
+    ['rimss-app/', 'React 19 + Vite PWA'],
+    ['  src/', ''],
+    ['    main.tsx, App.tsx', 'shell, routes, plugin wiring'],
+    ['    plugins/', 'PluginRegistry'],
+    ['    modules/', 'pluggable features'],
+    ['      productSearch/', 'filters, URL-synced params'],
+    ['      productShowcase/', 'detail + add to cart'],
+    ['      cart/', 'CartContext, CartDrawer, cartLogic'],
+    ['    components/', 'shared UI'],
+    ['      ui/', 'Button, Card, Field, Heading, Table'],
+    ['      Header/, Chatbot/, ProductCard/', ''],
+    ['      Skeleton/, Loader/, ErrorFallback/', ''],
+    ['      ModuleErrorBoundary/', ''],
+    ['      NotificationToggle/, UpdatePrompt/', ''],
+    ['    services/', 'httpClient, product/order/push,'],
+    ['', 'requestCache, telemetry'],
+    ['    hooks/', 'useAsyncResource, useDebouncedValue'],
+    ['    utils/, types/, styles/', 'price, models, SCSS tokens'],
+    ['  public/', 'push-sw.js, _headers'],
+    ['  e2e/', 'Playwright specs'],
+    ['  Dockerfile, nginx.conf', ''],
+  ];
+
+  const api = [
+    ['rimss-api/', 'Express + TypeScript'],
+    ['  src/', ''],
+    ['    server.ts, app.ts', 'bootstrap, wiring'],
+    ['    routes/', 'catalog, orders, push,'],
+    ['', 'telemetry, health'],
+    ['    orders.ts, products.ts', 'domain + repositories'],
+    ['    push.ts, db.ts', 'subscriptions, Postgres'],
+    ['    config.ts, logger.ts', ''],
+    ['    middleware.ts, errors.ts', ''],
+    ['  migrations/', '001_init, 002_order_idempotency'],
+    ['  data/', 'seed + local JSON stores'],
+    ['  test/', 'API, config, push, telemetry'],
+    ['  Dockerfile', ''],
+  ];
+
+  const root = [
+    ['packages/shared/', '@rimss/shared contracts'],
+    ['docs/adr/', 'architecture decisions'],
+    ['deliverables/', 'doc + diagram generators'],
+    ['docker-compose.yml', 'postgres, api, web'],
+    ['turbo.json, eslint.config.mjs', ''],
+  ];
+
+  return `
+<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
+  <rect width="${width}" height="${height}" fill="#ffffff"/>
+  ${DEFS}
+  ${label(40, 40, 'RIMSS - Repository & Application Folder Structure', { size: 22, weight: '700', color: ACCENT })}
+  ${label(40, 64, 'Turborepo monorepo: web app, API and shared contract package', { size: 13, weight: '400', color: TEXT_MUTED })}
+
+  ${column(40, 90, 620, 'Frontend - rimss-app', BLUE_FILL, BLUE_BORDER, app)}
+  ${column(690, 90, 470, 'Backend - rimss-api', AMBER_FILL, AMBER_BORDER, api)}
+  ${column(690, 450, 470, 'Monorepo root', GREEN_FILL, GREEN_BORDER, root)}
+
+  ${box(690, 600, 470, 70, { fill: '#ffffff', stroke: GREY_BORDER })}
+  ${label(704, 624, 'Dependency direction', { size: 13, weight: '700' })}
+  ${label(704, 646, 'rimss-app  ->  @rimss/shared  <-  rimss-api', { size: 12, weight: '400', color: TEXT_MUTED })}
+</svg>`;
+}
+
 module.exports = {
+  folderStructureDiagramSvg,
   technicalDiagramSvg,
   architectureDiagramSvg,
   dataFlowDiagramSvg,

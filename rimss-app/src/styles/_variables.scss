@@ -1,0 +1,25 @@
+// Breakpoints (max-width, mobile-last) and design tokens shared by all SCSS.
+$bp-sm: 480px;
+$bp-md: 720px;
+$bp-lg: 1024px;
+
+$color-accent: #b04a2d;
+$color-accent-disabled: #d9b6ab;
+$color-accent-dark: #933c22;
+$color-accent-tint: #fbf1ee;
+$color-text: #222;
+$color-text-muted: #6b6b6b;
+$color-border: #ddd;
+$color-border-subtle: #eee;
+$color-surface: #fff;
+$color-surface-alt: #fafafa;
+$color-success: #2e7d32;
+$color-danger: #c62828;
+
+$radius-sm: 4px;
+$radius-md: 8px;
+
+$layout-max-width: 1280px;
+
+$transition-fast: 0.18s ease;
+$transition-slow: 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);

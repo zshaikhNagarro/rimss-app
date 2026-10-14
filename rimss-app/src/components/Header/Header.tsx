@@ -2,7 +2,8 @@ import { Link } from 'react-router-dom';
 import type { ModulePlugin } from '../../plugins/PluginRegistry';
 import { useCart } from '../../modules/cart';
 import { NotificationToggle } from '../NotificationToggle';
-import './Header.css';
+import { Button } from '../ui';
+import './Header.scss';
 
 export function Header({
   modules,
@@ -31,9 +32,9 @@ export function Header({
 
       <NotificationToggle />
 
-      <button className="header__cart-btn" onClick={onCartClick} aria-label="Open cart">
+      <Button variant="outline" onClick={onCartClick} aria-label="Open cart">
         Cart ({itemCount})
-      </button>
+      </Button>
     </header>
   );
 }

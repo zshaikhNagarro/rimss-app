@@ -2,15 +2,16 @@ import { memo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { Product } from '../../types/product';
 import { formatPrice, getDiscountedPrice } from '../../utils/price';
-import './ProductCard.css';
-import '../Skeleton/Skeleton.css';
+import { Card, Heading } from '../ui';
+import './ProductCard.scss';
+import '../Skeleton/Skeleton.scss';
 
 export const ProductCard = memo(function ProductCard({ product }: { product: Product }) {
   const discountedPrice = getDiscountedPrice(product.price, product.discountPercent);
   const [imgState, setImgState] = useState<'loading' | 'loaded' | 'error'>('loading');
 
   return (
-    <Link to={`/product/${product.id}`} className="product-card">
+    <Card as={Link} to={`/product/${product.id}`} interactive className="product-card">
       <div className={`product-card__image-wrap ${imgState === 'loading' ? 'skeleton' : ''}`}>
         {imgState === 'error' ? (
           <div className="product-card__image-fallback">No image</div>
@@ -34,7 +35,9 @@ export const ProductCard = memo(function ProductCard({ product }: { product: Pro
       </div>
       <div className="product-card__body">
         <p className="product-card__category">{product.category}</p>
-        <h3 className="product-card__name">{product.name}</h3>
+        <Heading level={3} size="sm" className="product-card__name">
+          {product.name}
+        </Heading>
         <div className="product-card__price">
           <span className="product-card__price--current">{formatPrice(discountedPrice)}</span>
           {product.discountPercent > 0 && (
@@ -42,6 +45,6 @@ export const ProductCard = memo(function ProductCard({ product }: { product: Pro
           )}
         </div>
       </div>
-    </Link>
+    </Card>
   );
 });
