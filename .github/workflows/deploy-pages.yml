@@ -30,7 +30,7 @@ jobs:
           VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
       # SPA fallback so deep links resolve on Pages
       - run: cp rimss-app/dist/index.html rimss-app/dist/404.html
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: rimss-app/dist
 
