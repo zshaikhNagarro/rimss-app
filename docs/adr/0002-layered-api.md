@@ -9,7 +9,7 @@ Status: accepted
 ## Decision
 
 - `app.ts` is only the composition root: security middleware plus feature routers mounted on `/api`.
-- Feature routers live in `src/routes/` (`health`, `catalog`, `orders`, `push`). Each receives its dependencies as arguments: repositories and stores are interfaces (`ProductRepository`, `OrderStore`, `PushService`) with file/memory and Postgres implementations.
+- Feature routers live in `src/routes/` (`health`, `catalog`, `orders`, `push`, `telemetry`). Each receives its dependencies as arguments: repositories and stores are interfaces (`ProductRepository`, `OrderStore`, `PushService`) with file/memory and Postgres implementations.
 - Cross-cutting middleware (`requireAdmin`) lives in `src/middleware.ts`; errors use one envelope defined in `src/errors.ts`.
 - Pricing stays server-side in `buildQuote`; clients send ids and quantities only.
 

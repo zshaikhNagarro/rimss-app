@@ -629,7 +629,136 @@ function folderStructureDiagramSvg() {
 </svg>`;
 }
 
+// ---------------------------------------------------------------------------
+// API architecture: composition root, routers, interfaces, implementations
+// ---------------------------------------------------------------------------
+function apiArchitectureDiagramSvg() {
+  const width = 1200;
+  const height = 640;
+  const routers = ['health', 'catalog', 'orders', 'push', 'telemetry'];
+  const routerBoxes = routers
+    .map(
+      (r, i) =>
+        `${box(60 + i * 215, 250, 195, 44, { fill: '#ffffff' })}${label(157 + i * 215, 278, r, { size: 13, anchor: 'middle' })}`,
+    )
+    .join('\n');
+  const ifaces = [
+    ['ProductRepository', 'Postgres | JSON file'],
+    ['OrderStore', 'Postgres | in-memory'],
+    ['PushService', 'Postgres | JSON subscriptions'],
+  ];
+  const ifaceBoxes = ifaces
+    .map(
+      ([n, impl], i) =>
+        `${box(60 + i * 360, 400, 330, 90, { fill: GREEN_FILL, stroke: GREEN_BORDER })}${label(80 + i * 360, 430, n, { size: 14 })}${label(80 + i * 360, 456, impl, { size: 12, weight: '400', color: TEXT_MUTED })}`,
+    )
+    .join('\n');
+
+  return `
+<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
+  <rect width="${width}" height="${height}" fill="#ffffff"/>
+  ${DEFS}
+  ${label(40, 40, 'RIMSS - API Architecture', { size: 22, weight: '700', color: ACCENT })}
+  ${label(40, 64, 'Composition root, feature routers and injected dependencies', { size: 13, weight: '400', color: TEXT_MUTED })}
+
+  ${box(60, 90, 1080, 60, { fill: AMBER_FILL, stroke: AMBER_BORDER })}
+  ${label(80, 115, 'server.ts', { size: 14 })}
+  ${label(80, 136, 'Reads config; picks Postgres (DATABASE_URL) or JSON/in-memory implementations; runs migrations', { size: 12, weight: '400', color: TEXT_MUTED })}
+
+  ${box(60, 170, 1080, 50, { fill: BLUE_FILL, stroke: BLUE_BORDER })}
+  ${label(80, 200, 'app.ts - security headers, CORS, request id + pino logging, error envelope, /api mount', { size: 13 })}
+
+  ${box(40, 230, 1120, 80, { fill: '#ffffff', stroke: GREY_BORDER, dashed: true })}
+  ${label(60, 246, 'routes/', { size: 11, color: TEXT_MUTED })}
+  ${routerBoxes}
+
+  ${box(40, 330, 1120, 180, { fill: '#ffffff', stroke: GREY_BORDER, dashed: true })}
+  ${label(60, 352, 'Interfaces and implementations', { size: 13 })}
+  ${ifaceBoxes}
+
+  ${arrow(600, 150, 600, 170)}
+  ${arrow(600, 220, 600, 250)}
+  ${arrow(600, 310, 600, 400)}
+
+  ${box(40, 540, 1120, 80, { fill: GREY_FILL, stroke: GREY_BORDER })}
+  ${label(60, 566, 'Cross-cutting', { size: 13, weight: '700' })}
+  ${label(60, 590, 'middleware.ts requireAdmin (ADMIN_API_KEY) | errors.ts one error envelope | buildQuote server-side pricing | @rimss/shared zod schemas', { size: 12, weight: '400', color: TEXT_MUTED })}
+</svg>`;
+}
+
+function sequenceSvg(title, subtitle, actors, steps, height) {
+  const width = 1200;
+  const gap = width / actors.length;
+  const xs = actors.map((_, i) => Math.round(gap * i + gap / 2));
+  const heads = actors
+    .map(
+      (a, i) =>
+        `${box(xs[i] - 90, 90, 180, 40, { fill: BLUE_FILL, stroke: BLUE_BORDER })}${label(xs[i], 116, a, { size: 13, anchor: 'middle' })}<line x1="${xs[i]}" y1="130" x2="${xs[i]}" y2="${height - 30}" stroke="${GREY_BORDER}" stroke-width="1.5" stroke-dasharray="5,4"/>`,
+    )
+    .join('\n');
+  const msgs = steps
+    .map(([from, to, text, dashed], i) => {
+      const y = 170 + i * 46;
+      const x1 = xs[from];
+      const x2 = xs[to];
+      if (from === to) {
+        return `${box(x1 + 10, y - 22, 300, 30, { fill: AMBER_FILL, stroke: AMBER_BORDER })}${label(x1 + 22, y - 2, text, { size: 12, weight: '400' })}`;
+      }
+      return `${arrow(x1, y, x2, y, { dashed })}${label((x1 + x2) / 2, y - 8, text, { size: 12, weight: '400', anchor: 'middle' })}`;
+    })
+    .join('\n');
+  return `
+<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
+  <rect width="${width}" height="${height}" fill="#ffffff"/>
+  ${DEFS}
+  ${label(40, 40, title, { size: 22, weight: '700', color: ACCENT })}
+  ${label(40, 64, subtitle, { size: 13, weight: '400', color: TEXT_MUTED })}
+  ${heads}
+  ${msgs}
+</svg>`;
+}
+
+function checkoutSequenceDiagramSvg() {
+  return sequenceSvg(
+    'RIMSS - Checkout Sequence',
+    'Server-side pricing and idempotent order creation',
+    ['Shopper / Web app', 'API', 'Order store'],
+    [
+      [0, 1, 'POST /api/orders (items, Idempotency-Key)'],
+      [1, 2, 'findByIdempotencyKey'],
+      [2, 1, 'existing order or none', true],
+      [1, 0, 'replay: 200 original order', true],
+      [1, 1, 'new: buildQuote (server-side prices)'],
+      [1, 2, 'create(order, key)'],
+      [1, 0, '201 order', true],
+      [0, 1, 'POST /api/telemetry (checkout_success | checkout_failed)'],
+    ],
+    600,
+  );
+}
+
+function pushSequenceDiagramSvg() {
+  return sequenceSvg(
+    'RIMSS - Web Push Sequence',
+    'Subscription and admin broadcast using VAPID',
+    ['Web app', 'Service worker', 'API', 'Browser push service'],
+    [
+      [0, 2, 'GET /api/push/public-key'],
+      [0, 1, 'pushManager.subscribe(VAPID key)'],
+      [0, 2, 'POST /api/push/subscribe'],
+      [2, 2, 'store subscription'],
+      [2, 3, 'admin: POST /api/push/send -> encrypted push'],
+      [3, 1, 'push event', true],
+      [1, 0, 'show notification', true],
+    ],
+    520,
+  );
+}
+
 module.exports = {
+  apiArchitectureDiagramSvg,
+  checkoutSequenceDiagramSvg,
+  pushSequenceDiagramSvg,
   folderStructureDiagramSvg,
   technicalDiagramSvg,
   architectureDiagramSvg,

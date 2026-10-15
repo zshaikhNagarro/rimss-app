@@ -342,7 +342,7 @@ const doc = new Document({
             ],
             [
               'Unit testability',
-              'Business logic (cart, filtering) as pure functions plus component, service and module tests (Vitest + Testing Library, 77 tests); UI states documented in Storybook.',
+              'Business logic (cart, filtering) as pure functions plus component, service and module tests (Vitest + Testing Library, 160 tests); UI states documented in Storybook.',
             ],
             [
               'CI/CD readiness',

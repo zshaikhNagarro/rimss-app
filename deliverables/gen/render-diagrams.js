@@ -9,6 +9,9 @@ const {
   componentArchitectureDiagramSvg,
   comparisonDiagramSvg,
   folderStructureDiagramSvg,
+  apiArchitectureDiagramSvg,
+  checkoutSequenceDiagramSvg,
+  pushSequenceDiagramSvg,
 } = require('./diagrams');
 
 const OUT_DIR = path.join(__dirname, 'assets');
@@ -22,6 +25,9 @@ const diagrams = {
   'component-architecture-diagram.png': componentArchitectureDiagramSvg,
   'comparison-diagram.png': comparisonDiagramSvg,
   'folder-structure-diagram.png': folderStructureDiagramSvg,
+  'api-architecture-diagram.png': apiArchitectureDiagramSvg,
+  'checkout-sequence-diagram.png': checkoutSequenceDiagramSvg,
+  'push-sequence-diagram.png': pushSequenceDiagramSvg,
 };
 
 async function main() {
