@@ -1,46 +1,14 @@
 import { useEffect, useRef, useState, type SyntheticEvent } from 'react';
 import { createPortal } from 'react-dom';
 import responses from './responses.json';
+import {
+  appendExchange,
+  greeting,
+  loadMessages,
+  saveMessages,
+  type ChatMessage,
+} from './chatLogic';
 import './Chatbot.scss';
-
-interface ChatProduct {
-  name: string;
-  price: number;
-  note: string;
-}
-
-interface ChatMessage {
-  id: number;
-  from: 'user' | 'bot';
-  text: string;
-  products?: ChatProduct[];
-}
-
-const STORAGE_KEY = 'rimss.chat.v1';
-
-const greeting = (): ChatMessage[] => [{ id: 1, from: 'bot', text: responses.greeting }];
-
-function loadMessages(): ChatMessage[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    const parsed = raw ? (JSON.parse(raw) as ChatMessage[]) : null;
-    if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-  } catch {
-    // corrupt or unavailable storage: start fresh
-  }
-  return greeting();
-}
-
-function reply(input: string): Omit<ChatMessage, 'id' | 'from'> {
-  const text = input.toLowerCase();
-  const intent = responses.intents.find((i) => i.keywords.some((k) => text.includes(k)));
-  if (!intent) return { text: responses.fallback };
-  if ('type' in intent && intent.type === 'support') return { text: responses.support };
-  return {
-    text: 'reply' in intent ? (intent.reply as string) : responses.fallback,
-    products: 'products' in intent ? (intent.products as ChatProduct[]) : undefined,
-  };
-}
 
 export function Chatbot() {
   const [open, setOpen] = useState(false);
@@ -49,11 +17,7 @@ export function Chatbot() {
   const bodyRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
-    } catch {
-      // storage full or blocked: chat still works in memory
-    }
+    saveMessages(messages);
   }, [messages]);
 
   useEffect(() => {
@@ -63,14 +27,7 @@ export function Chatbot() {
   const send = (value: string) => {
     const content = value.trim();
     if (!content) return;
-    setMessages((prev) => {
-      const nextId = prev.length ? prev.at(-1)!.id + 1 : 1;
-      return [
-        ...prev,
-        { id: nextId, from: 'user', text: content },
-        { id: nextId + 1, from: 'bot', ...reply(content) },
-      ];
-    });
+    setMessages((prev) => appendExchange(prev, content));
     setDraft('');
   };
 
