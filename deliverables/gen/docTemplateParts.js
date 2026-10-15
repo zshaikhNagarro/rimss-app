@@ -134,7 +134,7 @@ function darCoverPage(projectName, authorName) {
 
 /** Reuses the exact embedded logo and running page furniture from a reference DOCX. */
 async function referencePageFurniture(templateName, runningHeader) {
-  const templatePath = path.join(__dirname, '..', '..', templateName);
+  const templatePath = path.join(__dirname, '..', '..', 'Req_Doc', templateName);
   const template = await JSZip.loadAsync(fs.readFileSync(templatePath));
   const logoEntry = template.file('word/media/image1.png');
   if (!logoEntry) {

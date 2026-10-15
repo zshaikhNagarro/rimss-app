@@ -1,0 +1,14 @@
+@use './styles' as *;
+
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: $color-surface-alt;
+  color: $color-text;
+
+  &__content {
+    flex: 1;
+    min-width: 0;
+  }
+}

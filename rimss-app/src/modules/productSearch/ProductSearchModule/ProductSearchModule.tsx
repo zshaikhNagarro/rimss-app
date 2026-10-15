@@ -1,73 +1,115 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useDeferredValue, useEffect, useMemo, useState } from 'react';
+import { useNavigationType, useSearchParams } from 'react-router-dom';
 import { productService } from '../../../services/productService';
+import { useAsyncResource } from '../../../hooks/useAsyncResource';
+import { useDebouncedValue } from '../../../hooks/useDebouncedValue';
 import type { Product, ProductFilters } from '../../../types/product';
 import { ProductCard } from '../../../components/ProductCard';
 import { ProductGridSkeleton } from '../../../components/Skeleton';
 import { ErrorFallback } from '../../../components/ErrorFallback';
+import { Button, Card, Field, Heading, Input, Select } from '../../../components/ui';
 import { filterProducts, sortByPrice } from '../filterProducts';
-import './ProductSearchModule.css';
+import {
+  parseSearchParams,
+  toSearchParams,
+  type SearchState,
+  type SortDirection,
+} from '../searchParams';
+import './ProductSearchModule.scss';
+
+// Stable reference so memoized values don't recompute on every render while loading.
+const EMPTY_CATALOG: [Product[], string[], string[]] = [[], [], []];
+const SEARCH_DEBOUNCE_MS = 250;
 
 export function ProductSearchModule() {
-  const [allProducts, setAllProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<string[]>([]);
-  const [colors, setColors] = useState<string[]>([]);
-  const [filters, setFilters] = useState<ProductFilters>({});
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
-  const [reloadKey, setReloadKey] = useState(0);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigationType = useNavigationType();
+
+  // Local state drives the controls so they respond instantly; the URL mirrors it
+  // so views are shareable and survive a reload.
+  const [state, setState] = useState<SearchState>(() => parseSearchParams(searchParams));
+  const { filters, sort: sortDirection } = state;
+
+  const { data, status, retry } = useAsyncResource(
+    () =>
+      Promise.all([
+        productService.search(),
+        productService.getCategories(),
+        productService.getColors(),
+      ]),
+    [],
+  );
+  const [allProducts, categories, colors] = data ?? EMPTY_CATALOG;
+
+  // Empty and false values clear the filter; 0 is kept as a valid max price.
+  const setFilter = <K extends keyof ProductFilters>(key: K, value: ProductFilters[K] | '') =>
+    setState((s) => ({
+      ...s,
+      filters: { ...s.filters, [key]: value === '' || value === false ? undefined : value },
+    }));
+  const setSort = (sort: SortDirection) => setState((s) => ({ ...s, sort }));
+
+  const [qInput, setQInput] = useState(filters.q ?? '');
+  const debouncedQ = useDebouncedValue(qInput, SEARCH_DEBOUNCE_MS);
+  useEffect(() => {
+    setState((s) =>
+      (s.filters.q ?? '') === debouncedQ
+        ? s
+        : { ...s, filters: { ...s.filters, q: debouncedQ || undefined } },
+    );
+  }, [debouncedQ]);
 
   useEffect(() => {
-    let cancelled = false;
-    setStatus('loading');
+    const next = toSearchParams(state).toString();
+    if (next !== searchParams.toString()) setSearchParams(next, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state]);
 
-    Promise.all([
-      productService.search(),
-      productService.getCategories(),
-      productService.getColors(),
-    ])
-      .then(([products, cats, cols]) => {
-        if (cancelled) return;
-        setAllProducts(products);
-        setCategories(cats);
-        setColors(cols);
-        setStatus('ready');
-      })
-      .catch(() => {
-        if (!cancelled) setStatus('error');
-      });
+  // Only back/forward (POP) navigation should overwrite local state from the URL.
+  useEffect(() => {
+    if (navigationType !== 'POP') return;
+    const fromUrl = parseSearchParams(searchParams);
+    if (toSearchParams(fromUrl).toString() === toSearchParams(state).toString()) return;
+    setState(fromUrl);
+    setQInput(fromUrl.filters.q ?? '');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
-    return () => {
-      cancelled = true;
-    };
-  }, [reloadKey]);
+  const clearFilters = () => {
+    setQInput('');
+    setState({ filters: {}, sort: 'asc' });
+  };
 
   // Filtering happens client-side against the already-fetched catalog so
   // results update instantly as the user types/toggles filters.
+  // Inputs stay responsive; the grid re-filters at lower priority.
+  const deferredFilters = useDeferredValue(filters);
+  const deferredSort = useDeferredValue(sortDirection);
   const visibleProducts = useMemo(
-    () => sortByPrice(filterProducts(allProducts, filters), sortDirection),
-    [allProducts, filters, sortDirection],
+    () => sortByPrice(filterProducts(allProducts, deferredFilters), deferredSort),
+    [allProducts, deferredFilters, deferredSort],
   );
 
   return (
     <section className="product-search">
-      <aside className="product-search__filters">
-        <h2>Filters</h2>
+      <Card as="aside" variant="filled" padding="md" className="product-search__filters">
+        <Heading level={2}>Filters</Heading>
 
-        <label className="product-search__field">
+        <Field>
           Search by name
-          <input
+          <Input
             type="search"
             placeholder="e.g. sweater"
-            value={filters.q ?? ''}
-            onChange={(e) => setFilters((f) => ({ ...f, q: e.target.value || undefined }))}
+            value={qInput}
+            onChange={(e) => setQInput(e.target.value)}
           />
-        </label>
+        </Field>
 
-        <label className="product-search__field">
+        <Field>
           Category
-          <select
+          <Select
             value={filters.category ?? ''}
-            onChange={(e) => setFilters((f) => ({ ...f, category: e.target.value || undefined }))}
+            onChange={(e) => setFilter('category', e.target.value)}
           >
             <option value="">All categories</option>
             {categories.map((c) => (
@@ -75,74 +117,69 @@ export function ProductSearchModule() {
                 {c}
               </option>
             ))}
-          </select>
-        </label>
+          </Select>
+        </Field>
 
-        <label className="product-search__field">
+        <Field>
           Color
-          <select
-            value={filters.color ?? ''}
-            onChange={(e) => setFilters((f) => ({ ...f, color: e.target.value || undefined }))}
-          >
+          <Select value={filters.color ?? ''} onChange={(e) => setFilter('color', e.target.value)}>
             <option value="">All colors</option>
             {colors.map((c) => (
               <option key={c} value={c}>
                 {c}
               </option>
             ))}
-          </select>
-        </label>
+          </Select>
+        </Field>
 
-        <label className="product-search__field">
+        <Field>
           Max price: ${filters.maxPrice ?? 300}
-          <input
+          <Input
             type="range"
             min={0}
             max={300}
             step={10}
             value={filters.maxPrice ?? 300}
-            onChange={(e) => setFilters((f) => ({ ...f, maxPrice: Number(e.target.value) }))}
+            onChange={(e) => setFilter('maxPrice', Number(e.target.value))}
           />
-        </label>
+        </Field>
 
-        <label className="product-search__checkbox">
+        <Field inline>
           <input
             type="checkbox"
             checked={Boolean(filters.discountedOnly)}
-            onChange={(e) =>
-              setFilters((f) => ({ ...f, discountedOnly: e.target.checked || undefined }))
-            }
+            onChange={(e) => setFilter('discountedOnly', e.target.checked)}
           />
           Discounted products only
-        </label>
+        </Field>
 
-        <label className="product-search__field">
+        <Field>
           Sort by price
-          <select
-            value={sortDirection}
-            onChange={(e) => setSortDirection(e.target.value as 'asc' | 'desc')}
-          >
+          <Select value={sortDirection} onChange={(e) => setSort(e.target.value as SortDirection)}>
             <option value="asc">Low to high</option>
             <option value="desc">High to low</option>
-          </select>
-        </label>
+          </Select>
+        </Field>
 
-        <button className="product-search__clear" onClick={() => setFilters({})}>
+        <Button variant="outline" onClick={clearFilters}>
           Clear filters
-        </button>
-      </aside>
+        </Button>
+      </Card>
 
       <div className="product-search__results">
+        <p className="visually-hidden" role="status" aria-live="polite">
+          {status === 'ready' ? `${visibleProducts.length} products found` : ''}
+        </p>
         {status === 'loading' && <ProductGridSkeleton />}
         {status === 'error' && (
           <ErrorFallback
             title="Unable to load products"
             message="Check your connection and try again."
-            onRetry={() => setReloadKey((k) => k + 1)}
+            onRetry={retry}
           />
         )}
         {status === 'ready' && visibleProducts.length === 0 && (
-          <p>No products match the selected filters.</p>
+          <p className="product-search__empty">No products match the selected filters.</p>
         )}
         {status === 'ready' && visibleProducts.length > 0 && (
           <div className="product-search__grid">

@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { makeProduct } from '../../../test/fixtures';
@@ -37,6 +37,30 @@ describe('ProductShowcaseModule', () => {
     renderModule();
     fireEvent.click(await screen.findByRole('button', { name: 'Add to Cart' }));
     expect(screen.getByText('Added to cart!')).toBeInTheDocument();
+  });
+
+  it('hides the confirmation after a delay', async () => {
+    svc.getById.mockResolvedValue(makeProduct());
+    renderModule();
+    const button = await screen.findByRole('button', { name: 'Add to Cart' });
+    vi.useFakeTimers();
+    try {
+      fireEvent.click(button);
+      expect(screen.getByText('Added to cart!')).toBeInTheDocument();
+      act(() => void vi.advanceTimersByTime(2000));
+      expect(screen.queryByText('Added to cart!')).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('defaults to the first size and lets the user pick another', async () => {
+    svc.getById.mockResolvedValue(makeProduct());
+    renderModule();
+    expect(await screen.findByRole('button', { name: 'S' })).toHaveClass('selected');
+    fireEvent.click(screen.getByRole('button', { name: 'L' }));
+    expect(screen.getByRole('button', { name: 'L' })).toHaveClass('selected');
+    expect(screen.getByRole('button', { name: 'S' })).not.toHaveClass('selected');
   });
 
   it('disables add-to-cart when out of stock', async () => {

@@ -1,5 +1,4 @@
 const sharp = require('sharp');
-const fs = require('fs');
 const path = require('path');
 
 const OUT_DIR = path.join(__dirname, '..', 'public');

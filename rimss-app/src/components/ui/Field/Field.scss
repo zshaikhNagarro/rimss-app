@@ -1,0 +1,49 @@
+@use '../../../styles' as *;
+
+.ui-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  color: #444;
+  text-align: left;
+
+  &--inline {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.4rem;
+  }
+}
+
+.ui-control {
+  font: inherit;
+  font-size: 0.9rem;
+  padding: 0.4rem;
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius);
+  max-width: 100%;
+  background: #fff;
+  transition:
+    border-color $transition-fast,
+    box-shadow $transition-fast;
+
+  &:hover {
+    border-color: #bbb;
+  }
+
+  &:focus {
+    border-color: var(--ui-accent);
+    box-shadow: 0 0 0 3px rgba(176, 74, 45, 0.15);
+  }
+
+  @include focus-ring;
+
+  // Avoid iOS zoom-on-focus.
+  @include down($bp-md) {
+    font-size: 1rem;
+  }
+
+  &--compact {
+    width: 3.5rem;
+  }
+}

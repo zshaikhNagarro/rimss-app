@@ -1,4 +1,5 @@
-import './ErrorFallback.css';
+import { Button, Heading } from '../ui';
+import './ErrorFallback.scss';
 
 interface Props {
   title?: string;
@@ -15,9 +16,11 @@ export function ErrorFallback({
 }: Props) {
   return (
     <div className="error-fallback" role="alert">
-      <h3>{title}</h3>
+      <Heading level={3} align="center">
+        {title}
+      </Heading>
       <p>{message}</p>
-      {onRetry && <button onClick={onRetry}>{actionLabel}</button>}
+      {onRetry && <Button onClick={onRetry}>{actionLabel}</Button>}
     </div>
   );
 }

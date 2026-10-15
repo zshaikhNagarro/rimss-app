@@ -1,6 +1,6 @@
 const { Document, Packer } = require('docx');
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 const {
   h1,
   h2,
@@ -61,6 +61,12 @@ referencePageFurniture('General Document.docx', 'RIMSS')
             ),
             bullet(
               'Mock Node.js/Express API server with static JSON backs frontend development in parallel with backend delivery.',
+            ),
+            bullet(
+              'Persistence and delivery: PostgreSQL with SQL migrations (JSON fallback locally), idempotent order creation, structured pino logging, and Docker/docker-compose images.',
+            ),
+            bullet(
+              'UX additions: SCSS design tokens with shared ui/ primitives, and a rule-based Chatbot assistant.',
             ),
             bullet(
               'Route-level code splitting (React.lazy/Suspense) and a full PWA setup (offline caching, installable manifest, update prompts).',
@@ -173,10 +179,11 @@ referencePageFurniture('General Document.docx', 'RIMSS')
       ],
     });
 
-    return Packer.toBuffer(doc).then((buffer) => {
-      fs.writeFileSync(path.join(OUT_DIR, 'RIMSS - Build Strategy Document.docx'), buffer);
-      console.log('Build Strategy document generated (General Document template).');
-    });
+    return Packer.toBuffer(doc);
+  })
+  .then((buffer) => {
+    fs.writeFileSync(path.join(OUT_DIR, 'RIMSS - Build Strategy Document.docx'), buffer);
+    console.log('Build Strategy document generated (General Document template).');
   })
   .catch((error) => {
     console.error('Failed to generate build strategy document:', error);

@@ -4,6 +4,16 @@
   "version": "1.0.0",
   "description": "RIMSS monorepo: web app, API and shared contract",
   "packageManager": "npm@11.17.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "lint-staged": {
+    "*.{js,cjs,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,css,html,yml,yaml}": "prettier --write"
+  },
   "workspaces": [
     "packages/*",
     "rimss-api",
@@ -14,7 +24,7 @@
     "prepare": "husky || exit 0",
     "dev": "turbo run dev",
     "build": "turbo run build",
-    "lint": "oxlint && turbo run lint",
+    "lint": "eslint . && turbo run lint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "turbo run test",
@@ -24,9 +34,19 @@
     "verify": "npm run format:check && npm run lint && turbo run test build"
   },
   "devDependencies": {
+    "@commitlint/cli": "^21.2.3",
+    "@commitlint/config-conventional": "^21.2.3",
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.11.0",
+    "eslint-import-resolver-typescript": "^4.4.5",
+    "eslint-plugin-import-x": "^4.17.1",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.7",
+    "globals": "^17.12.0",
     "husky": "^9.1.7",
-    "oxlint": "^1.81.0",
+    "lint-staged": "^17.6.0",
     "prettier": "^3.6.2",
-    "turbo": "^2.5.0"
+    "turbo": "^2.5.0",
+    "typescript-eslint": "^8.71.0"
   }
 }

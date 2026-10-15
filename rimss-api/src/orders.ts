@@ -37,7 +37,9 @@ export async function buildQuote(repo: ProductRepository, items: OrderLineInput[
 }
 
 export interface OrderStore {
-  create(quote: Quote): Promise<Order>;
+  /** A repeated idempotencyKey returns the order created by the first call. */
+  create(quote: Quote, idempotencyKey?: string): Promise<Order>;
+  findByIdempotencyKey(key: string): Promise<Order | undefined>;
   get(id: string): Promise<Order | undefined>;
 }
 
@@ -52,12 +54,17 @@ export function newOrder(quote: Quote): Order {
 
 export function createMemoryOrderStore(): OrderStore {
   const orders = new Map<string, Order>();
+  const byKey = new Map<string, Order>();
   return {
-    async create(quote) {
+    async create(quote, idempotencyKey) {
+      const existing = idempotencyKey ? byKey.get(idempotencyKey) : undefined;
+      if (existing) return existing;
       const order = newOrder(quote);
       orders.set(order.id, order);
+      if (idempotencyKey) byKey.set(idempotencyKey, order);
       return order;
     },
+    findByIdempotencyKey: async (key) => byKey.get(key),
     get: async (id) => orders.get(id),
   };
 }

@@ -126,14 +126,14 @@ export function createPgProductRepository(pool: Pool): ProductRepository {
 }
 
 export function createPgOrderStore(pool: Pool): OrderStore {
-  return {
-    async create(quote) {
+  const store: OrderStore = {
+    async create(quote, idempotencyKey) {
       const order = newOrder(quote);
       const client = await pool.connect();
       try {
         await client.query('BEGIN');
         await client.query(
-          'INSERT INTO orders (id, status, subtotal, discount_total, total, created_at) VALUES ($1,$2,$3,$4,$5,$6)',
+          'INSERT INTO orders (id, status, subtotal, discount_total, total, created_at, idempotency_key) VALUES ($1,$2,$3,$4,$5,$6,$7)',
           [
             order.id,
             order.status,
@@ -141,6 +141,7 @@ export function createPgOrderStore(pool: Pool): OrderStore {
             order.discountTotal,
             order.total,
             order.createdAt,
+            idempotencyKey ?? null,
           ],
         );
         for (const l of order.lines) {
@@ -161,11 +162,20 @@ export function createPgOrderStore(pool: Pool): OrderStore {
         await client.query('COMMIT');
       } catch (err) {
         await client.query('ROLLBACK');
+        // Concurrent retry with the same key lost the unique-index race.
+        if (idempotencyKey && (err as { code?: string }).code === '23505') {
+          const existing = await store.findByIdempotencyKey(idempotencyKey);
+          if (existing) return existing;
+        }
         throw err;
       } finally {
         client.release();
       }
       return order;
+    },
+    async findByIdempotencyKey(key) {
+      const { rows } = await pool.query('SELECT id FROM orders WHERE idempotency_key = $1', [key]);
+      return rows[0] ? store.get(rows[0].id) : undefined;
     },
     async get(id) {
       const { rows } = await pool.query('SELECT * FROM orders WHERE id = $1', [id]);
@@ -194,6 +204,7 @@ export function createPgOrderStore(pool: Pool): OrderStore {
       return order;
     },
   };
+  return store;
 }
 
 export function createPgSubscriptionStore(pool: Pool): SubscriptionStore {

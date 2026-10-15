@@ -1,0 +1,10 @@
+@use '../../styles' as *;
+
+:root {
+  --ui-accent: #{$color-accent};
+  --ui-accent-disabled: #{$color-accent-disabled};
+  --ui-border: #{$color-border};
+  --ui-border-subtle: #{$color-border-subtle};
+  --ui-muted: #{$color-text-muted};
+  --ui-radius: #{$radius-sm};
+}

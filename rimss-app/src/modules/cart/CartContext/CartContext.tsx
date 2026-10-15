@@ -1,6 +1,16 @@
-import { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react';
 import type { CartState } from '../../../types/cart';
 import type { Product } from '../../../types/product';
+import { trackEvent } from '../../../services/telemetry';
+import { loadCart, saveCart } from '../cartStorage';
 import {
   addToCart,
   getCartItemCount,
@@ -16,24 +26,42 @@ interface CartContextValue {
   addProduct: (product: Product, quantity?: number) => void;
   removeProduct: (productId: string) => void;
   setQuantity: (productId: string, quantity: number) => void;
+  clearCart: () => void;
 }
 
 const CartContext = createContext<CartContextValue | undefined>(undefined);
 
-export function CartProvider({ children }: { children: ReactNode }) {
-  const [cart, setCart] = useState<CartState>({ items: [] });
+export function CartProvider({ children }: Readonly<{ children: ReactNode }>) {
+  const [cart, setCart] = useState<CartState>(loadCart);
+
+  useEffect(() => saveCart(cart), [cart]);
+
+  const addProduct = useCallback<CartContextValue['addProduct']>((product, quantity = 1) => {
+    trackEvent('add_to_cart', { productId: product.id, quantity });
+    setCart((prev) => addToCart(prev, product, quantity));
+  }, []);
+  const removeProduct = useCallback<CartContextValue['removeProduct']>(
+    (productId) => setCart((prev) => removeFromCart(prev, productId)),
+    [],
+  );
+  const setQuantity = useCallback<CartContextValue['setQuantity']>(
+    (productId, quantity) => setCart((prev) => updateQuantity(prev, productId, quantity)),
+    [],
+  );
+
+  const clearCart = useCallback(() => setCart({ items: [] }), []);
 
   const value = useMemo<CartContextValue>(
     () => ({
       cart,
       itemCount: getCartItemCount(cart),
       total: getCartTotal(cart),
-      addProduct: (product, quantity = 1) => setCart((prev) => addToCart(prev, product, quantity)),
-      removeProduct: (productId) => setCart((prev) => removeFromCart(prev, productId)),
-      setQuantity: (productId, quantity) =>
-        setCart((prev) => updateQuantity(prev, productId, quantity)),
+      addProduct,
+      removeProduct,
+      setQuantity,
+      clearCart,
     }),
-    [cart],
+    [cart, addProduct, removeProduct, setQuantity, clearCart],
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

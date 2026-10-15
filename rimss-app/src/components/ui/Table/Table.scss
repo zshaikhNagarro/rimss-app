@@ -1,0 +1,45 @@
+@use '../../../styles' as *;
+
+.ui-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.9rem;
+
+  th,
+  td {
+    padding: 0.6rem 0.75rem;
+    border-bottom: 1px solid var(--ui-border-subtle);
+  }
+
+  th {
+    font-weight: 600;
+    color: #444;
+  }
+
+  &--striped tbody tr:nth-child(even) {
+    background: $color-surface-alt;
+  }
+
+  tbody tr {
+    transition: background-color $transition-fast;
+
+    &:hover {
+      background: $color-accent-tint;
+    }
+  }
+
+  &--compact {
+    th,
+    td {
+      padding: 0.35rem 0.5rem;
+    }
+  }
+
+  // Scroll horizontally instead of overflowing the page.
+  @include down($bp-md) {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}

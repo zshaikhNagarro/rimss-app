@@ -1,6 +1,6 @@
 const ExcelJS = require('exceljs');
-const path = require('path');
-const fs = require('fs');
+const path = require('node:path');
+const fs = require('node:fs');
 
 const OUT_DIR = path.join(__dirname, '..', 'output');
 fs.mkdirSync(OUT_DIR, { recursive: true });
@@ -235,6 +235,41 @@ async function main() {
     ],
     [
       'Development Phase',
+      'Backend: PostgreSQL persistence, migrations, idempotent orders, TLS options',
+      'Backend Dev',
+      16,
+      'Idempotency-Key header; JSON fallback without DATABASE_URL',
+    ],
+    [
+      'Development Phase',
+      'Structured logging (pino) with masking, telemetry and analytics endpoint',
+      'Backend Dev',
+      8,
+      'NFR: observability',
+    ],
+    [
+      'Development Phase',
+      'SCSS design tokens and shared ui/ components',
+      'Frontend Dev',
+      12,
+      'Button, Card, Field, Heading, Table',
+    ],
+    [
+      'Development Phase',
+      'Rule-based Chatbot assistant',
+      'Frontend Dev',
+      8,
+      'responses.json intents; localStorage history',
+    ],
+    [
+      'Development Phase',
+      'Dockerfiles and docker-compose (postgres, api, web)',
+      'DevOps',
+      8,
+      'Multi-stage, non-root images',
+    ],
+    [
+      'Development Phase',
       'Backend hardening: helmet, CORS allow-list, rate limiting, error envelope, config',
       'Backend Dev',
       8,
@@ -248,6 +283,41 @@ async function main() {
       'Products, orders, push subscriptions; parameterized queries',
     ],
     [
+      'Development Phase',
+      'Cart persistence, URL-synced search filters, debounced search, request cache',
+      'Frontend Dev',
+      12,
+      'localStorage with validation; useSearchParams mirror; TTL cache with in-flight de-dup',
+    ],
+    [
+      'Development Phase',
+      'Checkout flow: order placement from the cart drawer',
+      'Frontend Dev',
+      8,
+      'orderService (non-retried POST), confirmation and error states',
+    ],
+    [
+      'Development Phase',
+      'Accessibility hardening: focus-managed cart dialog, live regions, WCAG AA contrast',
+      'Frontend Dev',
+      8,
+      'axe checks in Playwright',
+    ],
+    [
+      'Development Phase',
+      'Telemetry/analytics events stored locally via API JSON file; global error capture; log masking; CSP/security headers',
+      'Frontend Dev',
+      6,
+      'VITE_TELEMETRY_URL (optional), public/_headers',
+    ],
+    [
+      'Development Phase',
+      'Repo quality gates: Husky, lint-staged, commitlint, bundle budget, Dependabot, npm audit',
+      'Frontend Dev / DevOps',
+      6,
+      'Conventional Commits, pre-commit checks, CI budget',
+    ],
+    [
       'Testing & Bug Fixing Phase',
       'Unit tests for business layer (cart, filters)',
       'Frontend Dev',
@@ -259,21 +329,21 @@ async function main() {
       'Component, service and module tests (Testing Library)',
       'Frontend Dev',
       24,
-      '~77 tests covering loading/error/retry states',
+      '~110 tests covering loading/error/retry states, persistence, checkout and focus handling',
     ],
     [
       'Testing & Bug Fixing Phase',
       'Backend API tests (supertest) incl. validation, security and pricing',
       'Backend Dev',
       16,
-      '~20 tests',
+      '~40 tests',
     ],
     [
       'Testing & Bug Fixing Phase',
-      'Playwright end-to-end tests (desktop + mobile)',
+      'Playwright end-to-end tests (desktop + mobile, incl. axe accessibility)',
       'QA / Frontend Dev',
       16,
-      '~18 scenarios x 2 projects',
+      '~21 scenarios x 2 projects',
     ],
     [
       'Testing & Bug Fixing Phase',
@@ -393,7 +463,7 @@ async function main() {
     ['Assumption', 'Application is served over HTTPS (required for service workers and Web Push)'],
     [
       'Assumption',
-      'Telemetry backend (Sentry/App Insights) is provided by client; only the integration hook is estimated',
+      'Production telemetry/analytics collector (Sentry/App Insights) is provided by client; the sample stores events in a local JSON file via the API',
     ],
   ];
   assumptionRows.forEach((r) => assumptionsSheet.addRow(r));

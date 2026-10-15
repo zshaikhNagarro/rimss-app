@@ -1,15 +1,17 @@
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { Product } from '../../types/product';
-import './ProductCard.css';
-import '../Skeleton/Skeleton.css';
+import { formatPrice, getDiscountedPrice } from '../../utils/price';
+import { Card, Heading } from '../ui';
+import './ProductCard.scss';
+import '../Skeleton/Skeleton.scss';
 
-export function ProductCard({ product }: { product: Product }) {
-  const discountedPrice = product.price * (1 - product.discountPercent / 100);
+export const ProductCard = memo(function ProductCard({ product }: { product: Product }) {
+  const discountedPrice = getDiscountedPrice(product.price, product.discountPercent);
   const [imgState, setImgState] = useState<'loading' | 'loaded' | 'error'>('loading');
 
   return (
-    <Link to={`/product/${product.id}`} className="product-card">
+    <Card as={Link} to={`/product/${product.id}`} interactive className="product-card">
       <div className={`product-card__image-wrap ${imgState === 'loading' ? 'skeleton' : ''}`}>
         {imgState === 'error' ? (
           <div className="product-card__image-fallback">No image</div>
@@ -18,6 +20,7 @@ export function ProductCard({ product }: { product: Product }) {
             src={product.image}
             alt={product.name}
             loading="lazy"
+            decoding="async"
             style={{ opacity: imgState === 'loaded' ? 1 : 0 }}
             onLoad={() => setImgState('loaded')}
             onError={() => setImgState('error')}
@@ -32,14 +35,16 @@ export function ProductCard({ product }: { product: Product }) {
       </div>
       <div className="product-card__body">
         <p className="product-card__category">{product.category}</p>
-        <h3 className="product-card__name">{product.name}</h3>
+        <Heading level={3} size="sm" className="product-card__name">
+          {product.name}
+        </Heading>
         <div className="product-card__price">
-          <span className="product-card__price--current">${discountedPrice.toFixed(2)}</span>
+          <span className="product-card__price--current">{formatPrice(discountedPrice)}</span>
           {product.discountPercent > 0 && (
-            <span className="product-card__price--original">${product.price.toFixed(2)}</span>
+            <span className="product-card__price--original">{formatPrice(product.price)}</span>
           )}
         </div>
       </div>
-    </Link>
+    </Card>
   );
-}
+});

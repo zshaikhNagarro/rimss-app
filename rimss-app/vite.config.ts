@@ -2,8 +2,12 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import { defineConfig } from 'vitest/config';
 
+// Set VITE_BASE=/<repo>/ when hosting under a sub-path (GitHub Pages).
+const base = process.env.VITE_BASE ?? '/';
+
 // https://vite.dev/config/
 export default defineConfig({
+  base,
   plugins: [
     react(),
     VitePWA({
@@ -13,7 +17,7 @@ export default defineConfig({
       injectRegister: null,
       includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
       manifest: {
-        id: '/',
+        id: base,
         name: 'RIMSS - Retail Inventory Management Software System',
         short_name: 'RIMSS',
         description: 'YCompany online shopping experience',
@@ -22,8 +26,8 @@ export default defineConfig({
         display: 'standalone',
         orientation: 'portrait-primary',
         lang: 'en',
-        start_url: '/',
-        scope: '/',
+        start_url: base,
+        scope: base,
         icons: [
           { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' },
           { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png' },
@@ -64,6 +68,25 @@ export default defineConfig({
       },
     }),
   ],
+  preview: {
+    // CSP is set by the production host (public/_headers); these are safe for any host.
+    headers: {
+      'X-Content-Type-Options': 'nosniff',
+      'X-Frame-Options': 'DENY',
+      'Referrer-Policy': 'strict-origin-when-cross-origin',
+    },
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        // Long-cached vendor chunk, separate from frequently changing app code.
+        manualChunks: (id) =>
+          /node_modules[\\/](react|react-dom|react-router|react-router-dom|scheduler)[\\/]/.test(id)
+            ? 'react'
+            : undefined,
+      },
+    },
+  },
   test: {
     environment: 'jsdom',
     globals: true,

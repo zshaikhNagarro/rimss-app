@@ -1,10 +1,14 @@
 import type { Product, ProductFilters } from '../types/product';
 import { getJson } from './httpClient';
+import { createRequestCache } from './requestCache';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000/api';
 
+// Short TTL: repeat navigation is instant while the catalog stays reasonably fresh.
+const cache = createRequestCache(60_000);
+
 function requestJson<T>(path: string): Promise<T> {
-  return getJson<T>(`${API_BASE_URL}${path}`);
+  return cache.get(path, () => getJson<T>(`${API_BASE_URL}${path}`));
 }
 
 function buildQueryString(filters: ProductFilters): string {
@@ -19,6 +23,7 @@ function buildQueryString(filters: ProductFilters): string {
 }
 
 export const productService = {
+  clearCache: () => cache.clear(),
   search(filters: ProductFilters = {}): Promise<Product[]> {
     return requestJson<Product[]>(`/products${buildQueryString(filters)}`);
   },

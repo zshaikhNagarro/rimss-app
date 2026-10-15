@@ -1,5 +1,6 @@
 import type { CartItem, CartState } from '../../../types/cart';
 import type { Product } from '../../../types/product';
+import { getDiscountedPrice } from '../../../utils/price';
 
 /**
  * Pure business-layer functions for the shopping cart, kept free of React
@@ -42,7 +43,7 @@ export function updateQuantity(state: CartState, productId: string, quantity: nu
 }
 
 export function getItemLineTotal(item: CartItem): number {
-  const discountedPrice = item.price * (1 - item.discountPercent / 100);
+  const discountedPrice = getDiscountedPrice(item.price, item.discountPercent);
   return Math.round(discountedPrice * item.quantity * 100) / 100;
 }
 

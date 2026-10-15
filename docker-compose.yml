@@ -15,5 +15,28 @@ services:
       timeout: 3s
       retries: 10
 
+  # Full stack: docker compose --profile full up --build (web on http://localhost:8080)
+  api:
+    profiles: ['full']
+    build:
+      context: .
+      dockerfile: rimss-api/Dockerfile
+    environment:
+      DATABASE_URL: postgres://rimss:rimss@postgres:5432/rimss
+      ADMIN_API_KEY: ${ADMIN_API_KEY:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  web:
+    profiles: ['full']
+    build:
+      context: .
+      dockerfile: rimss-app/Dockerfile
+    ports:
+      - '8080:8080'
+    depends_on:
+      - api
+
 volumes:
   pgdata:

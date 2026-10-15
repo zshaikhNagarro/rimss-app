@@ -39,6 +39,19 @@ describe('ModuleErrorBoundary', () => {
     expect(sink).toHaveBeenCalledWith(expect.objectContaining({ type: 'error', message: 'boom' }));
   });
 
+  it('tags the report with the module label and current route', () => {
+    render(
+      <ModuleErrorBoundary label="Shop">
+        <Bomb />
+      </ModuleErrorBoundary>,
+    );
+    expect(sink).toHaveBeenCalledWith(
+      expect.objectContaining({
+        context: expect.objectContaining({ module: 'Shop', route: window.location.pathname }),
+      }),
+    );
+  });
+
   it('recovers after retry once the child stops throwing', () => {
     render(
       <ModuleErrorBoundary label="Shop">

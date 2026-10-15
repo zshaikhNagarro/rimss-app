@@ -126,7 +126,7 @@ describe('postgres-backed HTTP API', () => {
     const pool = await freshPool();
     await seedProducts(pool, dataDir);
     const app = createApp({
-      config: loadConfig({ DATA_DIR: dataDir }),
+      config: loadConfig({ LOG_LEVEL: 'silent', DATA_DIR: dataDir }),
       products: createPgProductRepository(pool),
       orders: createPgOrderStore(pool),
       push: createPushService(
@@ -150,7 +150,7 @@ describe('postgres-backed HTTP API', () => {
   it('reports not ready when the database is down', async () => {
     const pool = await freshPool();
     const app = createApp({
-      config: loadConfig({ DATA_DIR: dataDir }),
+      config: loadConfig({ LOG_LEVEL: 'silent', DATA_DIR: dataDir }),
       products: createPgProductRepository(pool),
       orders: createPgOrderStore(pool),
       push: createPushService(
@@ -163,5 +163,19 @@ describe('postgres-backed HTTP API', () => {
       },
     });
     expect((await request(app).get('/api/ready')).status).toBe(503);
+  });
+
+  it('returns the same order for a repeated idempotency key', async () => {
+    const pool = await freshPool();
+    await seedProducts(pool, dataDir);
+    const orders = createPgOrderStore(pool);
+    const quote = await buildQuote(createPgProductRepository(pool), [
+      { productId: 'p001', quantity: 1 },
+    ]);
+    const first = await orders.create(quote, 'key-12345678');
+    const second = await orders.create(quote, 'key-12345678');
+    expect(second.id).toBe(first.id);
+    expect((await orders.findByIdempotencyKey('key-12345678'))?.id).toBe(first.id);
+    expect(await orders.findByIdempotencyKey('other-key-1')).toBeUndefined();
   });
 });

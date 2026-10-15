@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Button } from '../ui';
 import {
   getExistingSubscription,
   isPushSupported,
@@ -37,14 +38,14 @@ export function NotificationToggle() {
   };
 
   return (
-    <button
-      className="header__cart-btn"
+    <Button
+      variant="outline"
       onClick={toggle}
       disabled={busy}
       title={error ?? undefined}
       aria-label={enabled ? 'Disable notifications' : 'Enable notifications'}
     >
       {error ? 'Alerts: error' : enabled ? 'Alerts: On' : 'Alerts: Off'}
-    </button>
+    </Button>
   );
 }
