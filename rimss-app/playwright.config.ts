@@ -22,7 +22,7 @@ export default defineConfig({
   webServer: [
     {
       command: 'node --import tsx ../rimss-api/src/server.ts',
-      env: { PORT: String(API_PORT) },
+      env: { PORT: String(API_PORT), RATE_LIMIT_MAX: '5000' },
       url: `http://localhost:${API_PORT}/api/categories`,
       reuseExistingServer: !process.env.CI,
     },

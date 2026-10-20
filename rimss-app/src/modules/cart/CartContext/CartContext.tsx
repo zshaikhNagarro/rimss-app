@@ -10,7 +10,7 @@ import {
 import type { CartState } from '../../../types/cart';
 import type { Product } from '../../../types/product';
 import { trackEvent } from '../../../services/telemetry';
-import { loadCart, saveCart } from '../cartStorage';
+import { CART_STORAGE_KEY, loadCart, saveCart } from '../cartStorage';
 import {
   addToCart,
   getCartItemCount,
@@ -35,6 +35,15 @@ export function CartProvider({ children }: Readonly<{ children: ReactNode }>) {
   const [cart, setCart] = useState<CartState>(loadCart);
 
   useEffect(() => saveCart(cart), [cart]);
+
+  // Keep multiple tabs in sync via the storage event.
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === CART_STORAGE_KEY) setCart(loadCart());
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
 
   const addProduct = useCallback<CartContextValue['addProduct']>((product, quantity = 1) => {
     trackEvent('add_to_cart', { productId: product.id, quantity });

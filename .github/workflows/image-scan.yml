@@ -1,0 +1,27 @@
+name: Image scan
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  trivy:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        image:
+          - { name: rimss-api, dockerfile: rimss-api/Dockerfile }
+          - { name: rimss-app, dockerfile: rimss-app/Dockerfile }
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -f ${{ matrix.image.dockerfile }} -t ${{ matrix.image.name }}:scan .
+      - uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: ${{ matrix.image.name }}:scan
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: '1'

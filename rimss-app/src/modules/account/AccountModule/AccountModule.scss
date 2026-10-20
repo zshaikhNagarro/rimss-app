@@ -1,0 +1,175 @@
+@use '../../../styles' as *;
+
+.account {
+  max-width: 720px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  &__profile {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 0.5rem 1rem;
+    background: linear-gradient(135deg, $color-accent-tint, $color-surface);
+  }
+
+  &__avatar {
+    display: grid;
+    place-items: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 50%;
+    background: $color-accent;
+    color: $color-on-accent;
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+
+  &__identity {
+    min-width: 0;
+  }
+
+  &__email {
+    margin: 0.15rem 0 0;
+    color: $color-text-muted;
+    overflow-wrap: anywhere;
+  }
+
+  &__stats {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    margin: 0.5rem 0 0;
+  }
+
+  &__stat {
+    padding: 0.75rem;
+    border: 1px solid $color-border-subtle;
+    border-radius: $radius-md;
+    background: $color-surface;
+    text-align: center;
+
+    dt {
+      color: $color-text-muted;
+      font-size: 0.8rem;
+    }
+
+    dd {
+      margin: 0.2rem 0 0;
+      color: $color-text;
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+  }
+
+  &__section-title {
+    margin: 0.5rem 0 0;
+  }
+
+  &__empty {
+    color: $color-text-muted;
+    text-align: center;
+  }
+
+  &__error {
+    color: $color-danger;
+    margin: 0;
+  }
+
+  &__orders {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  &__order {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  &__order-top,
+  &__order-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  &__order-id {
+    margin: 0;
+    color: $color-text;
+    font-weight: 600;
+  }
+
+  &__lines {
+    list-style: none;
+    margin: 0;
+    padding: 0.5rem 0;
+    border-block: 1px solid $color-border-subtle;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+
+    li {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      color: $color-text;
+      font-size: 0.95rem;
+    }
+  }
+
+  &__total {
+    color: $color-text;
+    font-size: 1.15rem;
+  }
+
+  &__meta {
+    margin: 0.25rem 0 0;
+    color: $color-text-muted;
+    font-size: 0.875rem;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  &__status {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.2rem 0.65rem;
+    border-radius: 999px;
+    background: $color-surface-alt;
+    border: 1px solid $color-border;
+    color: $color-text;
+
+    &--PAID {
+      color: $color-success;
+      border-color: $color-success;
+    }
+
+    &--CANCELLED {
+      color: $color-danger;
+      border-color: $color-danger;
+    }
+  }
+
+  @include down($bp-sm) {
+    &__profile {
+      grid-template-columns: auto 1fr;
+    }
+
+    &__stats {
+      grid-template-columns: 1fr;
+    }
+  }
+}

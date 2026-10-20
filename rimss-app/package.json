@@ -2,6 +2,7 @@
   "name": "rimss-app",
   "private": true,
   "version": "0.0.0",
+  "author": "Zibran Shaikh",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -18,7 +19,8 @@
     "@rimss/shared": "*",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "react-router-dom": "^7.18.4"
+    "react-router-dom": "^7.18.4",
+    "web-vitals": "^6.2.3"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",

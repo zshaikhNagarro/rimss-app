@@ -14,6 +14,7 @@ const products: Product[] = [
     description: '',
     sizes: [],
     inStock: true,
+    stock: 25,
   },
   {
     id: 'p002',
@@ -26,6 +27,7 @@ const products: Product[] = [
     description: '',
     sizes: [],
     inStock: true,
+    stock: 25,
   },
   {
     id: 'p003',
@@ -38,6 +40,7 @@ const products: Product[] = [
     description: '',
     sizes: [],
     inStock: true,
+    stock: 25,
   },
 ];
 

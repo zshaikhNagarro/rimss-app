@@ -1,4 +1,19 @@
+import { getToken } from './session';
 import { track } from './telemetry';
+
+const authHeaders = (): Record<string, string> => {
+  const token = getToken();
+  return token ? { authorization: `Bearer ${token}` } : {};
+};
+
+/** Error thrown for non-2xx responses so callers can branch on `status`. */
+export class HttpStatusError extends Error {
+  status: number;
+  constructor(status: number) {
+    super(`Request failed with status ${status}`);
+    this.status = status;
+  }
+}
 
 export interface HttpOptions {
   timeoutMs?: number;
@@ -18,9 +33,9 @@ export async function getJson<T>(
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
     try {
-      const response = await fetch(url, { signal: controller.signal });
+      const response = await fetch(url, { signal: controller.signal, headers: authHeaders() });
       if (response.ok) return (await response.json()) as T;
-      const error = new Error(`Request failed with status ${response.status}`);
+      const error = new HttpStatusError(response.status);
       if (response.status < 500) throw Object.assign(error, { fatal: true });
       lastError = error;
     } catch (e) {
@@ -44,11 +59,11 @@ export async function postJson<T>(url: string, body: unknown, timeoutMs = 8000):
   try {
     const response = await fetch(url, {
       method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      headers: { 'content-type': 'application/json', ...authHeaders() },
       body: JSON.stringify(body),
       signal: controller.signal,
     });
-    if (!response.ok) throw new Error(`Request failed with status ${response.status}`);
+    if (!response.ok) throw new HttpStatusError(response.status);
     return (await response.json()) as T;
   } finally {
     clearTimeout(timer);

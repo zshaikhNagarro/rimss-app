@@ -16,12 +16,15 @@ import {
   type SortDirection,
 } from '../searchParams';
 import './ProductSearchModule.scss';
+import { useI18n } from '../../../i18n';
 
 // Stable reference so memoized values don't recompute on every render while loading.
 const EMPTY_CATALOG: [Product[], string[], string[]] = [[], [], []];
 const SEARCH_DEBOUNCE_MS = 250;
+const PAGE_SIZE = 12;
 
 export function ProductSearchModule() {
+  const { t } = useI18n();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigationType = useNavigationType();
 
@@ -90,28 +93,37 @@ export function ProductSearchModule() {
     [allProducts, deferredFilters, deferredSort],
   );
 
+  const [shown, setShown] = useState(PAGE_SIZE);
+  useEffect(() => setShown(PAGE_SIZE), [deferredFilters, deferredSort]);
+
   return (
     <section className="product-search">
       <Card as="aside" variant="filled" padding="md" className="product-search__filters">
-        <Heading level={2}>Filters</Heading>
+        <Heading level={2}>{t('search.filters')}</Heading>
 
         <Field>
-          Search by name
+          {t('search.byName')}
           <Input
             type="search"
-            placeholder="e.g. sweater"
+            placeholder={t('search.placeholder')}
+            list="product-name-suggestions"
             value={qInput}
             onChange={(e) => setQInput(e.target.value)}
           />
+          <datalist id="product-name-suggestions">
+            {allProducts.map((p) => (
+              <option key={p.id} value={p.name} />
+            ))}
+          </datalist>
         </Field>
 
         <Field>
-          Category
+          {t('search.category')}
           <Select
             value={filters.category ?? ''}
             onChange={(e) => setFilter('category', e.target.value)}
           >
-            <option value="">All categories</option>
+            <option value="">{t('search.allCategories')}</option>
             {categories.map((c) => (
               <option key={c} value={c}>
                 {c}
@@ -121,9 +133,9 @@ export function ProductSearchModule() {
         </Field>
 
         <Field>
-          Color
+          {t('search.color')}
           <Select value={filters.color ?? ''} onChange={(e) => setFilter('color', e.target.value)}>
-            <option value="">All colors</option>
+            <option value="">{t('search.allColors')}</option>
             {colors.map((c) => (
               <option key={c} value={c}>
                 {c}
@@ -133,7 +145,7 @@ export function ProductSearchModule() {
         </Field>
 
         <Field>
-          Max price: ${filters.maxPrice ?? 300}
+          {t('search.maxPrice', { price: filters.maxPrice ?? 300 })}
           <Input
             type="range"
             min={0}
@@ -150,43 +162,55 @@ export function ProductSearchModule() {
             checked={Boolean(filters.discountedOnly)}
             onChange={(e) => setFilter('discountedOnly', e.target.checked)}
           />
-          Discounted products only
+          {t('search.discountedOnly')}
         </Field>
 
         <Field>
-          Sort by price
+          {t('search.sortByPrice')}
           <Select value={sortDirection} onChange={(e) => setSort(e.target.value as SortDirection)}>
-            <option value="asc">Low to high</option>
-            <option value="desc">High to low</option>
+            <option value="asc">{t('search.lowToHigh')}</option>
+            <option value="desc">{t('search.highToLow')}</option>
           </Select>
         </Field>
 
         <Button variant="outline" onClick={clearFilters}>
-          Clear filters
+          {t('search.clear')}
         </Button>
       </Card>
 
       <div className="product-search__results">
         <p className="visually-hidden" role="status" aria-live="polite">
-          {status === 'ready' ? `${visibleProducts.length} products found` : ''}
+          {status === 'ready' ? t('search.found', { count: visibleProducts.length }) : ''}
         </p>
         {status === 'loading' && <ProductGridSkeleton />}
         {status === 'error' && (
           <ErrorFallback
-            title="Unable to load products"
-            message="Check your connection and try again."
+            title={t('search.loadError')}
+            message={t('common.checkConnection')}
             onRetry={retry}
           />
         )}
         {status === 'ready' && visibleProducts.length === 0 && (
-          <p className="product-search__empty">No products match the selected filters.</p>
+          <div className="product-search__empty">
+            <p>{t('search.empty')}</p>
+            <Button variant="outline" onClick={clearFilters}>
+              {t('search.reset')}
+            </Button>
+          </div>
         )}
         {status === 'ready' && visibleProducts.length > 0 && (
-          <div className="product-search__grid">
-            {visibleProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+          <>
+            <div className="product-search__grid">
+              {visibleProducts.slice(0, shown).map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+            {shown < visibleProducts.length && (
+              <Button variant="outline" onClick={() => setShown((n) => n + PAGE_SIZE)}>
+                {t('search.showMore', { count: visibleProducts.length - shown })}
+              </Button>
+            )}
+          </>
         )}
       </div>
     </section>

@@ -1,6 +1,7 @@
 {
   "name": "@rimss/api",
   "version": "1.0.0",
+  "author": "Zibran Shaikh",
   "private": true,
   "type": "module",
   "scripts": {
@@ -16,6 +17,7 @@
     "express": "^5.2.1",
     "express-rate-limit": "^8.0.0",
     "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.3",
     "pg": "^8.23.0",
     "pino": "^10.3.1",
     "pino-http": "^11.0.0",
@@ -25,6 +27,7 @@
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.19.0",
     "@types/pg": "^8.23.1",
     "@types/supertest": "^6.0.3",

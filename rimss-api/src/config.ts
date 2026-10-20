@@ -1,3 +1,4 @@
+import { randomBytes } from 'node:crypto';
 import path from 'node:path';
 
 export interface Config {
@@ -16,10 +17,15 @@ export interface Config {
   vapidPublicKey?: string;
   vapidPrivateKey?: string;
   vapidSubject: string;
+  jwtSecret: string;
   isProduction: boolean;
 }
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
+  // Without JWT_SECRET a random per-process secret is used, so tokens do not survive restarts.
+  if (env.NODE_ENV === 'production' && !env.JWT_SECRET) {
+    throw new Error('JWT_SECRET is required in production');
+  }
   return {
     port: Number(env.PORT ?? 4000),
     // Comma-separated allow-list; defaults to the local Vite dev servers.
@@ -40,6 +46,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     vapidPublicKey: env.VAPID_PUBLIC_KEY || undefined,
     vapidPrivateKey: env.VAPID_PRIVATE_KEY || undefined,
     vapidSubject: env.VAPID_SUBJECT ?? 'mailto:admin@example.com',
+    jwtSecret: env.JWT_SECRET || randomBytes(32).toString('hex'),
     isProduction: env.NODE_ENV === 'production',
   };
 }

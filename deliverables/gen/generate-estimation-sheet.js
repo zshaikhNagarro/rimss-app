@@ -11,7 +11,7 @@ const SECTION_FILL = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF0
 
 async function main() {
   const workbook = new ExcelJS.Workbook();
-  workbook.creator = 'RIMSS Promotion Assignment';
+  workbook.creator = 'Zibran Shaikh';
   workbook.created = new Date();
 
   const sheet = workbook.addWorksheet('Estimation');
@@ -318,6 +318,139 @@ async function main() {
       'Conventional Commits, pre-commit checks, CI budget',
     ],
     [
+      'Development Phase',
+      'Authentication: register/login (scrypt, JWT), sign-in dialog, auth-gated checkout, account and order history',
+      'Frontend Dev / Backend Dev',
+      24,
+      'Rate-limited auth routes, per-user order visibility, demo payment (pay/cancel)',
+    ],
+    [
+      'Development Phase',
+      'Stock reservation: atomic decrement on order, restore on cancel, oversell protection',
+      'Backend Dev',
+      8,
+      'Conditional UPDATE in the order transaction; migration 003',
+    ],
+    [
+      'Development Phase',
+      'Dark mode (CSS custom-property tokens) and English/Spanish i18n with persisted preferences',
+      'Frontend Dev',
+      20,
+      'Theme toggle, language menu, message catalogue, contrast checks',
+    ],
+    [
+      'Development Phase',
+      'Responsive header, active-nav highlighting, wishlist module, search paging',
+      'Frontend Dev',
+      12,
+      'Stacked layout below desktop width',
+    ],
+    [
+      'Development Phase',
+      'Technical documentation: ADRs, architecture views, README, generated deliverables',
+      'Architect / TL',
+      16,
+      '12 ADRs, Mermaid diagrams, Word/Excel deliverables',
+    ],
+    [
+      'Infrastructure & Environment Setup Phase',
+      'Infrastructure architecture, environment strategy and sizing (Dev, SIT, QA, UAT, Pre-prod, Prod, DR)',
+      'Architect / DevOps',
+      16,
+      'Topology, promotion path, naming, capacity and cost plan',
+    ],
+    [
+      'Infrastructure & Environment Setup Phase',
+      'Infrastructure as code baseline: network, container registry, Kubernetes namespaces, shared modules',
+      'DevOps',
+      24,
+      'Reusable templates so every environment is built the same way',
+    ],
+    [
+      'Infrastructure & Environment Setup Phase',
+      'Dev environment: docker-compose, local Postgres, seed data, developer onboarding',
+      'DevOps / Frontend Dev',
+      8,
+      'One-command start for web, API and database',
+    ],
+    [
+      'Infrastructure & Environment Setup Phase',
+      'SIT environment: web, API, managed Postgres, test data, integration endpoints',
+      'DevOps / QA',
+      16,
+      'Shared integration environment, resettable data',
+    ],
+    [
+      'Infrastructure & Environment Setup Phase',
+      'QA environment: isolated deployment, data refresh and automation access',
+      'DevOps / QA',
+      12,
+      'Hosts the Playwright and regression suites',
+    ],
+    [
+      'Infrastructure & Environment Setup Phase',
+      'UAT / Staging environment: production-like deployment with masked data',
+      'DevOps',
+      16,
+      'Business acceptance testing and release rehearsal',
+    ],
+    [
+      'Infrastructure & Environment Setup Phase',
+      'Pre-production / performance environment sized like production',
+      'DevOps',
+      16,
+      'Used for k6 load tests and failover checks',
+    ],
+    [
+      'Infrastructure & Environment Setup Phase',
+      'Production environment: hosting, autoscaling, CDN, WAF, managed Postgres with backups',
+      'DevOps',
+      32,
+      'Kubernetes manifests, ingress, HPA, high availability',
+    ],
+    [
+      'Infrastructure & Environment Setup Phase',
+      'Disaster recovery: backup and restore, multi-zone or secondary region, DR runbook and drill',
+      'DevOps',
+      16,
+      'RPO/RTO targets agreed with the client',
+    ],
+    [
+      'Infrastructure & Environment Setup Phase',
+      'DNS, TLS certificates and domain setup per environment',
+      'DevOps',
+      8,
+      'HTTPS is required for service workers and Web Push',
+    ],
+    [
+      'Infrastructure & Environment Setup Phase',
+      'Secrets and configuration management per environment (JWT_SECRET, VAPID keys, DATABASE_URL, CORS)',
+      'DevOps / Backend Dev',
+      12,
+      'Secret store, rotation, no secrets in images or repo',
+    ],
+    [
+      'Infrastructure & Environment Setup Phase',
+      'Observability stack per environment: logs, metrics (/metrics), dashboards, alerts, telemetry collector',
+      'DevOps',
+      20,
+      'Prometheus-style metrics, structured log shipping, on-call alerts',
+    ],
+    [
+      'Infrastructure & Environment Setup Phase',
+      'Network and security hardening: firewall rules, least-privilege access, image scanning, access reviews',
+      'DevOps / Security',
+      16,
+      'Trivy and CodeQL gates, private database access',
+    ],
+    [
+      'Infrastructure & Environment Setup Phase',
+      'Environment validation, smoke checks and handover documentation',
+      'DevOps / QA',
+      8,
+      'Health checks, access matrix, environment runbooks',
+    ],
+    [
       'Testing & Bug Fixing Phase',
       'Unit tests for business layer (cart, filters)',
       'Frontend Dev',
@@ -362,11 +495,95 @@ async function main() {
       '100ms interaction budget',
     ],
     [
+      'Testing & Bug Fixing Phase',
+      'Test strategy, test plan and test case design (functional, regression, NFR)',
+      'QA',
+      16,
+      'Traceability to requirements and NFRs',
+    ],
+    [
+      'Testing & Bug Fixing Phase',
+      'SIT execution: UI to API integration, checkout, auth, stock, push and offline flows',
+      'QA',
+      32,
+      'End-to-end scenarios across services, error and edge cases',
+    ],
+    [
+      'Testing & Bug Fixing Phase',
+      'SIT defect fixing and retest',
+      'Frontend Dev / Backend Dev / QA',
+      24,
+      'Triage, fix, verify, regression',
+    ],
+    [
+      'Testing & Bug Fixing Phase',
+      'QA full regression cycle (desktop, tablet, mobile; Chrome, Edge, Firefox, Safari)',
+      'QA',
+      24,
+      'Includes dark mode and both languages',
+    ],
+    [
+      'Testing & Bug Fixing Phase',
+      'Security testing: OWASP Top 10 review, dependency audit, auth and rate-limit checks',
+      'QA / Backend Dev',
+      16,
+      'npm audit, CodeQL, image scan, manual checks',
+    ],
+    [
+      'Testing & Bug Fixing Phase',
+      'Load and performance testing (k6) and tuning',
+      'QA / Backend Dev',
+      12,
+      'Thresholds: p95 < 300 ms, error rate < 1%',
+    ],
+    [
+      'Testing & Bug Fixing Phase',
+      'Accessibility audit (WCAG 2.1 AA, keyboard and screen reader)',
+      'QA',
+      8,
+      'axe plus manual verification',
+    ],
+    [
+      'Testing & Bug Fixing Phase',
+      'UAT support, defect fixes and QA sign-off report',
+      'QA / TL',
+      16,
+      'Business acceptance, exit criteria, test summary report',
+    ],
+    [
+      'Release & Deployment Phase',
+      'CD pipeline: image build, scan, deploy to staging and production',
+      'DevOps',
+      12,
+      'Trivy scan, environment promotion, rollback',
+    ],
+    [
+      'Release & Deployment Phase',
+      'Release readiness: release notes, runbook, rollback plan, go/no-go review',
+      'TL / PM',
+      8,
+      '',
+    ],
+    [
+      'Release & Deployment Phase',
+      'Production release and smoke test',
+      'DevOps / QA',
+      8,
+      'Health, metrics and critical-path checks',
+    ],
+    [
+      'Release & Deployment Phase',
+      'Hypercare and post-release support',
+      'Frontend Dev / Backend Dev / QA',
+      24,
+      'Monitoring, incident response, hotfixes during the first weeks',
+    ],
+    [
       'Project Management',
       'Planning, status reporting, reviews',
       'TL / PM',
       16,
-      'Across full 4-week duration',
+      'Across the full delivery, from planning through hypercare',
     ],
     ['Project Management', 'Risk management & stakeholder communication', 'TL / PM', 8, ''],
   ];
@@ -442,6 +659,14 @@ async function main() {
     ['In Scope', 'Mock backend APIs for development/demo purposes'],
     [
       'In Scope',
+      'Test strategy, SIT, QA regression, security, load and accessibility testing, UAT support, release to staging/production and hypercare',
+    ],
+    [
+      'In Scope',
+      'Infrastructure setup for Dev, SIT, QA, UAT, Pre-prod, Production and DR: IaC, secrets, TLS/DNS, observability, backups and security hardening',
+    ],
+    [
+      'In Scope',
       'PWA (offline app shell), Web Push opt-in, resilient HTTP client, error boundaries, telemetry hook, feature flags, CI, Storybook',
     ],
     [
@@ -450,7 +675,7 @@ async function main() {
     ],
     [
       'Out of Scope',
-      'Production hosting, managed Postgres provisioning/backups and payment processor (local docker-compose Postgres provided)',
+      'Payment processor integration and cloud cost/licence charges (infrastructure setup effort is in scope; the client supplies accounts and pays usage)',
     ],
     ['Out of Scope', 'Real payment processor integration and PCI compliance work'],
     ['Out of Scope', 'Admin/inventory management back-office screens'],
@@ -460,6 +685,18 @@ async function main() {
       'Moderate catalog size; pagination/server-side search can be added later without redesign',
     ],
     ['Assumption', 'Only evergreen browser support required (no IE11)'],
+    [
+      'Assumption',
+      'Cloud accounts, subscriptions, network access and domain ownership are provided by the client; infra effort assumes one cloud provider and Kubernetes',
+    ],
+    [
+      'Assumption',
+      'SIT and UAT environments, test users and business UAT participants are provided by the client',
+    ],
+    [
+      'Assumption',
+      'Hypercare is estimated for roughly the first two weeks after release; efforts are person-hours',
+    ],
     ['Assumption', 'Application is served over HTTPS (required for service workers and Web Push)'],
     [
       'Assumption',

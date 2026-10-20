@@ -7,8 +7,10 @@ export function catalogRoutes(products: ProductRepository): Router {
   const router = Router();
 
   router.get('/products', async (req, res) => {
-    const f = productFiltersQuerySchema.parse(req.query);
-    res.json(await products.search({ ...f, discountedOnly: f.discountedOnly === 'true' }));
+    const { limit, offset = 0, ...f } = productFiltersQuerySchema.parse(req.query);
+    const all = await products.search({ ...f, discountedOnly: f.discountedOnly === 'true' });
+    res.set('X-Total-Count', String(all.length));
+    res.json(limit === undefined ? all.slice(offset) : all.slice(offset, offset + limit));
   });
 
   router.get('/products/:id', async (req, res) => {

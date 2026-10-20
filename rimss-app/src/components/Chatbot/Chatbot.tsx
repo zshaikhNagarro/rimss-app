@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type SyntheticEvent } from 'react';
 import { createPortal } from 'react-dom';
 import responses from './responses.json';
+import { useI18n } from '../../i18n';
 import {
   appendExchange,
   greeting,
@@ -11,6 +12,7 @@ import {
 import './Chatbot.scss';
 
 export function Chatbot() {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>(loadMessages);
   const [draft, setDraft] = useState('');
@@ -41,17 +43,17 @@ export function Chatbot() {
   return createPortal(
     <div className="chatbot">
       {open && (
-        <dialog open className="chatbot__panel" aria-label="Chat assistant">
+        <dialog open className="chatbot__panel" aria-label={t('chat.panelLabel')}>
           <header className="chatbot__header">
-            <span>RIMSS Assistant</span>
+            <span>{t('chat.assistant')}</span>
             <span>
               <button type="button" className="chatbot__link" onClick={clear}>
-                Clear
+                {t('chat.clear')}
               </button>
               <button
                 type="button"
                 className="chatbot__close"
-                aria-label="Close chat"
+                aria-label={t('chat.close')}
                 onClick={() => setOpen(false)}
               >
                 ×
@@ -87,21 +89,21 @@ export function Chatbot() {
             <input
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
-              placeholder="Type a message..."
-              aria-label="Chat message"
+              placeholder={t('chat.placeholder')}
+              aria-label={t('chat.message')}
             />
-            <button type="submit">Send</button>
+            <button type="submit">{t('chat.send')}</button>
           </form>
         </dialog>
       )}
       <button
         type="button"
         className="chatbot__toggle"
-        aria-label={open ? 'Close chat' : 'Open chat'}
+        aria-label={open ? t('chat.close') : t('chat.open')}
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
       >
-        {open ? '×' : 'Chat'}
+        {open ? '×' : t('chat.toggle')}
       </button>
     </div>,
     document.body,

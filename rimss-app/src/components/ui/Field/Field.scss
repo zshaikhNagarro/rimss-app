@@ -5,7 +5,7 @@
   flex-direction: column;
   gap: 0.3rem;
   font-size: 0.85rem;
-  color: #444;
+  color: $color-text;
   text-align: left;
 
   &--inline {
@@ -22,13 +22,14 @@
   border: 1px solid var(--ui-border);
   border-radius: var(--ui-radius);
   max-width: 100%;
-  background: #fff;
+  background: $color-surface;
+  color: $color-text;
   transition:
     border-color $transition-fast,
     box-shadow $transition-fast;
 
   &:hover {
-    border-color: #bbb;
+    border-color: $color-text-muted;
   }
 
   &:focus {
