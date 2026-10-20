@@ -1,6 +1,6 @@
 # RIMSS Working Sample (Frontend)
 
-Working sample for the YCompany RIMSS promotion assignment. React + TypeScript
+Working sample for the YCompany RIMSS promotion assignment, by Zibran Shaikh. React + TypeScript
 frontend with a plugin-based architecture, backed by a Node.js mock API server.
 
 ## Structure

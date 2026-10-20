@@ -1,11 +1,14 @@
 import fs from 'node:fs';
+import { randomUUID } from 'node:crypto';
 import path from 'node:path';
 import type { Order, Product, ProductFilters } from '@rimss/shared';
 import type { Pool } from 'pg';
+import type { User, UserStore } from './auth.js';
 import { newOrder } from './orders.js';
+import { HttpError } from './errors.js';
 import type { OrderStore } from './orders.js';
-import { readSeedProducts } from './products.js';
-import type { ProductRepository } from './products.js';
+import { readSeedProducts, stockError } from './products.js';
+import type { ProductRepository, StockLine } from './products.js';
 import type { SubscriptionStore } from './push.js';
 
 export async function migrate(pool: Pool, migrationsDir: string): Promise<void> {
@@ -35,8 +38,8 @@ export async function seedProducts(pool: Pool, dataDir: string): Promise<number>
   const products = readSeedProducts(dataDir);
   for (const p of products) {
     await pool.query(
-      `INSERT INTO products (id, name, category, color, price, discount_percent, image, description, sizes, in_stock)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) ON CONFLICT (id) DO NOTHING`,
+      `INSERT INTO products (id, name, category, color, price, discount_percent, image, description, sizes, in_stock, stock)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) ON CONFLICT (id) DO NOTHING`,
       [
         p.id,
         p.name,
@@ -48,6 +51,7 @@ export async function seedProducts(pool: Pool, dataDir: string): Promise<number>
         p.description,
         JSON.stringify(p.sizes),
         p.inStock,
+        p.stock,
       ],
     );
   }
@@ -67,6 +71,7 @@ interface ProductRow {
   description: string;
   sizes: string[];
   in_stock: boolean;
+  stock: number;
 }
 
 const toProduct = (r: ProductRow): Product => ({
@@ -80,6 +85,7 @@ const toProduct = (r: ProductRow): Product => ({
   description: r.description,
   sizes: r.sizes,
   inStock: r.in_stock,
+  stock: r.stock,
 });
 
 const escapeLike = (s: string) => s.replace(/[\\%_]/g, (c) => `\\${c}`);
@@ -122,18 +128,69 @@ export function createPgProductRepository(pool: Pool): ProductRepository {
       const { rows } = await pool.query('SELECT DISTINCT color FROM products ORDER BY color');
       return rows.map((r) => r.color);
     },
+    async reserve(lines) {
+      const client = await pool.connect();
+      try {
+        await client.query('BEGIN');
+        await reserveInTx(client, lines);
+        await client.query('COMMIT');
+      } catch (err) {
+        await client.query('ROLLBACK');
+        throw err;
+      } finally {
+        client.release();
+      }
+    },
+    async release(lines) {
+      await releaseInTx(pool, lines);
+    },
   };
+}
+
+type Queryable = Pick<Pool, 'query'>;
+
+// Sorted by id so concurrent orders lock rows in the same order and cannot deadlock.
+const sortLines = (lines: StockLine[]) =>
+  [...lines].sort((a, b) => a.productId.localeCompare(b.productId));
+
+// The conditional UPDATE is atomic, so concurrent orders cannot oversell.
+async function reserveInTx(db: Queryable, lines: StockLine[]): Promise<void> {
+  for (const { productId, quantity } of sortLines(lines)) {
+    const res = await db.query(
+      `UPDATE products SET stock = stock - $1::int, in_stock = (stock - $1::int) > 0
+       WHERE id = $2 AND in_stock AND stock >= $1::int`,
+      [quantity, productId],
+    );
+    if (res.rowCount === 0) {
+      const { rows } = await db.query('SELECT name, stock FROM products WHERE id = $1', [
+        productId,
+      ]);
+      throw rows[0]
+        ? stockError(rows[0].name, rows[0].stock)
+        : new HttpError(422, 'UNKNOWN_PRODUCT', `Unknown product: ${productId}`);
+    }
+  }
+}
+
+async function releaseInTx(db: Queryable, lines: StockLine[]): Promise<void> {
+  for (const { productId, quantity } of sortLines(lines)) {
+    await db.query(
+      'UPDATE products SET stock = stock + $1, in_stock = (stock + $1) > 0 WHERE id = $2',
+      [quantity, productId],
+    );
+  }
 }
 
 export function createPgOrderStore(pool: Pool): OrderStore {
   const store: OrderStore = {
-    async create(quote, idempotencyKey) {
-      const order = newOrder(quote);
+    async create(quote, idempotencyKey, userId) {
+      const order = newOrder(quote, userId);
       const client = await pool.connect();
       try {
         await client.query('BEGIN');
+        await reserveInTx(client, order.lines);
         await client.query(
-          'INSERT INTO orders (id, status, subtotal, discount_total, total, created_at, idempotency_key) VALUES ($1,$2,$3,$4,$5,$6,$7)',
+          'INSERT INTO orders (id, status, subtotal, discount_total, total, created_at, idempotency_key, user_id) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)',
           [
             order.id,
             order.status,
@@ -142,6 +199,7 @@ export function createPgOrderStore(pool: Pool): OrderStore {
             order.total,
             order.createdAt,
             idempotencyKey ?? null,
+            userId ?? null,
           ],
         );
         for (const l of order.lines) {
@@ -192,6 +250,7 @@ export function createPgOrderStore(pool: Pool): OrderStore {
         discountTotal: num(o.discount_total),
         total: num(o.total),
         createdAt: new Date(o.created_at).toISOString(),
+        ...(o.user_id && { userId: o.user_id }),
         lines: lines.rows.map((l) => ({
           productId: l.product_id,
           name: l.name,
@@ -203,8 +262,68 @@ export function createPgOrderStore(pool: Pool): OrderStore {
       };
       return order;
     },
+    async setStatus(id, status) {
+      const client = await pool.connect();
+      try {
+        await client.query('BEGIN');
+        const prev = await client.query('SELECT status FROM orders WHERE id = $1 FOR UPDATE', [id]);
+        if (prev.rows[0] && status === 'CANCELLED' && prev.rows[0].status !== 'CANCELLED') {
+          const { rows } = await client.query(
+            'SELECT product_id, quantity FROM order_lines WHERE order_id = $1',
+            [id],
+          );
+          await releaseInTx(
+            client,
+            rows.map((r) => ({ productId: r.product_id, quantity: r.quantity })),
+          );
+        }
+        await client.query('UPDATE orders SET status = $1 WHERE id = $2', [status, id]);
+        await client.query('COMMIT');
+      } catch (err) {
+        await client.query('ROLLBACK');
+        throw err;
+      } finally {
+        client.release();
+      }
+      return store.get(id);
+    },
+    async listByUser(userId) {
+      const { rows } = await pool.query(
+        'SELECT id FROM orders WHERE user_id = $1 ORDER BY created_at DESC',
+        [userId],
+      );
+      const orders = await Promise.all(rows.map((r) => store.get(r.id)));
+      return orders.filter((o): o is Order => o !== undefined);
+    },
   };
   return store;
+}
+
+export function createPgUserStore(pool: Pool): UserStore {
+  const toUser = (r: { id: string; email: string; password_hash: string }): User => ({
+    id: r.id,
+    email: r.email,
+    passwordHash: r.password_hash,
+  });
+  return {
+    async create(email, passwordHash) {
+      const id = randomUUID();
+      try {
+        const { rows } = await pool.query(
+          'INSERT INTO users (id, email, password_hash) VALUES ($1,$2,$3) RETURNING *',
+          [id, email, passwordHash],
+        );
+        return toUser(rows[0]);
+      } catch (err) {
+        if ((err as { code?: string }).code === '23505') return undefined;
+        throw err;
+      }
+    },
+    async findByEmail(email) {
+      const { rows } = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+      return rows[0] ? toUser(rows[0]) : undefined;
+    },
+  };
 }
 
 export function createPgSubscriptionStore(pool: Pool): SubscriptionStore {

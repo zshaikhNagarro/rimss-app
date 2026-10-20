@@ -93,7 +93,7 @@ const sections = [
     'checkout-sequence-diagram.png',
     600,
     'Checkout sequence',
-    'Server-side pricing and idempotent order creation (ADR 0004).',
+    'Server-side pricing, sign-in at checkout, idempotent order creation and stock reservation (ADR 0004, 0010, 0011).',
   ],
   [
     '9. Web Push Sequence',
@@ -115,9 +115,7 @@ referencePageFurniture('General Document.docx', 'RIMSS')
   .then((pageFurniture) => {
     const children = [
       ...coverPage('RIMSS', 'Architecture Diagrams'),
-      ...revisionHistory([
-        ['1.00', TODAY, 'Senior Staff Engineer Candidate', 'Consolidated architecture diagrams'],
-      ]),
+      ...revisionHistory([['1.00', TODAY, 'Zibran Shaikh', 'Consolidated architecture diagrams']]),
       ...contentsPage(),
       h1('1. Introduction'),
       p(

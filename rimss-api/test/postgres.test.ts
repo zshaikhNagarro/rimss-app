@@ -9,6 +9,7 @@ import {
   createPgOrderStore,
   createPgProductRepository,
   createPgSubscriptionStore,
+  createPgUserStore,
   migrate,
   seedProducts,
 } from '../src/db.js';
@@ -53,6 +54,7 @@ describe('postgres: product repository', () => {
       price: 129,
       discountPercent: 15,
       inStock: true,
+      stock: 25,
     });
     expect(p?.sizes).toEqual(['S', 'M', 'L', 'XL']);
   });
@@ -100,6 +102,42 @@ describe('postgres: orders', () => {
     expect(fetched?.lines).toHaveLength(2);
     expect(fetched?.total).toBe(quote.total);
     expect(await orders.get('missing')).toBeUndefined();
+  });
+
+  it('decrements stock, rejects overselling and restores stock on cancel', async () => {
+    const pool = await freshPool();
+    await seedProducts(pool, dataDir);
+    const products = createPgProductRepository(pool);
+    const orders = createPgOrderStore(pool);
+
+    const quote = await buildQuote(products, [{ productId: 'p001', quantity: 25 }]);
+    const order = await orders.create(quote);
+    expect(await products.byId('p001')).toMatchObject({ stock: 0, inStock: false });
+    await expect(orders.create(quote)).rejects.toMatchObject({ code: 'OUT_OF_STOCK' });
+
+    await orders.setStatus(order.id, 'CANCELLED');
+    expect(await products.byId('p001')).toMatchObject({ stock: 25, inStock: true });
+  });
+
+  it('stores users, scopes order history to them and updates status', async () => {
+    const pool = await freshPool();
+    await seedProducts(pool, dataDir);
+    const products = createPgProductRepository(pool);
+    const orders = createPgOrderStore(pool);
+    const users = createPgUserStore(pool);
+
+    const user = await users.create('a@example.com', 'hash');
+    expect(user).toBeDefined();
+    expect(await users.create('a@example.com', 'other')).toBeUndefined();
+    expect((await users.findByEmail('a@example.com'))?.id).toBe(user?.id);
+
+    const quote = await buildQuote(products, [{ productId: 'p001', quantity: 1 }]);
+    const mine = await orders.create(quote, undefined, user?.id);
+    await orders.create(quote);
+    expect(mine.userId).toBe(user?.id);
+    expect((await orders.listByUser(user?.id as string)).map((o) => o.id)).toEqual([mine.id]);
+
+    expect((await orders.setStatus(mine.id, 'PAID'))?.status).toBe('PAID');
   });
 });
 

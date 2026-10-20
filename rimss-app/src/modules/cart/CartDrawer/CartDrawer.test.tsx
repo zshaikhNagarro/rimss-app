@@ -1,26 +1,30 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { makeProduct } from '../../../test/fixtures';
+import { setSession } from '../../../services/session';
 import { setTelemetrySink } from '../../../services/telemetry';
 import { CartProvider, useCart } from '../CartContext';
 
-const orders = vi.hoisted(() => ({ createOrder: vi.fn() }));
+const orders = vi.hoisted(() => ({ createOrder: vi.fn(), pay: vi.fn() }));
 vi.mock('../../../services/orderService', () => ({ orderService: orders }));
 
 import { CartDrawer } from './CartDrawer';
 
-beforeEach(() => vi.resetAllMocks());
+beforeEach(() => {
+  vi.resetAllMocks();
+  setSession({ token: 't', email: 'a@example.com' });
+});
 
 function Seed() {
   const { addProduct } = useCart();
   return <button onClick={() => addProduct(makeProduct(), 1)}>seed</button>;
 }
 
-const renderDrawer = (open = true, onClose = vi.fn()) => {
+const renderDrawer = (open = true, onClose = vi.fn(), onSignIn = vi.fn()) => {
   render(
     <CartProvider>
       <Seed />
-      <CartDrawer open={open} onClose={onClose} />
+      <CartDrawer open={open} onClose={onClose} onSignIn={onSignIn} />
     </CartProvider>,
   );
   return onClose;
@@ -100,6 +104,41 @@ describe('CartDrawer', () => {
     );
     expect(orders.createOrder).toHaveBeenCalledTimes(1);
     expect(screen.queryByText('Wool Sweater')).toBeNull();
+  });
+
+  it('asks signed-out users to sign in instead of placing the order', () => {
+    setSession(null);
+    const onSignIn = vi.fn();
+    renderDrawer(true, vi.fn(), onSignIn);
+    fireEvent.click(screen.getByText('seed'));
+    expect(screen.getByText(/Sign in to place your order/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Sign in to checkout' }));
+    expect(onSignIn).toHaveBeenCalledTimes(1);
+    expect(orders.createOrder).not.toHaveBeenCalled();
+    expect(screen.getByText('Wool Sweater')).toBeInTheDocument();
+  });
+
+  it('pays for a placed order through the demo gateway', async () => {
+    orders.createOrder.mockResolvedValue({ id: 'ord-1', total: 100, status: 'PENDING_PAYMENT' });
+    orders.pay.mockResolvedValue({ id: 'ord-1', total: 100, status: 'PAID' });
+    renderDrawer();
+    fireEvent.click(screen.getByText('seed'));
+    fireEvent.click(screen.getByRole('button', { name: /Proceed to Payment/ }));
+    fireEvent.click(await screen.findByRole('button', { name: /Pay \$100\.00/ }));
+    expect(await screen.findByText(/Payment successful/)).toBeInTheDocument();
+    expect(orders.pay).toHaveBeenCalledWith('ord-1');
+    expect(screen.queryByRole('button', { name: /Pay \$/ })).toBeNull();
+  });
+
+  it('shows an error when payment fails and allows retry', async () => {
+    orders.createOrder.mockResolvedValue({ id: 'ord-1', total: 100, status: 'PENDING_PAYMENT' });
+    orders.pay.mockRejectedValue(new Error('x'));
+    renderDrawer();
+    fireEvent.click(screen.getByText('seed'));
+    fireEvent.click(screen.getByRole('button', { name: /Proceed to Payment/ }));
+    fireEvent.click(await screen.findByRole('button', { name: /Pay \$100\.00/ }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('Payment failed');
+    expect(screen.getByRole('button', { name: /Pay \$100\.00/ })).toBeEnabled();
   });
 
   it('keeps the cart and shows an error when the order fails', async () => {

@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import type { Product, ProductFilters } from '@rimss/shared';
+import { HttpError } from './errors.js';
 
 export interface ProductRepository {
   search(filters: ProductFilters): Promise<Product[]>;
@@ -8,10 +9,28 @@ export interface ProductRepository {
   byIds(ids: string[]): Promise<Product[]>;
   categories(): Promise<string[]>;
   colors(): Promise<string[]>;
+  /** Atomically decrements stock for all lines, or throws a 409 HttpError and changes nothing. */
+  reserve(lines: StockLine[]): Promise<void>;
+  /** Returns previously reserved stock. */
+  release(lines: StockLine[]): Promise<void>;
+}
+
+export interface StockLine {
+  productId: string;
+  quantity: number;
+}
+
+export function stockError(name: string, available: number): HttpError {
+  return available > 0
+    ? new HttpError(409, 'INSUFFICIENT_STOCK', `Only ${available} of ${name} available`)
+    : new HttpError(409, 'OUT_OF_STOCK', `${name} is out of stock`);
 }
 
 export function readSeedProducts(dataDir: string): Product[] {
-  return JSON.parse(fs.readFileSync(path.join(dataDir, 'products.json'), 'utf8'));
+  const raw: (Omit<Product, 'stock'> & { stock?: number })[] = JSON.parse(
+    fs.readFileSync(path.join(dataDir, 'products.json'), 'utf8'),
+  );
+  return raw.map((p) => ({ ...p, stock: p.stock ?? (p.inStock ? 25 : 0) }));
 }
 
 function filterProducts(products: Product[], f: ProductFilters): Product[] {
@@ -35,5 +54,26 @@ export function createFileProductRepository(dataDir: string): ProductRepository 
     byIds: async (ids) => products.filter((p) => ids.includes(p.id)),
     categories: async () => unique(products.map((p) => p.category)),
     colors: async () => unique(products.map((p) => p.color)),
+    // Synchronous check-then-write, so it is atomic within the single Node thread.
+    async reserve(lines) {
+      for (const { productId, quantity } of lines) {
+        const p = products.find((x) => x.id === productId);
+        if (!p || !p.inStock || p.stock < quantity)
+          throw stockError(p?.name ?? productId, p?.stock ?? 0);
+      }
+      for (const { productId, quantity } of lines) {
+        const p = products.find((x) => x.id === productId) as Product;
+        p.stock -= quantity;
+        p.inStock = p.stock > 0;
+      }
+    },
+    async release(lines) {
+      for (const { productId, quantity } of lines) {
+        const p = products.find((x) => x.id === productId);
+        if (!p) continue;
+        p.stock += quantity;
+        p.inStock = p.stock > 0;
+      }
+    },
   };
 }

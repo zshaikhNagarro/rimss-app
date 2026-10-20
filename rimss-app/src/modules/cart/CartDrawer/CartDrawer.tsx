@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { orderService } from '../../../services/orderService';
+import { useSession } from '../../../services/session';
 import { trackEvent } from '../../../services/telemetry';
 import { formatPrice } from '../../../utils/price';
 import type { Order } from '../../../types/order';
@@ -7,15 +8,28 @@ import { useCart } from '../CartContext';
 import { getItemLineTotal } from '../cartLogic';
 import { Button, Heading, Input } from '../../../components/ui';
 import './CartDrawer.scss';
+import { useI18n } from '../../../i18n';
 
 const FOCUSABLE =
   'button:not([disabled]), input:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])';
 
-export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function CartDrawer({
+  open,
+  onClose,
+  onSignIn,
+}: {
+  open: boolean;
+  onClose: () => void;
+  /** Called when a signed-out user tries to check out. */
+  onSignIn?: () => void;
+}) {
+  const { t } = useI18n();
+  const session = useSession();
   const { cart, total, removeProduct, setQuantity, clearCart } = useCart();
   const dialogRef = useRef<HTMLElement>(null);
   const [checkout, setCheckout] = useState<'idle' | 'submitting' | 'error'>('idle');
   const [order, setOrder] = useState<Order | null>(null);
+  const [payment, setPayment] = useState<'idle' | 'paying' | 'error'>('idle');
   // Latest callback without re-running the focus effect on every parent render.
   const onCloseRef = useRef(onClose);
   useEffect(() => {
@@ -54,16 +68,30 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
   if (!open) return null;
 
   const handleCheckout = async () => {
+    if (!session) return onSignIn?.();
     setCheckout('submitting');
     try {
       const created = await orderService.createOrder(cart);
       trackEvent('checkout_success', { items: cart.items.length, total });
       setOrder(created);
+      setPayment('idle');
       clearCart();
       setCheckout('idle');
     } catch {
       trackEvent('checkout_failed');
       setCheckout('error');
+    }
+  };
+
+  // Demo gateway: the API just moves the order to PAID.
+  const handlePay = async () => {
+    if (!order) return;
+    setPayment('paying');
+    try {
+      setOrder(await orderService.pay(order.id));
+      setPayment('idle');
+    } catch {
+      setPayment('error');
     }
   };
 
@@ -80,21 +108,37 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
       >
         <header className="cart-drawer__header">
           <Heading level={2} size="lg" id="cart-drawer-title">
-            Shopping Cart
+            {t('cart.title')}
           </Heading>
-          <Button variant="icon" onClick={onClose} aria-label="Close cart">
-            Ã—
+          <Button variant="icon" onClick={onClose} aria-label={t('cart.close')}>
+            &times;
           </Button>
         </header>
 
         {order && cart.items.length === 0 && (
-          <p className="cart-drawer__empty" role="status">
-            Order {order.id} placed. Total {formatPrice(order.total)}.
-          </p>
+          <>
+            <p className="cart-drawer__empty" role="status">
+              {order.status === 'PAID'
+                ? t('cart.paid', { id: order.id })
+                : t('cart.placed', { id: order.id, total: formatPrice(order.total) })}
+            </p>
+            {order.status === 'PENDING_PAYMENT' && (
+              <Button block disabled={payment === 'paying'} onClick={handlePay}>
+                {payment === 'paying'
+                  ? t('cart.paying')
+                  : t('cart.payNow', { total: formatPrice(order.total) })}
+              </Button>
+            )}
+            {payment === 'error' && (
+              <p className="cart-drawer__empty" role="alert">
+                {t('cart.payError')}
+              </p>
+            )}
+          </>
         )}
 
         {cart.items.length === 0 ? (
-          !order && <p className="cart-drawer__empty">Your cart is empty.</p>
+          !order && <p className="cart-drawer__empty">{t('cart.empty')}</p>
         ) : (
           <ul className="cart-drawer__list">
             {cart.items.map((item) => (
@@ -109,7 +153,7 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
                     type="number"
                     min={1}
                     value={item.quantity}
-                    aria-label={`Quantity for ${item.name}`}
+                    aria-label={t('cart.quantityFor', { name: item.name })}
                     onChange={(e) => setQuantity(item.productId, Number(e.target.value))}
                   />
                   <Button
@@ -117,7 +161,7 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
                     size="sm"
                     onClick={() => removeProduct(item.productId)}
                   >
-                    Remove
+                    {t('cart.remove')}
                   </Button>
                 </div>
               </li>
@@ -127,19 +171,26 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
 
         {checkout === 'error' && (
           <p className="cart-drawer__empty" role="alert">
-            Could not place your order. Please try again.
+            {t('cart.error')}
           </p>
         )}
 
         <footer className="cart-drawer__footer">
-          <strong>Total: {formatPrice(total)}</strong>
+          {!session && cart.items.length > 0 && (
+            <p className="cart-drawer__hint">{t('cart.signInRequired')}</p>
+          )}
+          <strong>{t('cart.total', { total: formatPrice(total) })}</strong>
           <Button
             size="lg"
             block
             disabled={cart.items.length === 0 || checkout === 'submitting'}
             onClick={handleCheckout}
           >
-            {checkout === 'submitting' ? 'Placing order...' : 'Proceed to Payment Gateway'}
+            {checkout === 'submitting'
+              ? t('cart.placing')
+              : session
+                ? t('cart.checkout')
+                : t('cart.signInToCheckout')}
           </Button>
         </footer>
       </aside>

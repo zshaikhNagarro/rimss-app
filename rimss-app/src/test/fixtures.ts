@@ -11,5 +11,6 @@ export const makeProduct = (overrides: Partial<Product> = {}): Product => ({
   description: 'Warm and cozy.',
   sizes: ['S', 'M', 'L'],
   inStock: true,
+  stock: 25,
   ...overrides,
 });

@@ -1,6 +1,12 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { track } from '../../services/telemetry';
 import { ErrorFallback } from '../ErrorFallback';
+import { useI18n } from '../../i18n';
+
+function Unavailable({ label, onRetry }: Readonly<{ label: string; onRetry: () => void }>) {
+  const { t } = useI18n();
+  return <ErrorFallback title={t('module.unavailable', { label })} onRetry={onRetry} />;
+}
 
 interface Props {
   label: string;
@@ -31,10 +37,7 @@ export class ModuleErrorBoundary extends Component<Props, { failed: boolean }> {
   render() {
     if (!this.state.failed) return this.props.children;
     return (
-      <ErrorFallback
-        title={`${this.props.label} is temporarily unavailable`}
-        onRetry={() => this.setState({ failed: false })}
-      />
+      <Unavailable label={this.props.label} onRetry={() => this.setState({ failed: false })} />
     );
   }
 }

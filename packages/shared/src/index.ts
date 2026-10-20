@@ -12,6 +12,8 @@ export interface Product {
   description: string;
   sizes: string[];
   inStock: boolean;
+  /** Units on hand. */
+  stock: number;
 }
 
 export interface ProductFilters {
@@ -61,6 +63,8 @@ export interface Order extends Quote {
   id: string;
   status: OrderStatus;
   createdAt: string;
+  /** Set when the order was placed while signed in. */
+  userId?: string;
 }
 
 const round2 = (n: number) => Math.round((n + Number.EPSILON) * 100) / 100;
@@ -78,6 +82,8 @@ export const productFiltersQuerySchema = z.object({
   color: z.string().max(50).optional(),
   maxPrice: z.coerce.number().nonnegative().optional(),
   discountedOnly: z.enum(['true', 'false']).optional(),
+  limit: z.coerce.number().int().min(1).max(100).optional(),
+  offset: z.coerce.number().int().min(0).optional(),
 });
 
 export const orderRequestSchema = z.object({
@@ -92,6 +98,15 @@ export const orderRequestSchema = z.object({
     .max(50),
 });
 export type OrderRequest = z.infer<typeof orderRequestSchema>;
+
+export const authRequestSchema = z.object({
+  email: z
+    .email()
+    .max(254)
+    .transform((e) => e.toLowerCase()),
+  // 72 bytes is the practical upper bound for common password hashes.
+  password: z.string().min(8).max(72),
+});
 
 export const pushSubscriptionSchema = z.object({
   endpoint: z.url().refine((u) => u.startsWith('https://'), 'endpoint must be https'),

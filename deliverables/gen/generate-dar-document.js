@@ -29,12 +29,12 @@ referencePageFurniture('DAR Template.docx', 'YCompany-RIMSS - DAR Document')
         {
           ...pageFurniture,
           children: [
-            ...darCoverPage('YCompany-RIMSS', 'Senior Staff Engineer Candidate'),
+            ...darCoverPage('YCompany-RIMSS', 'Zibran Shaikh'),
             ...revisionHistory([
               [
                 '1.00',
                 TODAY,
-                'Senior Staff Engineer Candidate',
+                'Zibran Shaikh',
                 'Initial DAR for frontend framework & architecture selection',
               ],
             ]),

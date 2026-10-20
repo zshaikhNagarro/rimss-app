@@ -1,4 +1,5 @@
 import { Button, Heading } from '../ui';
+import { useI18n } from '../../i18n';
 import './ErrorFallback.scss';
 
 interface Props {
@@ -8,19 +9,15 @@ interface Props {
   actionLabel?: string;
 }
 
-export function ErrorFallback({
-  title = 'Something went wrong',
-  message = 'Please try again.',
-  onRetry,
-  actionLabel = 'Try again',
-}: Props) {
+export function ErrorFallback({ title, message, onRetry, actionLabel }: Props) {
+  const { t } = useI18n();
   return (
     <div className="error-fallback" role="alert">
       <Heading level={3} align="center">
-        {title}
+        {title ?? t('common.somethingWrong')}
       </Heading>
-      <p>{message}</p>
-      {onRetry && <Button onClick={onRetry}>{actionLabel}</Button>}
+      <p>{message ?? t('common.pleaseTryAgain')}</p>
+      {onRetry && <Button onClick={onRetry}>{actionLabel ?? t('common.tryAgain')}</Button>}
     </div>
   );
 }

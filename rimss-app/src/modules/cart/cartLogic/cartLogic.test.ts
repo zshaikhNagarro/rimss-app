@@ -21,6 +21,7 @@ const product: Product = {
   description: '',
   sizes: ['M'],
   inStock: true,
+  stock: 25,
 };
 
 const emptyState: CartState = { items: [] };

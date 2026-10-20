@@ -2,3 +2,5 @@
 // Adding a new functional module only requires one line here.
 import './productSearch';
 import './productShowcase';
+import './account';
+import './wishlist';

@@ -21,6 +21,7 @@ describe('loadConfig', () => {
       DATABASE_URL: 'postgres://x',
       DATABASE_SSL: 'true',
       NODE_ENV: 'production',
+      JWT_SECRET: 's',
     });
     expect(c.port).toBe(8080);
     expect(c.corsOrigins).toEqual(['https://a.example', 'https://b.example']);
@@ -28,6 +29,10 @@ describe('loadConfig', () => {
     expect(c.databaseUrl).toBe('postgres://x');
     expect(c.databaseSsl).toBe(true);
     expect(c.isProduction).toBe(true);
+  });
+
+  it('requires JWT_SECRET in production', () => {
+    expect(() => loadConfig({ NODE_ENV: 'production' })).toThrow(/JWT_SECRET/);
   });
 
   it('treats empty strings as unset', () => {
