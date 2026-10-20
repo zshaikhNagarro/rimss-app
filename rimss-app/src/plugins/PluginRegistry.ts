@@ -22,6 +22,8 @@ export interface ModulePlugin {
   order?: number;
   /** Detail/child routes that shouldn't get their own nav entry. */
   hideFromNav?: boolean;
+  /** Hidden from the nav while signed out. */
+  requiresAuth?: boolean;
   component: ComponentType;
 }
 

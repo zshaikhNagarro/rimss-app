@@ -34,7 +34,7 @@ referencePageFurniture('General Document.docx', 'RIMSS')
               [
                 '1.00',
                 TODAY,
-                'Senior Staff Engineer Candidate',
+                'Zibran Shaikh',
                 'Initial version for YCompany RIMSS promotion assignment',
               ],
             ]),
@@ -66,7 +66,10 @@ referencePageFurniture('General Document.docx', 'RIMSS')
               'Persistence and delivery: PostgreSQL with SQL migrations (JSON fallback locally), idempotent order creation, structured pino logging, and Docker/docker-compose images.',
             ),
             bullet(
-              'UX additions: SCSS design tokens with shared ui/ primitives, and a rule-based Chatbot assistant.',
+              'UX additions: SCSS design tokens (CSS custom properties) with shared ui/ primitives, light and dark themes, English/Spanish UI strings, a responsive header and a rule-based Chatbot assistant.',
+            ),
+            bullet(
+              'Accounts and orders: JWT authentication, sign-in dialog, auth-gated checkout with a demo payment, order history, and atomic stock reservation so concurrent orders cannot oversell.',
             ),
             bullet(
               'Route-level code splitting (React.lazy/Suspense) and a full PWA setup (offline caching, installable manifest, update prompts).',
@@ -78,35 +81,51 @@ referencePageFurniture('General Document.docx', 'RIMSS')
               'Opt-in Web Push notifications via the service worker, served by Web Push (VAPID) endpoints on the mock server.',
             ),
             bullet(
-              'Quality tooling: Vitest + Testing Library tests, Storybook for UI states, GitHub Actions CI (lint, test, build).',
+              'Quality tooling: Vitest + Testing Library tests (209 app and 64 API tests), Playwright e2e on desktop and mobile with axe accessibility checks, k6 load test, Storybook for UI states, CodeQL and image scanning, GitHub Actions CI (lint, test, build).',
+            ),
+            bullet(
+              'Environments and release: infrastructure as code for Dev, SIT, QA, UAT, Pre-prod, Production and DR; staged promotion with smoke tests, rollback plan, go/no-go review and hypercare.',
             ),
 
-            h2('2.2 4-Week Delivery Plan'),
+            h2('2.2 Delivery Plan by Phase'),
+            p(
+              'Effort per phase is detailed in the Estimation Sheet (about 1,100 person-hours in total); phases overlap where noted.',
+            ),
             table(
-              ['Week', 'Focus', 'Key Outputs'],
+              ['Phase', 'Focus', 'Key Outputs'],
               [
                 [
-                  '1',
-                  'Setup & Design',
-                  'Project scaffold, architecture & technical diagrams, API contracts, wireframes',
+                  'Requirements & Design',
+                  'Scope, NFRs, architecture, UX, API contract',
+                  'Architecture diagrams, ADRs, wireframes, API contract',
                 ],
                 [
-                  '2',
-                  'Core Build',
-                  'App shell, plugin registry, Home + Product Search module, mock API',
+                  'Development',
+                  'App shell, plugin modules, API, auth, orders and stock, PWA, push, theming, i18n',
+                  'Working full-stack sample, Storybook, unit and API tests',
                 ],
                 [
-                  '3',
-                  'Feature Completion',
-                  'Product Showcase, Shopping Cart, Payment Gateway stub, responsive polish, PWA + Web Push, skeleton/fallback UI',
+                  'Infrastructure & Environments',
+                  'IaC, Dev/SIT/QA/UAT/Pre-prod/Prod/DR, secrets, TLS, observability',
+                  'Repeatable environments, runbooks, access matrix',
                 ],
                 [
-                  '4',
-                  'Hardening',
-                  'Component/service/module tests, Storybook, CI, cross-browser fixes, performance tuning, documentation & demo',
+                  'SIT & QA',
+                  'Test plan, SIT, regression, security, load, accessibility',
+                  'Test reports, defect log, exit criteria met',
+                ],
+                [
+                  'UAT & Release',
+                  'Business acceptance, CD pipeline, go/no-go, production release',
+                  'Signed-off release, release notes, smoke test results',
+                ],
+                [
+                  'Hypercare',
+                  'Monitoring, incident response, hotfixes',
+                  'Stable production, handover to support',
                 ],
               ],
-              [12, 30, 58],
+              [20, 40, 40],
             ),
 
             h2('2.3 Quality Gates'),
@@ -117,6 +136,10 @@ referencePageFurniture('General Document.docx', 'RIMSS')
             bullet(
               'Manual smoke test across Chrome, Edge, Firefox, Safari and one mobile viewport.',
             ),
+            bullet(
+              'SIT exit: integration scenarios pass with no open critical or high defects; QA regression, security (OWASP, dependency audit), load (p95 < 300 ms) and WCAG AA checks complete.',
+            ),
+            bullet('UAT sign-off and a go/no-go review before each production release.'),
             bullet(
               'Lighthouse/PWA checks (installability, offline start-up) and a push-notification round trip before demo.',
             ),
@@ -140,6 +163,18 @@ referencePageFurniture('General Document.docx', 'RIMSS')
                 [
                   'Push support varies by browser/OS (e.g. iOS needs an installed PWA)',
                   'Feature-detect and hide the toggle when unsupported; test on real devices',
+                ],
+                [
+                  'Environments or access (cloud accounts, SIT/UAT data) not ready on time',
+                  'Start infrastructure setup early with IaC, agree owners and access in the planning phase',
+                ],
+                [
+                  'Defects found late in SIT/UAT delay release',
+                  'Automated regression in CI, early SIT of critical flows, buffer for defect fixing and retest',
+                ],
+                [
+                  'Overselling or data loss under concurrent orders',
+                  'Atomic stock reservation, idempotent orders, load tests on the pre-production environment',
                 ],
               ],
               [30, 70],
@@ -170,6 +205,16 @@ referencePageFurniture('General Document.docx', 'RIMSS')
                   'Browser push notifications delivered through a service worker using VAPID-signed messages',
                 ],
                 ['Skeleton loader', 'Placeholder UI shown while data loads, preserving layout'],
+                [
+                  'SIT',
+                  'System Integration Testing - verifying the UI, API and database work together',
+                ],
+                ['UAT', 'User Acceptance Testing - business sign-off before release'],
+                [
+                  'IaC',
+                  'Infrastructure as Code - environments defined and created from versioned templates',
+                ],
+                ['i18n', 'Internationalisation - UI text served from per-language catalogues'],
                 ['CDN', 'Content Delivery Network'],
               ],
               [25, 75],

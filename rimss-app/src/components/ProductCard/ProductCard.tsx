@@ -3,18 +3,20 @@ import { Link } from 'react-router-dom';
 import type { Product } from '../../types/product';
 import { formatPrice, getDiscountedPrice } from '../../utils/price';
 import { Card, Heading } from '../ui';
+import { useI18n } from '../../i18n';
 import './ProductCard.scss';
 import '../Skeleton/Skeleton.scss';
 
 export const ProductCard = memo(function ProductCard({ product }: { product: Product }) {
   const discountedPrice = getDiscountedPrice(product.price, product.discountPercent);
+  const { t } = useI18n();
   const [imgState, setImgState] = useState<'loading' | 'loaded' | 'error'>('loading');
 
   return (
     <Card as={Link} to={`/product/${product.id}`} interactive className="product-card">
       <div className={`product-card__image-wrap ${imgState === 'loading' ? 'skeleton' : ''}`}>
         {imgState === 'error' ? (
-          <div className="product-card__image-fallback">No image</div>
+          <div className="product-card__image-fallback">{t('product.noImage')}</div>
         ) : (
           <img
             src={product.image}
@@ -30,7 +32,9 @@ export const ProductCard = memo(function ProductCard({ product }: { product: Pro
           <span className="product-card__badge">-{product.discountPercent}%</span>
         )}
         {!product.inStock && (
-          <span className="product-card__badge product-card__badge--muted">Out of stock</span>
+          <span className="product-card__badge product-card__badge--muted">
+            {t('product.outOfStock')}
+          </span>
         )}
       </div>
       <div className="product-card__body">

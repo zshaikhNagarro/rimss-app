@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react';
+import { useI18n } from '../../i18n';
 import { Card } from '../ui';
 import '../ProductCard/ProductCard.scss';
 import './Skeleton.scss';
@@ -29,12 +30,13 @@ export function ProductCardSkeleton() {
 }
 
 export function ProductGridSkeleton({ count = 6 }: { count?: number }) {
+  const { t } = useI18n();
   return (
     <div
       className="product-search__grid"
       role="status"
       aria-busy="true"
-      aria-label="Loading products"
+      aria-label={t('product.loadingProducts')}
     >
       {Array.from({ length: count }, (_, i) => (
         <ProductCardSkeleton key={i} />
@@ -44,12 +46,13 @@ export function ProductGridSkeleton({ count = 6 }: { count?: number }) {
 }
 
 export function ProductDetailSkeleton() {
+  const { t } = useI18n();
   return (
     <section
       className="product-showcase"
       role="status"
       aria-busy="true"
-      aria-label="Loading product"
+      aria-label={t('product.loadingProduct')}
     >
       <div className="product-showcase__image-wrap skeleton" style={{ aspectRatio: '1 / 1' }} />
       <div className="product-showcase__details">

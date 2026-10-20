@@ -40,7 +40,7 @@ test.describe('Product showcase and cart', () => {
 
     await page.getByRole('button', { name: 'Remove' }).click();
     await expect(page.getByText('Your cart is empty.')).toBeVisible();
-    await expect(page.getByRole('button', { name: /Proceed to Payment/ })).toBeDisabled();
+    await expect(page.getByRole('button', { name: /Sign in to checkout/ })).toBeDisabled();
   });
 
   test('keeps the cart after a reload', async ({ page }) => {
@@ -50,14 +50,29 @@ test.describe('Product showcase and cart', () => {
     await expect(page.getByRole('button', { name: 'Open cart' })).toContainText('Cart (1)');
   });
 
-  test('places an order from the cart drawer', async ({ page }) => {
+  test('asks for sign-in at checkout, then places and pays an order', async ({ page }) => {
     await page.goto('/product/p001');
     await page.getByRole('button', { name: 'Add to Cart' }).click();
     await page.getByRole('button', { name: 'Open cart' }).click();
-    await page.getByRole('button', { name: /Proceed to Payment/ }).click();
+    await page.getByRole('button', { name: 'Sign in to checkout' }).click();
 
+    await expect(page.getByRole('dialog', { name: 'Sign in' })).toBeVisible();
+    await expect(page).toHaveURL(/\/product\/p001$/);
+    await expect(page.getByRole('link', { name: 'Account' })).toHaveCount(0);
+    await page.getByRole('button', { name: 'Need an account? Register' }).click();
+    await page
+      .getByLabel('Email')
+      .fill(`shopper-${Date.now()}-${test.info().project.name}@example.com`);
+    await page.getByLabel('Password').fill('correct horse battery');
+    await page.getByRole('button', { name: 'Register' }).click();
+
+    await expect(page.getByRole('link', { name: 'Account' })).toBeVisible();
+    await page.getByRole('button', { name: /Proceed to Payment/ }).click();
     await expect(page.getByRole('status')).toContainText(/Order .+ placed\. Total \$109\.65/);
     await expect(page.getByRole('button', { name: 'Open cart' })).toContainText('Cart (0)');
+
+    await page.getByRole('button', { name: /Pay \$109\.65/ }).click();
+    await expect(page.getByRole('status')).toContainText('Payment successful');
   });
 
   test('closes the cart drawer', async ({ page }) => {

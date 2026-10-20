@@ -29,7 +29,7 @@
   }
 
   &__image-wrap {
-    background: #f5f5f5;
+    background: $color-surface-sunken;
     border-radius: $radius-md;
     overflow: hidden;
     aspect-ratio: 1 / 1;
@@ -74,14 +74,14 @@
 
   &__discount-tag {
     background: $color-accent;
-    color: #fff;
+    color: $color-on-accent;
     border-radius: $radius-sm;
     padding: 0.15rem 0.5rem;
     font-size: 0.8rem;
   }
 
   &__description {
-    color: #555;
+    color: $color-text-muted;
     line-height: 1.5;
   }
 
@@ -117,12 +117,19 @@
     text-align: center;
   }
 
-  // Full-width primary action on phones.
-  &__details > .ui-button--lg {
+  // Stacked full-width actions on phones.
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
     margin-top: 0.5rem;
 
     @include down($bp-sm) {
-      width: 100%;
+      flex-direction: column;
+
+      .ui-button {
+        width: 100%;
+      }
     }
   }
 }

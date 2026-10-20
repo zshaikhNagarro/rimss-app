@@ -45,8 +45,8 @@ flowchart TD
 flowchart TD
   main[main.tsx / App.tsx<br/>shell, routes, providers]
   registry[plugins/PluginRegistry]
-  modules[modules<br/>cart, productSearch, productShowcase]
-  components[components<br/>Header, ProductCard, Chatbot, ui/*...]
+  modules[modules<br/>cart, productSearch, productShowcase,<br/>account, wishlist]
+  components[components<br/>Header, AuthDialog, LanguageMenu, ProductCard, Chatbot, ui/*...]
   hooks[hooks]
   services[services<br/>httpClient, requestCache, orderService,<br/>productService, pushService, telemetry]
   utils[utils]
@@ -69,7 +69,7 @@ flowchart TD
   hooks --> services
 ```
 
-Modules register themselves with `PluginRegistry`; `App` renders one route per registered plugin, each wrapped in `ModuleErrorBoundary`. Only `cart` may be imported by other modules.
+Modules register themselves with `PluginRegistry`; `App` renders one route per registered plugin, each wrapped in `ModuleErrorBoundary`. Only `cart` may be imported by other modules. A plugin with `requiresAuth` is hidden from the nav while signed out (ADR 0011). Colours are CSS variables switched by `data-theme`, and UI strings come from `src/i18n` (ADR 0012).
 
 ## 4. API structure (ADR 0002)
 

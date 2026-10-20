@@ -147,6 +147,10 @@ const doc = new Document({
           ],
           alignment: AlignmentType.CENTER,
         }),
+        new Paragraph({
+          children: [new TextRun({ text: 'Prepared by: Zibran Shaikh', italics: true })],
+          alignment: AlignmentType.CENTER,
+        }),
         new Paragraph({ children: [new PageBreak()] }),
 
         h1('1. Introduction & Objective'),
@@ -274,13 +278,19 @@ const doc = new Document({
           'Chatbot (components/Chatbot): rule-based assistant driven by responses.json; keyword intents return canned replies and product suggestions, and the conversation is persisted in localStorage. No backend dependency.',
         ),
         bullet(
-          'Design system (styles/ + components/ui): SCSS variables/mixins and reusable Button, Card, Field, Heading and Table primitives keep modules visually consistent.',
+          'Design system (styles/ + components/ui): SCSS variables/mixins and reusable Button, Card, Field, Heading and Table primitives keep modules visually consistent. Colour tokens are CSS custom properties, so a header toggle switches light and dark themes (persisted, defaults to the OS preference).',
         ),
         bullet(
-          'Persistence (rimss-api): PostgreSQL with versioned SQL migrations (001_init, 002_order_idempotency) and seed-on-empty catalog; falls back to JSON files when DATABASE_URL is unset.',
+          'Internationalisation (src/i18n): all UI strings live in a message catalogue (English and Spanish) with a header language menu; the choice is persisted and sets the page language.',
         ),
         bullet(
-          'Orders are idempotent: an optional Idempotency-Key header makes checkout retries return the original order.',
+          'Accounts and checkout: guests can browse and fill a cart; checkout asks them to sign in through a modal dialog, then reopens the cart and offers a demo payment. The Account area (order history, pay, cancel) is only shown when signed in.',
+        ),
+        bullet(
+          'Persistence (rimss-api): PostgreSQL with versioned SQL migrations (001_init to 004_users) and seed-on-empty catalog; falls back to JSON files when DATABASE_URL is unset.',
+        ),
+        bullet(
+          'Orders are idempotent: an optional Idempotency-Key header makes checkout retries return the original order. Creating an order atomically decrements stock (cancelling restores it), so concurrent orders cannot oversell.',
         ),
         bullet(
           'Delivery: multi-stage non-root Dockerfiles for web (nginx proxying /api) and API, plus docker-compose with a Postgres service and a full-stack profile.',
@@ -342,7 +352,7 @@ const doc = new Document({
             ],
             [
               'Unit testability',
-              'Business logic (cart, filtering) as pure functions plus component, service and module tests (Vitest + Testing Library, 160 tests); UI states documented in Storybook.',
+              'Business logic (cart, filtering) as pure functions plus component, service and module tests (Vitest + Testing Library, 209 app tests plus 64 API tests); UI states documented in Storybook.',
             ],
             [
               'CI/CD readiness',
@@ -417,7 +427,7 @@ const doc = new Document({
         bullet(
           "Real payment gateway integration - UI stub only ('Proceed to Payment Gateway' button)",
         ),
-        bullet('Authentication/authorization and admin/inventory management screens'),
+        bullet('Admin/inventory management screens and a real payment processor'),
         bullet('Production SEO/SSR implementation (documented as a recommended follow-on)'),
         bullet(
           'Production push campaign tooling, segmentation and VAPID key management (mock broadcast endpoint only)',

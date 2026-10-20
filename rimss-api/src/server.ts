@@ -7,6 +7,7 @@ import {
   createPgOrderStore,
   createPgProductRepository,
   createPgSubscriptionStore,
+  createPgUserStore,
   migrate,
   seedProducts,
 } from './db.js';
@@ -43,16 +44,18 @@ async function main() {
       logger,
       products: createPgProductRepository(pool),
       orders: createPgOrderStore(pool),
+      users: createPgUserStore(pool),
       push: createPushService(keys, createPgSubscriptionStore(pool), config.vapidSubject),
       ping: async () => void (await pool.query('SELECT 1')),
     };
   } else {
     logger.warn('DATABASE_URL not set: using in-memory orders and JSON files (dev only)');
+    const fileProducts = createFileProductRepository(config.dataDir);
     deps = {
       config,
       logger,
-      products: createFileProductRepository(config.dataDir),
-      orders: createMemoryOrderStore(),
+      products: fileProducts,
+      orders: createMemoryOrderStore(fileProducts),
       push: createPushService(
         keys,
         createFileSubscriptionStore(path.join(config.dataDir, 'subscriptions.json')),
@@ -61,10 +64,13 @@ async function main() {
     };
   }
 
-  const server = createApp({
-    ...deps,
-    telemetryFile: path.join(config.dataDir, 'telemetry.json'),
-  }).listen(config.port, () => {
+  const server = createApp(
+    {
+      ...deps,
+      telemetryFile: path.join(config.dataDir, 'telemetry.json'),
+    },
+    { rateLimitMax: Number(process.env.RATE_LIMIT_MAX) || undefined },
+  ).listen(config.port, () => {
     logger.info({ port: config.port }, 'RIMSS API listening');
   });
 

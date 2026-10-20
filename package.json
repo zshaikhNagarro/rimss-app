@@ -3,6 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "description": "RIMSS monorepo: web app, API and shared contract",
+  "author": "Zibran Shaikh",
   "packageManager": "npm@11.17.0",
   "engines": {
     "node": ">=22"

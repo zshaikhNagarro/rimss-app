@@ -58,7 +58,9 @@ Run one workspace with `npx turbo run test --filter=@rimss/api`.
 | `POST /api/push/send`                                                                                                         | Broadcast; requires header `x-api-key` matching `ADMIN_API_KEY`                      |
 | `POST /api/telemetry`                                                                                                         | Stores frontend error and analytics events in `data/telemetry.json` (latest 1000)    |
 
-Configuration (environment variables): `PORT`, `CORS_ORIGINS` (comma-separated), `ADMIN_API_KEY`, `VAPID_SUBJECT`, `DATA_DIR`, `DATABASE_URL`, `DATABASE_SSL`, `DATABASE_SSL_CA`, `DATABASE_SSL_INSECURE`, `LOG_LEVEL`, `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` (see [rimss-api/.env.example](rimss-api/.env.example); the API does not load `.env` itself, so export the variables in your shell or host).
+Also available: `GET /api/products` accepts `limit` and `offset` (total in the `X-Total-Count` header); `POST /api/auth/register` and `/api/auth/login` return a bearer token; `GET /api/orders` lists the signed-in user's orders; `POST /api/orders/:id/pay` and `/cancel` drive the mock payment status (cancelling restores stock; creating an order decrements it); `GET /api/openapi.json` and `GET /metrics` serve the API spec and Prometheus metrics. Kubernetes manifests are in [k8s](k8s).
+
+Configuration (environment variables): `PORT`, `CORS_ORIGINS` (comma-separated), `ADMIN_API_KEY`, `JWT_SECRET` (required in production), `VAPID_SUBJECT`, `DATA_DIR`, `DATABASE_URL`, `DATABASE_SSL`, `DATABASE_SSL_CA`, `DATABASE_SSL_INSECURE`, `LOG_LEVEL`, `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` (see [rimss-api/.env.example](rimss-api/.env.example); the API does not load `.env` itself, so export the variables in your shell or host).
 
 ## Postgres
 

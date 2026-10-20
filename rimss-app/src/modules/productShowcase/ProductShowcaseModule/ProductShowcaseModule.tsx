@@ -7,13 +7,18 @@ import { ProductDetailSkeleton } from '../../../components/Skeleton';
 import { ErrorFallback } from '../../../components/ErrorFallback';
 import { Button, Heading } from '../../../components/ui';
 import { useCart } from '../../cart';
+import { useI18n } from '../../../i18n';
+import { useWishlist, wishlist } from '../../wishlist/wishlistStore';
 import './ProductShowcaseModule.scss';
 
 const ADDED_MESSAGE_MS = 2000;
+const LOW_STOCK = 5;
 
 export function ProductShowcaseModule() {
+  const { t } = useI18n();
   const { id } = useParams<{ id: string }>();
   const { addProduct } = useCart();
+  const wishlisted = useWishlist().includes(id ?? '');
 
   const {
     data: product,
@@ -33,8 +38,8 @@ export function ProductShowcaseModule() {
   if (status === 'error' || !product) {
     return (
       <ErrorFallback
-        title="Couldn't load this product"
-        message="It may no longer exist, or the connection failed."
+        title={t('product.loadError')}
+        message={t('product.loadErrorHint')}
         onRetry={retry}
       />
     );
@@ -70,7 +75,7 @@ export function ProductShowcaseModule() {
 
         {product.sizes.length > 0 && (
           <div className="product-showcase__sizes">
-            <span>Size</span>
+            <span>{t('product.size')}</span>
             <div className="product-showcase__size-options">
               {product.sizes.map((s) => (
                 <Button
@@ -88,21 +93,35 @@ export function ProductShowcaseModule() {
         )}
 
         <p className={`product-showcase__stock ${product.inStock ? 'in' : 'out'}`}>
-          {product.inStock ? 'In stock' : 'Out of stock'}
+          {!product.inStock && t('product.outOfStock')}
+          {product.inStock &&
+            product.stock <= LOW_STOCK &&
+            t('product.onlyLeft', { count: product.stock })}
+          {product.inStock && product.stock > LOW_STOCK && t('product.inStock')}
         </p>
 
-        <Button
-          size="lg"
-          disabled={!product.inStock}
-          onClick={() => {
-            addProduct(product, 1);
-            setAddedMessage(true);
-          }}
-        >
-          Add to Cart
-        </Button>
+        <div className="product-showcase__actions">
+          <Button
+            size="lg"
+            disabled={!product.inStock}
+            onClick={() => {
+              addProduct(product, 1);
+              setAddedMessage(true);
+            }}
+          >
+            {t('product.addToCart')}
+          </Button>
+          <Button
+            variant="outline"
+            size="lg"
+            selected={wishlisted}
+            onClick={() => wishlist.toggle(product.id)}
+          >
+            {wishlisted ? t('product.wishlisted') : t('product.saveToWishlist')}
+          </Button>
+        </div>
 
-        {addedMessage && <p className="product-showcase__added">Added to cart!</p>}
+        {addedMessage && <p className="product-showcase__added">{t('product.added')}</p>}
       </div>
     </section>
   );

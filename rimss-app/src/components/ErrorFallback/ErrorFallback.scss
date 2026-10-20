@@ -3,10 +3,10 @@
 .error-fallback {
   text-align: center;
   padding: 2rem 1rem;
-  color: #444;
+  color: $color-text;
 
   p {
     margin: 0 0 1rem;
-    color: #777;
+    color: $color-text-muted;
   }
 }

@@ -52,7 +52,7 @@
 
   &--primary {
     background: var(--ui-accent);
-    color: #fff;
+    color: $color-on-accent;
 
     &:hover:not(:disabled) {
       background: $color-accent-dark;
@@ -64,7 +64,7 @@
   }
 
   &--outline {
-    background: #fff;
+    background: $color-surface;
     border-color: var(--ui-accent);
     color: var(--ui-accent);
 
@@ -78,7 +78,7 @@
   }
 
   &--secondary {
-    background: #fff;
+    background: $color-surface;
     border-color: var(--ui-border);
     color: $color-text;
 

@@ -2,7 +2,12 @@
 
 .skeleton {
   display: block;
-  background: linear-gradient(90deg, #eee 25%, #f7f7f7 50%, #eee 75%);
+  background: linear-gradient(
+    90deg,
+    $color-border-subtle 25%,
+    $color-surface-alt 50%,
+    $color-border-subtle 75%
+  );
   background-size: 200% 100%;
   animation: skeleton-shimmer 1.2s ease-in-out infinite;
   border-radius: $radius-sm;

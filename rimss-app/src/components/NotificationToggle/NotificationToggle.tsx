@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Button } from '../ui';
+import { useI18n } from '../../i18n';
 import {
   getExistingSubscription,
   isPushSupported,
@@ -9,6 +10,7 @@ import {
 
 /** Lets the user opt in/out of push notifications (offers, restocks). */
 export function NotificationToggle() {
+  const { t } = useI18n();
   const supported = isPushSupported();
   const [enabled, setEnabled] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -31,7 +33,7 @@ export function NotificationToggle() {
       else await subscribeToPush();
       setEnabled(!enabled);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Something went wrong');
+      setError(e instanceof Error ? e.message : t('common.somethingWrong'));
     } finally {
       setBusy(false);
     }
@@ -43,9 +45,9 @@ export function NotificationToggle() {
       onClick={toggle}
       disabled={busy}
       title={error ?? undefined}
-      aria-label={enabled ? 'Disable notifications' : 'Enable notifications'}
+      aria-label={enabled ? t('notify.disable') : t('notify.enable')}
     >
-      {error ? 'Alerts: error' : enabled ? 'Alerts: On' : 'Alerts: Off'}
+      {error ? t('notify.error') : enabled ? t('notify.on') : t('notify.off')}
     </Button>
   );
 }

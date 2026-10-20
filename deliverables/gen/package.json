@@ -7,7 +7,7 @@
     "docs": "node render-diagrams.js && node generate-solution-approach.js && node generate-estimation-sheet.js && node generate-strategy-onepager.js && node generate-architecture-document.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "Zibran Shaikh",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {

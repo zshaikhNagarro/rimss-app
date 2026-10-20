@@ -14,7 +14,7 @@
 
   th {
     font-weight: 600;
-    color: #444;
+    color: $color-text;
   }
 
   &--striped tbody tr:nth-child(even) {
