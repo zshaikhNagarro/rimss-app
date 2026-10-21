@@ -44,28 +44,21 @@
     text-decoration: underline;
   }
 
+  &__cta:focus-visible,
+  &__controls .ui-button:focus-visible {
+    outline: 3px solid currentcolor;
+    outline-offset: 2px;
+  }
+
   &__controls {
     display: flex;
     align-items: center;
     gap: 0.5rem;
 
-    button {
+    .ui-button {
       min-width: 2.75rem;
       min-height: 2.75rem;
-      border: 1px solid currentcolor;
-      border-radius: $radius-sm;
-      background: transparent;
-      color: inherit;
-      cursor: pointer;
+      border-color: currentcolor;
     }
-  }
-
-  &__show {
-    margin-bottom: 1rem;
-    background: none;
-    border: 0;
-    color: $color-accent-dark;
-    text-decoration: underline;
-    cursor: pointer;
   }
 }

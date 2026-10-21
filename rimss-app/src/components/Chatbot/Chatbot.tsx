@@ -2,6 +2,8 @@ import { useEffect, useRef, useState, type SyntheticEvent } from 'react';
 import { createPortal } from 'react-dom';
 import { useI18n } from '../../i18n';
 import { trackEvent } from '../../services/telemetry';
+import { Button, Input } from '../ui';
+import { useEscapeKey } from '../../hooks/useEscapeKey';
 import {
   appendExchange,
   getResponses,
@@ -26,6 +28,8 @@ export function Chatbot() {
   useEffect(() => {
     if (open && bodyRef.current) bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
   }, [messages, open]);
+
+  useEscapeKey(() => setOpen(false), open);
 
   const send = (value: string) => {
     const content = value.trim();
@@ -52,17 +56,17 @@ export function Chatbot() {
           <header className="chatbot__header">
             <span>{t('chat.assistant')}</span>
             <span>
-              <button type="button" className="chatbot__link" onClick={clear}>
+              <Button variant="ghost" size="sm" className="chatbot__link" onClick={clear}>
                 {t('chat.clear')}
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
+                variant="icon"
                 className="chatbot__close"
                 aria-label={t('chat.close')}
                 onClick={() => setOpen(false)}
               >
                 ×
-              </button>
+              </Button>
             </span>
           </header>
           <div className="chatbot__body" ref={bodyRef} aria-live="polite">
@@ -85,31 +89,30 @@ export function Chatbot() {
           </div>
           <div className="chatbot__chips">
             {getResponses(lang).suggestions.map((s) => (
-              <button key={s} type="button" onClick={() => send(s)}>
+              <Button key={s} variant="outline" size="sm" onClick={() => send(s)}>
                 {s}
-              </button>
+              </Button>
             ))}
           </div>
           <form className="chatbot__form" onSubmit={onSubmit}>
-            <input
+            <Input
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               placeholder={t('chat.placeholder')}
               aria-label={t('chat.message')}
             />
-            <button type="submit">{t('chat.send')}</button>
+            <Button type="submit">{t('chat.send')}</Button>
           </form>
         </dialog>
       )}
-      <button
-        type="button"
+      <Button
         className="chatbot__toggle"
         aria-label={open ? t('chat.close') : t('chat.open')}
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
       >
         {open ? '×' : t('chat.toggle')}
-      </button>
+      </Button>
     </div>,
     document.body,
   );

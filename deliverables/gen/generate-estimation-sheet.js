@@ -165,7 +165,7 @@ async function main() {
     ],
     [
       'Development Phase',
-      'Web Push notifications (SW handlers, subscription client, header toggle, mock push endpoints)',
+      'Web Push notifications (SW handlers, subscription client, avatar-menu toggle, mock push endpoints)',
       'Frontend Dev',
       16,
       'NFR: re-engagement; HTTPS + VAPID keys',
@@ -336,7 +336,7 @@ async function main() {
       'Dark mode (CSS custom-property tokens) and English/Spanish i18n with persisted preferences',
       'Frontend Dev',
       20,
-      'Theme toggle, language menu, message catalogue, contrast checks',
+      'Theme toggle in avatar menu, language menu, message catalogue, contrast checks',
     ],
     [
       'Development Phase',

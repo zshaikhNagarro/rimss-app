@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useAsyncResource } from '../../hooks/useAsyncResource';
 import { productService } from '../../services/productService';
 import { useI18n } from '../../i18n';
 import { formatPrice, getDiscountedPrice } from '../../utils/price';
+import { Button } from '../../components/ui';
 import './OffersBanner.scss';
 
 const HIDE_KEY = 'rimss.offers.hidden';
@@ -16,32 +17,51 @@ export function OffersBanner() {
   const { t } = useI18n();
   const [hidden, setHidden] = useState(() => localStorage.getItem(HIDE_KEY) === '1');
   const [index, setIndex] = useState(0);
+  const showRef = useRef<HTMLButtonElement>(null);
+  const hideRef = useRef<HTMLButtonElement>(null);
+  const toggled = useRef(false);
   const { data } = useAsyncResource(
     () => productService.searchPage({ discountedOnly: true }, 'desc', 0, OFFER_COUNT),
     [],
   );
 
   const toggle = (next: boolean) => {
+    toggled.current = true;
     setHidden(next);
     localStorage.setItem(HIDE_KEY, next ? '1' : '0');
   };
+
+  // The clicked button unmounts on toggle, so move focus to its replacement.
+  useEffect(() => {
+    if (!toggled.current) return;
+    (hidden ? showRef : hideRef).current?.focus();
+  }, [hidden]);
 
   const offers = data?.items ?? [];
   if (offers.length === 0) return null;
 
   if (hidden) {
     return (
-      <button type="button" className="offers__show" onClick={() => toggle(false)}>
+      <Button ref={showRef} variant="ghost" size="sm" onClick={() => toggle(false)}>
         {t('offers.show')}
-      </button>
+      </Button>
     );
   }
 
   const offer = offers[index % offers.length];
   const step = (d: number) => setIndex((i) => (i + d + offers.length) % offers.length);
 
+  const onKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'ArrowLeft') step(-1);
+    else if (e.key === 'ArrowRight') step(1);
+  };
+
   return (
-    <section className={`offers offers--${theme}`} aria-label={t('offers.title')}>
+    <section
+      className={`offers offers--${theme}`}
+      aria-label={t('offers.title')}
+      onKeyDown={onKeyDown}
+    >
       <div className="offers__text" aria-live="polite">
         <p className="offers__eyebrow">{t('offers.title')}</p>
         <p className="offers__headline">
@@ -56,18 +76,18 @@ export function OffersBanner() {
         </Link>
       </div>
       <div className="offers__controls">
-        <button type="button" onClick={() => step(-1)} aria-label={t('offers.prev')}>
+        <Button variant="ghost" size="sm" onClick={() => step(-1)} aria-label={t('offers.prev')}>
           ‹
-        </button>
+        </Button>
         <span>
           {(index % offers.length) + 1}/{offers.length}
         </span>
-        <button type="button" onClick={() => step(1)} aria-label={t('offers.next')}>
+        <Button variant="ghost" size="sm" onClick={() => step(1)} aria-label={t('offers.next')}>
           ›
-        </button>
-        <button type="button" onClick={() => toggle(true)}>
+        </Button>
+        <Button ref={hideRef} variant="ghost" size="sm" onClick={() => toggle(true)}>
           {t('offers.hide')}
-        </button>
+        </Button>
       </div>
     </section>
   );

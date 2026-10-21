@@ -44,6 +44,19 @@ describe('OffersBanner', () => {
     expect(screen.getByText(/Red Hat/)).toBeInTheDocument();
   });
 
+  it('supports arrow keys and keeps focus when hiding and showing', async () => {
+    renderBanner();
+    const region = await screen.findByRole('region', { name: 'Latest offers' });
+    fireEvent.keyDown(region, { key: 'ArrowRight' });
+    expect(screen.getByText(/Blue Coat/)).toBeInTheDocument();
+    fireEvent.keyDown(region, { key: 'ArrowLeft' });
+    expect(screen.getByText(/Red Hat/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Hide' }));
+    expect(screen.getByRole('button', { name: 'Show latest offers' })).toHaveFocus();
+    fireEvent.click(screen.getByRole('button', { name: 'Show latest offers' }));
+    expect(screen.getByRole('button', { name: 'Hide' })).toHaveFocus();
+  });
+
   it('renders nothing when there are no discounted products', async () => {
     svc.searchPage.mockResolvedValue({ items: [], total: 0 });
     const { container } = renderBanner();

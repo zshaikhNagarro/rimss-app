@@ -43,7 +43,8 @@ test.describe('Accessibility', () => {
 
   test('dark mode has no WCAG A/AA violations and persists', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('button', { name: 'Switch to dark mode' }).click();
+    await page.getByRole('button', { name: /Account menu/ }).click();
+    await page.getByRole('menuitem', { name: 'Switch to dark mode' }).click();
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
     await expect(page.locator('.product-card')).toHaveCount(8);
     await expectNoViolations(page);

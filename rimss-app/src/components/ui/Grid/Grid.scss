@@ -1,0 +1,5 @@
+.ui-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--ui-grid-min, 200px), 1fr));
+  gap: var(--ui-grid-gap, 1.25rem);
+}

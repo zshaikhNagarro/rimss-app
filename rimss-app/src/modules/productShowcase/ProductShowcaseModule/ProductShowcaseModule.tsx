@@ -57,7 +57,14 @@ export function ProductShowcaseModule() {
   return (
     <section className="product-showcase">
       <div className="product-showcase__image-wrap">
-        <img src={product.image} alt={product.name} />
+        <img
+          src={product.image}
+          alt={product.name}
+          fetchPriority="high"
+          decoding="async"
+          width={600}
+          height={600}
+        />
       </div>
 
       <div className="product-showcase__details">

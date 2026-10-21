@@ -278,7 +278,7 @@ const doc = new Document({
           'Chatbot (components/Chatbot): rule-based assistant driven by responses.json; keyword intents return canned replies and product suggestions, and the conversation is persisted in localStorage. No backend dependency.',
         ),
         bullet(
-          'Design system (styles/ + components/ui): SCSS variables/mixins and reusable Button, Card, Field, Heading and Table primitives keep modules visually consistent. Colour tokens are CSS custom properties, so a header toggle switches light and dark themes (persisted, defaults to the OS preference).',
+          'Design system (styles/ + components/ui): SCSS variables/mixins and reusable Button, Card, Field, Heading and Table primitives keep modules visually consistent. Colour tokens are CSS custom properties, so an avatar-menu toggle switches light and dark themes (persisted, defaults to the OS preference).',
         ),
         bullet(
           'Internationalisation (src/i18n): all UI strings live in a message catalogue (English and Spanish) with a header language menu; the choice is persisted and sets the page language.',
@@ -347,7 +347,7 @@ const doc = new Document({
             ],
             [
               'Engagement / re-engagement',
-              'Opt-in Web Push notifications (VAPID) via the service worker for offers and restocks; user can enable/disable from the header.',
+              'Opt-in Web Push notifications (VAPID) via the service worker for offers and restocks; user can enable/disable from the header avatar menu.',
             ],
             [
               'Feature toggling',

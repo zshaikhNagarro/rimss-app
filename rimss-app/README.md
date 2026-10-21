@@ -4,14 +4,15 @@ React 19 + TypeScript + Vite single-page app for YCompany RIMSS. See [ASSIGNMENT
 
 ## Scripts
 
-| Command              | Purpose                                                    |
-| -------------------- | ---------------------------------------------------------- |
-| `npm run dev`        | Vite dev server (http://localhost:5173)                    |
-| `npm test`           | Vitest unit and component tests                            |
-| `npm run test:e2e`   | Playwright end-to-end tests, including axe accessibility   |
-| `npm run build`      | Type-check and production build                            |
-| `npm run check:size` | Fails when gzipped JS exceeds the budget (run after build) |
-| `npm run storybook`  | Component explorer on http://localhost:6006                |
+| Command                 | Purpose                                                       |
+| ----------------------- | ------------------------------------------------------------- |
+| `npm run dev`           | Vite dev server (http://localhost:5173)                       |
+| `npm test`              | Vitest unit and component tests                               |
+| `npm run test:coverage` | Unit tests with V8 coverage (text, html, lcov in `coverage/`) |
+| `npm run test:e2e`      | Playwright end-to-end tests, including axe accessibility      |
+| `npm run build`         | Type-check and production build                               |
+| `npm run check:size`    | Fails when gzipped JS exceeds the budget (run after build)    |
+| `npm run storybook`     | Component explorer on http://localhost:6006                   |
 
 ## Configuration
 

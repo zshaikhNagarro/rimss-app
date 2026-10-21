@@ -13,6 +13,8 @@ RIMSS is a shopping experience that must start quickly, survive flaky networks a
 - Runtime caching: `/api/*` uses `StaleWhileRevalidate` (`rimss-api-cache`, 100 entries, 1 day); images use `CacheFirst` (`rimss-image-cache`, 60 entries, 7 days).
 - The service worker imports `public/push-sw.js` for push handling (see ADR 0006).
 - The build splits React and router into a long-cached `react` chunk. `scripts/check-bundle-size.mjs` (`npm run check:size`) guards bundle growth.
+- Footer, cart drawer, auth dialog, chatbot, consent banner and update prompt are lazy-loaded, each wrapped in `Deferred` (error boundary + `Suspense`) so a failed chunk cannot break the shell. `nginx.conf` gzips text assets.
+- SEO and accessibility basics: Open Graph/Twitter meta and `noscript` in `index.html`, `public/robots.txt`, and a per-route `document.title` set by `useRouteEffects`.
 - Security headers (CSP, HSTS, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`) are set in `public/_headers`; `vite preview` sends the host-independent subset. `nginx.conf` serves the container image.
 
 ## Consequences

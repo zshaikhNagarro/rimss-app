@@ -17,6 +17,7 @@ export const en: Record<string, string> = {
   'header.themeToDark': 'Switch to dark mode',
   'header.themeToLight': 'Switch to light mode',
   'header.language': 'Language',
+  'header.accountMenu': 'Account menu',
   'header.signIn': 'Sign in',
   'common.close': 'Close',
   'nav.account': 'Account',
@@ -86,6 +87,7 @@ export const en: Record<string, string> = {
   'search.showMore': 'Show more ({count} remaining)',
 
   'offers.title': 'Latest offers',
+  'app.skip': 'Skip to main content',
   'offers.headline': '{name}: {percent}% off',
   'offers.view': 'View offer',
   'offers.prev': 'Previous offer',
@@ -179,6 +181,7 @@ export const es: Record<string, string> = {
   'header.themeToDark': 'Cambiar a modo oscuro',
   'header.themeToLight': 'Cambiar a modo claro',
   'header.language': 'Idioma',
+  'header.accountMenu': 'Menú de cuenta',
   'header.signIn': 'Iniciar sesión',
   'common.close': 'Cerrar',
   'nav.account': 'Cuenta',
@@ -248,6 +251,7 @@ export const es: Record<string, string> = {
   'search.showMore': 'Ver más ({count} restantes)',
 
   'offers.title': 'Últimas ofertas',
+  'app.skip': 'Saltar al contenido principal',
   'offers.headline': '{name}: {percent}% de descuento',
   'offers.view': 'Ver oferta',
   'offers.prev': 'Oferta anterior',

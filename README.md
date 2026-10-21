@@ -18,16 +18,17 @@ npm run dev          # shared build, then API (http://localhost:4000) and web (h
 
 ## Common commands (run from the root)
 
-| Command             | What it does                                                             |
-| ------------------- | ------------------------------------------------------------------------ |
-| `npm run dev`       | API and web in watch mode                                                |
-| `npm run build`     | Builds shared, API and web (cached)                                      |
-| `npm run lint`      | Type-checks / lints every workspace                                      |
-| `npm test`          | Unit and API tests in every workspace                                    |
-| `npm run test:e2e`  | Playwright end-to-end tests (starts its own API on 4199 and web on 5199) |
-| `npm run storybook` | Storybook on http://localhost:6006                                       |
-| `npm run docs`      | Regenerates the deliverable documents                                    |
-| `npm run verify`    | format check + lint + test + build                                       |
+| Command                                       | What it does                                                             |
+| --------------------------------------------- | ------------------------------------------------------------------------ |
+| `npm run dev`                                 | API and web in watch mode                                                |
+| `npm run build`                               | Builds shared, API and web (cached)                                      |
+| `npm run lint`                                | Type-checks / lints every workspace                                      |
+| `npm test`                                    | Unit and API tests in every workspace                                    |
+| `npm run test:coverage --workspace rimss-app` | Web unit tests with V8 coverage (thresholds in `vite.config.ts`)         |
+| `npm run test:e2e`                            | Playwright end-to-end tests (starts its own API on 4199 and web on 5199) |
+| `npm run storybook`                           | Storybook on http://localhost:6006                                       |
+| `npm run docs`                                | Regenerates the deliverable documents                                    |
+| `npm run verify`                              | format check + lint + test + build                                       |
 
 Run one workspace with `npx turbo run test --filter=@rimss/api`.
 
