@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Button, Field, Heading, Input } from '../ui';
 import { authService } from '../../services/authService';
 import { HttpStatusError } from '../../services/httpClient';
+import { trackEvent } from '../../services/telemetry';
 import { useI18n, type TFunction } from '../../i18n';
 import './AuthDialog.scss';
 
@@ -52,10 +53,12 @@ export function AuthDialog({
     setError(undefined);
     try {
       await authService[mode](email, password);
+      trackEvent(mode === 'login' ? 'login' : 'sign_up');
       setPassword('');
       onSuccess?.();
       onClose();
     } catch (err) {
+      trackEvent(mode === 'login' ? 'login_failed' : 'sign_up_failed');
       setError(authErrorMessage(err, t));
     } finally {
       setBusy(false);

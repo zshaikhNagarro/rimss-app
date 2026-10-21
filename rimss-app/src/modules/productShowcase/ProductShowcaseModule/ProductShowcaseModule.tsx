@@ -9,6 +9,7 @@ import { Button, Heading } from '../../../components/ui';
 import { useCart } from '../../cart';
 import { useI18n } from '../../../i18n';
 import { useWishlist, wishlist } from '../../wishlist/wishlistStore';
+import { trackEvent } from '../../../services/telemetry';
 import './ProductShowcaseModule.scss';
 
 const ADDED_MESSAGE_MS = 2000;
@@ -27,6 +28,10 @@ export function ProductShowcaseModule() {
   } = useAsyncResource(() => productService.getById(id!), [id], Boolean(id));
   const [selectedSize, setSelectedSize] = useState<string>();
   const [addedMessage, setAddedMessage] = useState(false);
+
+  useEffect(() => {
+    if (product) trackEvent('view_item', { productId: product.id });
+  }, [product]);
 
   useEffect(() => {
     if (!addedMessage) return;
@@ -83,7 +88,10 @@ export function ProductShowcaseModule() {
                   variant="secondary"
                   size="sm"
                   selected={s === size}
-                  onClick={() => setSelectedSize(s)}
+                  onClick={() => {
+                    trackEvent('select_size', { productId: product.id, size: s });
+                    setSelectedSize(s);
+                  }}
                 >
                   {s}
                 </Button>
@@ -115,7 +123,12 @@ export function ProductShowcaseModule() {
             variant="outline"
             size="lg"
             selected={wishlisted}
-            onClick={() => wishlist.toggle(product.id)}
+            onClick={() => {
+              trackEvent(wishlisted ? 'remove_from_wishlist' : 'add_to_wishlist', {
+                productId: product.id,
+              });
+              wishlist.toggle(product.id);
+            }}
           >
             {wishlisted ? t('product.wishlisted') : t('product.saveToWishlist')}
           </Button>

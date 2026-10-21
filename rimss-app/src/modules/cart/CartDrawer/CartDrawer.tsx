@@ -69,6 +69,7 @@ export function CartDrawer({
 
   const handleCheckout = async () => {
     if (!session) return onSignIn?.();
+    trackEvent('begin_checkout', { items: cart.items.length, total });
     setCheckout('submitting');
     try {
       const created = await orderService.createOrder(cart);
@@ -89,8 +90,10 @@ export function CartDrawer({
     setPayment('paying');
     try {
       setOrder(await orderService.pay(order.id));
+      trackEvent('payment_success', { orderId: order.id });
       setPayment('idle');
     } catch {
+      trackEvent('payment_failed', { orderId: order.id });
       setPayment('error');
     }
   };
@@ -159,7 +162,10 @@ export function CartDrawer({
                   <Button
                     variant="secondary"
                     size="sm"
-                    onClick={() => removeProduct(item.productId)}
+                    onClick={() => {
+                      trackEvent('remove_from_cart', { productId: item.productId });
+                      removeProduct(item.productId);
+                    }}
                   >
                     {t('cart.remove')}
                   </Button>

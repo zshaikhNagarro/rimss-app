@@ -4,6 +4,7 @@ import { useCart } from '../../modules/cart';
 import { useTheme } from '../../hooks/useTheme';
 import { useSession } from '../../services/session';
 import { authService } from '../../services/authService';
+import { trackEvent } from '../../services/telemetry';
 import { useI18n } from '../../i18n';
 import { LanguageMenu } from '../LanguageMenu';
 import { NotificationToggle } from '../NotificationToggle';
@@ -45,7 +46,10 @@ export function Header({
 
         <Button
           variant="outline"
-          onClick={toggleTheme}
+          onClick={() => {
+            trackEvent('toggle_theme', { to: theme === 'dark' ? 'light' : 'dark' });
+            toggleTheme();
+          }}
           aria-label={theme === 'dark' ? t('header.themeToLight') : t('header.themeToDark')}
           title={theme === 'dark' ? t('header.themeLight') : t('header.themeDark')}
         >
@@ -55,12 +59,25 @@ export function Header({
 
         <NotificationToggle />
 
-        <Button variant="outline" onClick={onCartClick} aria-label={t('header.openCart')}>
+        <Button
+          variant="outline"
+          onClick={() => {
+            trackEvent('open_cart', { items: itemCount });
+            onCartClick();
+          }}
+          aria-label={t('header.openCart')}
+        >
           {t('header.cart', { count: itemCount })}
         </Button>
 
         {session ? (
-          <Button variant="outline" onClick={authService.logout}>
+          <Button
+            variant="outline"
+            onClick={() => {
+              trackEvent('logout');
+              authService.logout();
+            }}
+          >
             {t('account.signOut')}
           </Button>
         ) : (
