@@ -26,6 +26,7 @@ flowchart LR
   api -. "no DATABASE_URL" .-> files
   api -- "Web Push / VAPID" --> pushsvc --> sw
   spa -. "VITE_TELEMETRY_URL" .-> collector
+  spa -. "VITE_GA_MEASUREMENT_ID" .-> ga[[Google Analytics 4<br/>optional]]
 ```
 
 ## 2. Repository and package dependencies
@@ -46,9 +47,9 @@ flowchart TD
   main[main.tsx / App.tsx<br/>shell, routes, providers]
   registry[plugins/PluginRegistry]
   modules[modules<br/>cart, productSearch, productShowcase,<br/>account, wishlist]
-  components[components<br/>Header, AuthDialog, LanguageMenu, ProductCard, Chatbot, ui/*...]
+  components[components<br/>Header, Footer, AuthDialog, LanguageMenu, AccountMenu, ProductCard, Chatbot, ConsentBanner, ui/*...]
   hooks[hooks]
-  services[services<br/>httpClient, requestCache, orderService,<br/>productService, pushService, telemetry]
+  services[services<br/>httpClient, requestCache, orderService,<br/>productService, pushService, telemetry, analytics]
   utils[utils]
   types[types]
 
@@ -189,22 +190,26 @@ rimss-app/
 ├─ playwright.config.ts, e2e/          e2e, accessibility, resilience specs
 ├─ public/
 │  ├─ _headers                         CSP and security headers
+│  ├─ robots.txt                       crawler rules
 │  └─ push-sw.js                       push + notificationclick handlers
 ├─ scripts/                            check-bundle-size, PWA icon generation
 └─ src/
-   ├─ main.tsx, App.tsx, App.scss      entry and shell (routes from registry)
+   ├─ main.tsx, App.tsx, App.scss      entry; App wires CartProvider + HomeContainer
+   ├─ containers/HomeContainer/        page shell: header, routed main, lazy overlays
+   ├─ routes/AppRoutes.tsx             routes built from the plugin registry
    ├─ plugins/PluginRegistry.ts        module manifest + feature flags
    ├─ modules/                         feature modules (barrel per module)
    │  ├─ index.ts                      registers all modules
-   │  ├─ cart/                         CartContext, CartDrawer, cartLogic, cartStorage
+   │  ├─ cart/                         CartContext, CartDrawer (lazy), cartLogic, cartStorage
    │  ├─ productSearch/                ProductSearchModule, filterProducts, searchParams
    │  └─ productShowcase/              ProductShowcaseModule
    ├─ components/                      shared UI
    │  ├─ Chatbot/                      rule-based chat + responses.json
-   │  ├─ Header/, ProductCard/, NotificationToggle/, UpdatePrompt/
+   │  ├─ Header/, Footer/, ProductCard/, AccountMenu/, NotificationToggle/, UpdatePrompt/, ConsentBanner/
    │  ├─ Loader/, Skeleton/, ErrorFallback/, ModuleErrorBoundary/
+   │  ├─ Deferred/                     error boundary + Suspense wrapper for lazy parts
    │  └─ ui/                           Button, Card, Field, Heading, Table
-   ├─ hooks/                           useAsyncResource, useDebouncedValue
+   ├─ hooks/                           useAsyncResource, useDebouncedValue, useRouteEffects
    ├─ services/                        httpClient, requestCache, productService,
    │                                   orderService, pushService, telemetry
    ├─ utils/                           price

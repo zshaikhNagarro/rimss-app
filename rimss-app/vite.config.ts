@@ -92,5 +92,21 @@ export default defineConfig({
     globals: true,
     setupFiles: './src/setupTests.ts',
     exclude: ['e2e/**', 'node_modules/**'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html', 'lcov'],
+      reportsDirectory: './coverage',
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: [
+        'src/**/*.{test,stories}.{ts,tsx}',
+        'src/main.tsx',
+        'src/pwa.d.ts',
+        'src/setupTests.ts',
+        'src/test/**',
+        'src/types/**',
+        'src/**/index.ts',
+      ],
+      thresholds: { lines: 70, functions: 70, statements: 70, branches: 60 },
+    },
   },
 });

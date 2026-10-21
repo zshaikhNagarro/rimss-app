@@ -287,6 +287,14 @@ export function createPgOrderStore(pool: Pool): OrderStore {
       }
       return store.get(id);
     },
+    async expirePending(cutoff) {
+      const { rows } = await pool.query(
+        "SELECT id FROM orders WHERE status = 'PENDING_PAYMENT' AND created_at < $1",
+        [cutoff.toISOString()],
+      );
+      for (const r of rows) await store.setStatus(r.id, 'CANCELLED');
+      return rows.length;
+    },
     async listByUser(userId) {
       const { rows } = await pool.query(
         'SELECT id FROM orders WHERE user_id = $1 ORDER BY created_at DESC',

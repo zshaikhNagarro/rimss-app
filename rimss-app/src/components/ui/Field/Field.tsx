@@ -1,4 +1,4 @@
-import type { InputHTMLAttributes, LabelHTMLAttributes, SelectHTMLAttributes } from 'react';
+import type { ComponentPropsWithRef, LabelHTMLAttributes, SelectHTMLAttributes } from 'react';
 import '../tokens.scss';
 import './Field.scss';
 
@@ -16,11 +16,24 @@ export function Input({
   compact = false,
   className,
   ...rest
-}: Readonly<InputHTMLAttributes<HTMLInputElement> & { compact?: boolean }>) {
+}: Readonly<ComponentPropsWithRef<'input'> & { compact?: boolean }>) {
   const classes = ['ui-control', compact && 'ui-control--compact', className]
     .filter(Boolean)
     .join(' ');
   return <input className={classes} {...rest} />;
+}
+
+export function Checkbox({
+  className,
+  ...rest
+}: Readonly<Omit<ComponentPropsWithRef<'input'>, 'type'>>) {
+  return (
+    <input
+      type="checkbox"
+      className={['ui-checkbox', className].filter(Boolean).join(' ')}
+      {...rest}
+    />
+  );
 }
 
 export function Select({ className, ...rest }: Readonly<SelectHTMLAttributes<HTMLSelectElement>>) {

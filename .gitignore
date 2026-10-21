@@ -38,3 +38,6 @@ pnpm-debug.log*
 lerna-debug.log*
 
 rimss-api/data/telemetry.json
+
+# Generated build output
+rimss-app/dev-dist

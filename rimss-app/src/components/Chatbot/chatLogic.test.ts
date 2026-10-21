@@ -14,6 +14,13 @@ describe('reply', () => {
     const r = reply('Show me JACKETS');
     expect(r.products?.length).toBeGreaterThan(0);
   });
+
+  it('answers in Spanish when asked to', () => {
+    const r = reply('Busco una chaqueta', 'es');
+    expect(r.text).toBe('Nuestras mejores prendas de abrigo:');
+    expect(r.products?.length).toBeGreaterThan(0);
+    expect(greeting('es')[0].text).toMatch(/Hola/);
+  });
 });
 
 describe('appendExchange', () => {

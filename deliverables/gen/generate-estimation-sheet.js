@@ -165,7 +165,7 @@ async function main() {
     ],
     [
       'Development Phase',
-      'Web Push notifications (SW handlers, subscription client, header toggle, mock push endpoints)',
+      'Web Push notifications (SW handlers, subscription client, avatar-menu toggle, mock push endpoints)',
       'Frontend Dev',
       16,
       'NFR: re-engagement; HTTPS + VAPID keys',
@@ -305,10 +305,10 @@ async function main() {
     ],
     [
       'Development Phase',
-      'Telemetry/analytics events stored locally via API JSON file; global error capture; log masking; CSP/security headers',
+      'Telemetry/analytics events stored locally via API JSON file and forwarded to Google Analytics 4 when configured; global error capture; log masking; CSP/security headers',
       'Frontend Dev',
       6,
-      'VITE_TELEMETRY_URL (optional), public/_headers',
+      'VITE_TELEMETRY_URL (optional), VITE_GA_MEASUREMENT_ID (optional), public/_headers',
     ],
     [
       'Development Phase',
@@ -336,7 +336,7 @@ async function main() {
       'Dark mode (CSS custom-property tokens) and English/Spanish i18n with persisted preferences',
       'Frontend Dev',
       20,
-      'Theme toggle, language menu, message catalogue, contrast checks',
+      'Theme toggle in avatar menu, language menu, message catalogue, contrast checks',
     ],
     [
       'Development Phase',
@@ -344,6 +344,13 @@ async function main() {
       'Frontend Dev',
       12,
       'Stacked layout below desktop width',
+    ],
+    [
+      'Development Phase',
+      'Header product search with type-ahead suggestions and 30-minute inactivity sign-out',
+      'Frontend Dev',
+      8,
+      'Debounced suggestions linking to product pages; activity-reset idle timer',
     ],
     [
       'Development Phase',
@@ -636,6 +643,69 @@ async function main() {
       };
     });
   });
+
+  // Planning heuristics, not measurements: replace with real usage once tracked.
+  const TOKENS_IN_PER_AI_HOUR = 150_000;
+  const TOKENS_OUT_PER_AI_HOUR = 20_000;
+  const REVIEW_FACTOR = 0.25; // human review/rework per AI-assisted hour
+  const aiShare = {
+    'Requirement Phase': 0.35,
+    'Design Phase': 0.4,
+    'Development Phase': 0.7,
+    'Infrastructure & Environment Setup Phase': 0.5,
+    'Testing & Bug Fixing Phase': 0.6,
+    'Release & Deployment Phase': 0.4,
+    'Project Management': 0.3,
+  };
+
+  const aiSheet = workbook.addWorksheet('AI Effort & Tokens');
+  aiSheet.columns = [
+    { header: 'Phase', key: 'phase', width: 38 },
+    { header: 'Manual Effort (Hours)', key: 'manual', width: 22 },
+    { header: 'AI-assistable Share', key: 'share', width: 20 },
+    { header: 'AI-assisted Work (Hours)', key: 'aiWork', width: 24 },
+    { header: 'Human Review (Hours)', key: 'review', width: 22 },
+    { header: 'Effort With AI (Hours)', key: 'withAi', width: 22 },
+    { header: 'Est. Input Tokens', key: 'tin', width: 20 },
+    { header: 'Est. Output Tokens', key: 'tout', width: 20 },
+  ];
+  aiSheet.getRow(1).eachCell((c) => {
+    c.fill = HEADER_FILL;
+    c.font = HEADER_FONT;
+  });
+  const totals = { manual: 0, aiWork: 0, review: 0, withAi: 0, tin: 0, tout: 0 };
+  phases.forEach((ph) => {
+    const manual = data.filter((r) => r[0] === ph).reduce((s, r) => s + r[3], 0);
+    const share = aiShare[ph] ?? 0;
+    const aiWork = manual * share;
+    const review = aiWork * REVIEW_FACTOR;
+    const withAi = manual - aiWork + review;
+    const tin = Math.round(aiWork * TOKENS_IN_PER_AI_HOUR);
+    const tout = Math.round(aiWork * TOKENS_OUT_PER_AI_HOUR);
+    const row = { manual, aiWork, review, withAi, tin, tout };
+    Object.keys(totals).forEach((k) => (totals[k] += row[k]));
+    aiSheet.addRow({ phase: ph, share, ...row });
+  });
+  const aiTotal = aiSheet.addRow({
+    phase: 'Total',
+    share: totals.aiWork / totals.manual,
+    ...totals,
+  });
+  aiTotal.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+  aiTotal.eachCell((c) => (c.fill = HEADER_FILL));
+  aiSheet.addRow([]);
+  aiSheet.addRow([
+    `Saving: ${(totals.manual - totals.withAi).toFixed(0)} hours (${(((totals.manual - totals.withAi) / totals.manual) * 100).toFixed(0)}%)`,
+  ]).font = { bold: true };
+  [
+    `Token heuristic: ${TOKENS_IN_PER_AI_HOUR.toLocaleString('en-US')} input and ${TOKENS_OUT_PER_AI_HOUR.toLocaleString('en-US')} output tokens per AI-assisted hour (agentic coding re-reads context on each step).`,
+    `Human review adds ${REVIEW_FACTOR * 100}% of each AI-assisted hour for review, testing and rework.`,
+    'AI share per phase and token rates are planning assumptions, not measured usage; replace with actual usage from the AI tool dashboard.',
+    'Token cost depends on the model and pricing agreed with the client; costs are not included.',
+  ].forEach((n) => aiSheet.addRow([n]));
+  aiSheet.getColumn('share').numFmt = '0%';
+  ['manual', 'aiWork', 'review', 'withAi'].forEach((k) => (aiSheet.getColumn(k).numFmt = '0.0'));
+  ['tin', 'tout'].forEach((k) => (aiSheet.getColumn(k).numFmt = '#,##0'));
 
   const assumptionsSheet = workbook.addWorksheet('Assumptions & Scope');
   assumptionsSheet.columns = [

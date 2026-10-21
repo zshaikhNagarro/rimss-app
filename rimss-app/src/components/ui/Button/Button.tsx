@@ -1,11 +1,11 @@
-import type { ButtonHTMLAttributes } from 'react';
+import type { ComponentPropsWithRef } from 'react';
 import '../tokens.scss';
 import './Button.scss';
 
 export type ButtonVariant = 'primary' | 'outline' | 'secondary' | 'ghost' | 'icon';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
-export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends ComponentPropsWithRef<'button'> {
   variant?: ButtonVariant;
   size?: ButtonSize;
   block?: boolean;

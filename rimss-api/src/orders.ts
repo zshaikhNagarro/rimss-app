@@ -51,6 +51,8 @@ export interface OrderStore {
   listByUser(userId: string): Promise<Order[]>;
   /** Moves an order to a new status; returns the updated order, or undefined if it does not exist. */
   setStatus(id: string, status: OrderStatus): Promise<Order | undefined>;
+  /** Cancels PENDING_PAYMENT orders created before the cutoff (restoring stock); returns the count. */
+  expirePending(cutoff: Date): Promise<number>;
 }
 
 export function newOrder(quote: Quote, userId?: string): Order {
@@ -86,6 +88,17 @@ export function createMemoryOrderStore(products?: ProductRepository): OrderStore
         await products?.release(order.lines);
       order.status = status;
       return order;
+    },
+    async expirePending(cutoff) {
+      let n = 0;
+      for (const o of orders.values()) {
+        if (o.status === 'PENDING_PAYMENT' && new Date(o.createdAt) < cutoff) {
+          await products?.release(o.lines);
+          o.status = 'CANCELLED';
+          n++;
+        }
+      }
+      return n;
     },
   };
 }

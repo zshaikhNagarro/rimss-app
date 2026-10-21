@@ -3,7 +3,7 @@ import request from 'supertest';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createApp } from '../src/app.js';
 import { loadConfig } from '../src/config.js';
-import { createMemoryOrderStore } from '../src/orders.js';
+import { buildQuote, createMemoryOrderStore } from '../src/orders.js';
 import { createFileProductRepository } from '../src/products.js';
 import type { PushService } from '../src/push.js';
 
@@ -55,6 +55,15 @@ describe('catalog', () => {
       ),
     ).toBe(true);
     expect((await request(app).get('/api/products?discountedOnly=true')).body).toHaveLength(5);
+  });
+
+  it('sorts by price before paging', async () => {
+    const prices = (res: { body: { price: number }[] }) => res.body.map((p) => p.price);
+    const all = prices(await request(app).get('/api/products'));
+    const asc = prices(await request(app).get('/api/products?sort=asc&limit=3'));
+    expect(asc).toEqual([...all].sort((a, b) => a - b).slice(0, 3));
+    const desc = prices(await request(app).get('/api/products?sort=desc&limit=3'));
+    expect(desc).toEqual([...all].sort((a, b) => b - a).slice(0, 3));
   });
 
   it('paginates with limit and offset and reports the total', async () => {
@@ -169,8 +178,44 @@ describe('stock quantity', () => {
   });
 });
 
+describe('guest orders and expiry', () => {
+  const items = [{ productId: 'p001', quantity: 1 }];
+
+  it('rejects guest orders when REQUIRE_AUTH_FOR_ORDERS is true', async () => {
+    const { app } = build({ REQUIRE_AUTH_FOR_ORDERS: 'true' });
+    const res = await request(app).post('/api/orders').send({ items });
+    expect(res.status).toBe(401);
+  });
+
+  it('cancels stale unpaid orders and restores stock', async () => {
+    const products = createFileProductRepository(dataDir);
+    const orders = createMemoryOrderStore(products);
+    const start = (await products.byIds(['p001']))[0]?.stock as number;
+    const order = await orders.create(await buildQuote(products, items));
+    expect(await orders.expirePending(new Date(Date.now() - 60_000))).toBe(0);
+    expect(await orders.expirePending(new Date(Date.now() + 60_000))).toBe(1);
+    expect((await orders.get(order.id))?.status).toBe('CANCELLED');
+    expect((await products.byIds(['p001']))[0]?.stock).toBe(start);
+  });
+});
+
 describe('auth and order history', () => {
   const { app } = build();
+
+  it('sets an httpOnly cookie that authenticates later requests and logout clears it', async () => {
+    const agent = request.agent(app);
+    const reg = await agent
+      .post('/api/auth/register')
+      .send({ email: 'cookie@example.com', password: 'correct horse' });
+    const cookie = (reg.headers['set-cookie'] as unknown as string[])[0] ?? '';
+    expect(cookie).toMatch(/rimss_token=/);
+    expect(cookie).toMatch(/HttpOnly/i);
+    expect(cookie).toMatch(/SameSite=Lax/i);
+    expect((await agent.get('/api/orders')).status).toBe(200);
+    expect((await request(app).get('/api/orders')).status).toBe(401);
+    await agent.post('/api/auth/logout').expect(204);
+    expect((await agent.get('/api/orders')).status).toBe(401);
+  });
   const creds = { email: 'Shopper@Example.com', password: 'correct horse' };
   const items = [{ productId: 'p001', quantity: 1 }];
 

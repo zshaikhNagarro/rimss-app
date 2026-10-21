@@ -1,0 +1,73 @@
+@use '../../styles' as *;
+
+.account-menu {
+  position: relative;
+
+  &__avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.4rem;
+    height: 2.4rem;
+    padding: 0;
+    border: 1px solid $color-accent;
+    border-radius: 50%;
+    background: $color-accent;
+    color: #fff;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity $transition-fast;
+
+    &:hover {
+      opacity: 0.9;
+    }
+  }
+
+  &__list {
+    position: absolute;
+    top: calc(100% + 0.35rem);
+    right: 0;
+    z-index: 20;
+    min-width: 12rem;
+    padding: 0.25rem;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid $color-accent;
+    border-radius: $radius-md;
+    background: $color-surface;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+    transform-origin: top right;
+    animation: fade-up 0.18s ease both;
+  }
+
+  &__email {
+    margin: 0;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.85rem;
+    color: $color-text-muted;
+    border-bottom: 1px solid $color-border-subtle;
+    overflow-wrap: anywhere;
+  }
+
+  &__link,
+  &__item.ui-button {
+    border-color: transparent;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  &__link {
+    padding: 0.45rem 0.75rem;
+    border-radius: $radius-md;
+    color: $color-text;
+    text-decoration: none;
+    font-size: 0.9rem;
+
+    &:hover,
+    &:focus-visible {
+      color: $color-accent;
+      background: rgba(176, 74, 45, 0.08);
+    }
+  }
+}

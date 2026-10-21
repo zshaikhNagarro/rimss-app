@@ -40,14 +40,18 @@ describe('Header', () => {
     expect(screen.queryByRole('link', { name: 'Detail' })).toBeNull();
   });
 
-  it('shows auth-only modules and no sign-in button once signed in', () => {
-    setSession({ token: 't', email: 'a@example.com' });
+  it('shows auth-only modules in the avatar menu and signs out from it', () => {
+    setSession({ email: 'a@example.com' });
     renderHeader();
-    expect(screen.getByRole('link', { name: 'Account' })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Sign in' })).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: 'Sign out' }));
     expect(screen.queryByRole('link', { name: 'Account' })).toBeNull();
-    expect(screen.getByRole('button', { name: 'Sign in' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Account menu' })).toHaveTextContent('A');
+    fireEvent.click(screen.getByRole('button', { name: 'Account menu' }));
+    expect(screen.getByRole('menuitem', { name: 'Account' })).toHaveAttribute('href', '/account');
+    expect(screen.queryByRole('menuitem', { name: 'Sign in' })).toBeNull();
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Sign out' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Account menu' }));
+    expect(screen.queryByRole('menuitem', { name: 'Account' })).toBeNull();
+    expect(screen.getByRole('menuitem', { name: 'Sign in' })).toBeInTheDocument();
     setSession(null);
   });
 
@@ -61,7 +65,9 @@ describe('Header', () => {
       </MemoryRouter>,
     );
     expect(screen.queryByRole('link', { name: 'Account' })).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Account menu' }));
+    expect(screen.queryByRole('menuitem', { name: 'Account' })).toBeNull();
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Sign in' }));
     expect(onSignInClick).toHaveBeenCalled();
   });
 

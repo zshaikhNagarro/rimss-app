@@ -18,16 +18,17 @@ npm run dev          # shared build, then API (http://localhost:4000) and web (h
 
 ## Common commands (run from the root)
 
-| Command             | What it does                                                             |
-| ------------------- | ------------------------------------------------------------------------ |
-| `npm run dev`       | API and web in watch mode                                                |
-| `npm run build`     | Builds shared, API and web (cached)                                      |
-| `npm run lint`      | Type-checks / lints every workspace                                      |
-| `npm test`          | Unit and API tests in every workspace                                    |
-| `npm run test:e2e`  | Playwright end-to-end tests (starts its own API on 4199 and web on 5199) |
-| `npm run storybook` | Storybook on http://localhost:6006                                       |
-| `npm run docs`      | Regenerates the deliverable documents                                    |
-| `npm run verify`    | format check + lint + test + build                                       |
+| Command                                       | What it does                                                             |
+| --------------------------------------------- | ------------------------------------------------------------------------ |
+| `npm run dev`                                 | API and web in watch mode                                                |
+| `npm run build`                               | Builds shared, API and web (cached)                                      |
+| `npm run lint`                                | Type-checks / lints every workspace                                      |
+| `npm test`                                    | Unit and API tests in every workspace                                    |
+| `npm run test:coverage --workspace rimss-app` | Web unit tests with V8 coverage (thresholds in `vite.config.ts`)         |
+| `npm run test:e2e`                            | Playwright end-to-end tests (starts its own API on 4199 and web on 5199) |
+| `npm run storybook`                           | Storybook on http://localhost:6006                                       |
+| `npm run docs`                                | Regenerates the deliverable documents                                    |
+| `npm run verify`                              | format check + lint + test + build                                       |
 
 Run one workspace with `npx turbo run test --filter=@rimss/api`.
 
@@ -43,7 +44,7 @@ Run one workspace with `npx turbo run test --filter=@rimss/api`.
 
 - The cart persists in `localStorage`; checkout posts ids and quantities to `POST /api/orders` and shows the order id.
 - Search filters and sort live in the URL (for example `/?category=Jackets&sort=desc`).
-- Optional `rimss-app` environment variables: `VITE_API_BASE_URL`, `VITE_DISABLED_MODULES`, `VITE_TELEMETRY_URL` (defaults to `<VITE_API_BASE_URL>/telemetry`). Copy [rimss-app/.env.example](rimss-app/.env.example) to `rimss-app/.env`.
+- Optional `rimss-app` environment variables: `VITE_API_BASE_URL`, `VITE_DISABLED_MODULES`, `VITE_TELEMETRY_URL` (defaults to `<VITE_API_BASE_URL>/telemetry`), `VITE_GA_MEASUREMENT_ID` (enables Google Analytics 4). Copy [rimss-app/.env.example](rimss-app/.env.example) to `rimss-app/.env`.
 
 ## API summary
 
@@ -60,7 +61,7 @@ Run one workspace with `npx turbo run test --filter=@rimss/api`.
 
 Also available: `GET /api/products` accepts `limit` and `offset` (total in the `X-Total-Count` header); `POST /api/auth/register` and `/api/auth/login` return a bearer token; `GET /api/orders` lists the signed-in user's orders; `POST /api/orders/:id/pay` and `/cancel` drive the mock payment status (cancelling restores stock; creating an order decrements it); `GET /api/openapi.json` and `GET /metrics` serve the API spec and Prometheus metrics. Kubernetes manifests are in [k8s](k8s).
 
-Configuration (environment variables): `PORT`, `CORS_ORIGINS` (comma-separated), `ADMIN_API_KEY`, `JWT_SECRET` (required in production), `VAPID_SUBJECT`, `DATA_DIR`, `DATABASE_URL`, `DATABASE_SSL`, `DATABASE_SSL_CA`, `DATABASE_SSL_INSECURE`, `LOG_LEVEL`, `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` (see [rimss-api/.env.example](rimss-api/.env.example); the API does not load `.env` itself, so export the variables in your shell or host).
+Configuration (environment variables): `PORT`, `CORS_ORIGINS` (comma-separated), `ADMIN_API_KEY`, `JWT_SECRET` (required in production), `VAPID_SUBJECT`, `DATA_DIR`, `DATABASE_URL`, `DATABASE_SSL`, `DATABASE_SSL_CA`, `DATABASE_SSL_INSECURE`, `LOG_LEVEL`, `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `REQUIRE_AUTH_FOR_ORDERS` (default true in production), `ORDER_TTL_MINUTES` (default 30; 0 disables expiry of unpaid orders) (see [rimss-api/.env.example](rimss-api/.env.example); the API does not load `.env` itself, so export the variables in your shell or host).
 
 ## Postgres
 
@@ -82,5 +83,5 @@ Errors use one envelope: `{ "error": { "code": "...", "message": "..." } }`.
 - `docker compose up -d postgres` starts only the database (as above).
 - `docker compose --profile full up --build` also builds [rimss-api/Dockerfile](rimss-api/Dockerfile) and [rimss-app/Dockerfile](rimss-app/Dockerfile) (nginx serving the SPA and proxying `/api`) and serves the app on http://localhost:8080. Both images run as non-root and define healthchecks.
 - Logs are JSON (pino) with an `x-request-id` per request; set `LOG_LEVEL` to change verbosity. Credentials and push-subscription secrets (`authorization`, `cookie`, `endpoint`, `keys`, `p256dh`, `auth`, `password`, `token`, `apiKey`) are masked as `[REDACTED]` (see `REDACT_PATHS` in `rimss-api/src/logger.ts`).
-- Frontend errors and analytics events (`page_view`, `add_to_cart`, `checkout_success`, `checkout_failed`) are posted to `POST /api/telemetry` and stored locally in `rimss-api/data/telemetry.json` (latest 1000 events, git-ignored).
+- Frontend errors and analytics events (`page_view`, `view_item`, `add_to_cart`, `remove_from_cart`, `begin_checkout`, `checkout_success`, `checkout_failed`, `payment_success`, `payment_failed`, `login`, `sign_up`, and more) are posted to `POST /api/telemetry` and stored locally in `rimss-api/data/telemetry.json` (latest 1000 events, git-ignored).
 - Postgres TLS verifies certificates by default; provide `DATABASE_SSL_CA` for a private CA.

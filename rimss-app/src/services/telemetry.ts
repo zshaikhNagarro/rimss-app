@@ -1,3 +1,5 @@
+import { sendGaEvent } from './analytics';
+
 export interface TelemetryEvent {
   type: 'error' | 'http_retry' | 'analytics';
   message: string;
@@ -24,6 +26,11 @@ export function track(event: TelemetryEvent): void {
 /** Product analytics event (page_view, add_to_cart, checkout, ...). */
 export function trackEvent(name: string, props?: Record<string, unknown>): void {
   track({ type: 'analytics', message: name, context: props });
+  try {
+    sendGaEvent(name, props);
+  } catch {
+    // Analytics must never break the app.
+  }
 }
 
 /** Ships events to `endpoint` (when set) and captures uncaught errors. Call once at startup. */

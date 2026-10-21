@@ -1,10 +1,30 @@
-import responses from './responses.json';
+import type { Lang } from '../../i18n';
+import responsesEn from './responses.json';
+import responsesEs from './responses.es.json';
 
 export interface ChatProduct {
   name: string;
   price: number;
   note: string;
 }
+
+interface Intent {
+  keywords: string[];
+  type?: string;
+  reply?: string;
+  products?: ChatProduct[];
+}
+
+export interface Responses {
+  greeting: string;
+  fallback: string;
+  support: string;
+  suggestions: string[];
+  intents: Intent[];
+}
+
+const catalogs: Record<Lang, Responses> = { en: responsesEn, es: responsesEs };
+export const getResponses = (lang: Lang = 'en'): Responses => catalogs[lang];
 
 export interface ChatMessage {
   id: number;
@@ -15,7 +35,9 @@ export interface ChatMessage {
 
 const STORAGE_KEY = 'rimss.chat.v1';
 
-export const greeting = (): ChatMessage[] => [{ id: 1, from: 'bot', text: responses.greeting }];
+export const greeting = (lang: Lang = 'en'): ChatMessage[] => [
+  { id: 1, from: 'bot', text: getResponses(lang).greeting },
+];
 
 export function loadMessages(): ChatMessage[] {
   try {
@@ -36,22 +58,24 @@ export function saveMessages(messages: ChatMessage[]): void {
   }
 }
 
-export function reply(input: string): Omit<ChatMessage, 'id' | 'from'> {
+export function reply(input: string, lang: Lang = 'en'): Omit<ChatMessage, 'id' | 'from'> {
+  const responses = getResponses(lang);
   const text = input.toLowerCase();
   const intent = responses.intents.find((i) => i.keywords.some((k) => text.includes(k)));
   if (!intent) return { text: responses.fallback };
-  if ('type' in intent && intent.type === 'support') return { text: responses.support };
-  return {
-    text: 'reply' in intent ? (intent.reply as string) : responses.fallback,
-    products: 'products' in intent ? (intent.products as ChatProduct[]) : undefined,
-  };
+  if (intent.type === 'support') return { text: responses.support };
+  return { text: intent.reply ?? responses.fallback, products: intent.products };
 }
 
-export function appendExchange(prev: ChatMessage[], content: string): ChatMessage[] {
+export function appendExchange(
+  prev: ChatMessage[],
+  content: string,
+  lang: Lang = 'en',
+): ChatMessage[] {
   const nextId = prev.length ? prev.at(-1)!.id + 1 : 1;
   return [
     ...prev,
     { id: nextId, from: 'user', text: content },
-    { id: nextId + 1, from: 'bot', ...reply(content) },
+    { id: nextId + 1, from: 'bot', ...reply(content, lang) },
   ];
 }

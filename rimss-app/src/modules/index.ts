@@ -4,3 +4,4 @@ import './productSearch';
 import './productShowcase';
 import './account';
 import './wishlist';
+import './offers';

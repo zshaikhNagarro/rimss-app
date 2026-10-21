@@ -1,1 +1,1 @@
-export { Field, Input, Select } from './Field';
+export { Field, Input, Select, Checkbox } from './Field';
