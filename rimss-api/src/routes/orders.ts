@@ -17,7 +17,11 @@ const idempotencyKeySchema = z
   .regex(/^[\w.:-]+$/)
   .optional();
 
-export function orderRoutes(products: ProductRepository, orders: OrderStore): Router {
+export function orderRoutes(
+  products: ProductRepository,
+  orders: OrderStore,
+  requireAuthToOrder = false,
+): Router {
   const router = Router();
 
   // Orders owned by a user are hidden (404) from everyone else; guest orders stay id-addressed.
@@ -33,7 +37,7 @@ export function orderRoutes(products: ProductRepository, orders: OrderStore): Ro
     res.json(await buildQuote(products, items));
   });
 
-  router.post('/orders', async (req, res) => {
+  router.post('/orders', ...(requireAuthToOrder ? [requireAuth] : []), async (req, res) => {
     const { items } = orderRequestSchema.parse(req.body);
     const key = idempotencyKeySchema.parse(req.header('idempotency-key'));
     const replay = key ? await orders.findByIdempotencyKey(key) : undefined;

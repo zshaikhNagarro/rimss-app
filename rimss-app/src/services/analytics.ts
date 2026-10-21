@@ -7,6 +7,30 @@ declare global {
 
 let enabled = false;
 
+const CONSENT_KEY = 'rimss.analytics-consent';
+export type Consent = 'granted' | 'denied';
+export const GA_ID: string | undefined = import.meta.env.VITE_GA_MEASUREMENT_ID || undefined;
+
+export function getConsent(): Consent | null {
+  try {
+    const v = localStorage.getItem(CONSENT_KEY);
+    return v === 'granted' || v === 'denied' ? v : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Persists the choice; granting loads GA, denying stops further events. */
+export function setConsent(value: Consent): void {
+  try {
+    localStorage.setItem(CONSENT_KEY, value);
+  } catch {
+    // Storage unavailable: the choice only lasts for this session.
+  }
+  if (value === 'granted') initAnalytics(GA_ID);
+  else enabled = false;
+}
+
 /** Loads GA4 when a measurement id (G-XXXX) is configured. Call once at startup. */
 export function initAnalytics(measurementId?: string): void {
   if (!measurementId || enabled || typeof document === 'undefined') return;

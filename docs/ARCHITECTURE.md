@@ -26,6 +26,7 @@ flowchart LR
   api -. "no DATABASE_URL" .-> files
   api -- "Web Push / VAPID" --> pushsvc --> sw
   spa -. "VITE_TELEMETRY_URL" .-> collector
+  spa -. "VITE_GA_MEASUREMENT_ID" .-> ga[[Google Analytics 4<br/>optional]]
 ```
 
 ## 2. Repository and package dependencies
@@ -46,9 +47,9 @@ flowchart TD
   main[main.tsx / App.tsx<br/>shell, routes, providers]
   registry[plugins/PluginRegistry]
   modules[modules<br/>cart, productSearch, productShowcase,<br/>account, wishlist]
-  components[components<br/>Header, AuthDialog, LanguageMenu, ProductCard, Chatbot, ui/*...]
+  components[components<br/>Header, Footer, AuthDialog, LanguageMenu, ProductCard, Chatbot, ConsentBanner, ui/*...]
   hooks[hooks]
-  services[services<br/>httpClient, requestCache, orderService,<br/>productService, pushService, telemetry]
+  services[services<br/>httpClient, requestCache, orderService,<br/>productService, pushService, telemetry, analytics]
   utils[utils]
   types[types]
 
@@ -201,7 +202,7 @@ rimss-app/
    │  └─ productShowcase/              ProductShowcaseModule
    ├─ components/                      shared UI
    │  ├─ Chatbot/                      rule-based chat + responses.json
-   │  ├─ Header/, ProductCard/, NotificationToggle/, UpdatePrompt/
+   │  ├─ Header/, Footer/, ProductCard/, NotificationToggle/, UpdatePrompt/, ConsentBanner/
    │  ├─ Loader/, Skeleton/, ErrorFallback/, ModuleErrorBoundary/
    │  └─ ui/                           Button, Card, Field, Heading, Table
    ├─ hooks/                           useAsyncResource, useDebouncedValue

@@ -1,0 +1,71 @@
+@use '../../styles/variables' as *;
+
+.offers {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.25rem;
+  border-radius: $radius-md;
+  background: $color-accent;
+  color: $color-on-accent;
+
+  &--dark {
+    background: #1d1d1f;
+    color: #fff;
+  }
+
+  &--light {
+    background: $color-surface-alt;
+    color: $color-text;
+    border: 1px solid $color-border-subtle;
+  }
+
+  &__eyebrow {
+    margin: 0;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  &__headline {
+    margin: 0.25rem 0;
+    font-weight: 600;
+  }
+
+  &__price {
+    margin: 0 0 0.5rem;
+  }
+
+  &__cta {
+    color: inherit;
+    text-decoration: underline;
+  }
+
+  &__controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    button {
+      min-width: 2.75rem;
+      min-height: 2.75rem;
+      border: 1px solid currentcolor;
+      border-radius: $radius-sm;
+      background: transparent;
+      color: inherit;
+      cursor: pointer;
+    }
+  }
+
+  &__show {
+    margin-bottom: 1rem;
+    background: none;
+    border: 0;
+    color: $color-accent-dark;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+}

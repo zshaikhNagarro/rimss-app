@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState, type SyntheticEvent } from 'react';
 import { createPortal } from 'react-dom';
-import responses from './responses.json';
 import { useI18n } from '../../i18n';
+import { trackEvent } from '../../services/telemetry';
 import {
   appendExchange,
+  getResponses,
   greeting,
   loadMessages,
   saveMessages,
@@ -12,7 +13,7 @@ import {
 import './Chatbot.scss';
 
 export function Chatbot() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>(loadMessages);
   const [draft, setDraft] = useState('');
@@ -29,7 +30,8 @@ export function Chatbot() {
   const send = (value: string) => {
     const content = value.trim();
     if (!content) return;
-    setMessages((prev) => appendExchange(prev, content));
+    trackEvent('chatbot_message');
+    setMessages((prev) => appendExchange(prev, content, lang));
     setDraft('');
   };
 
@@ -38,7 +40,10 @@ export function Chatbot() {
     send(draft);
   };
 
-  const clear = () => setMessages(greeting());
+  const clear = () => {
+    trackEvent('chatbot_clear');
+    setMessages(greeting(lang));
+  };
 
   return createPortal(
     <div className="chatbot">
@@ -79,7 +84,7 @@ export function Chatbot() {
             ))}
           </div>
           <div className="chatbot__chips">
-            {responses.suggestions.map((s) => (
+            {getResponses(lang).suggestions.map((s) => (
               <button key={s} type="button" onClick={() => send(s)}>
                 {s}
               </button>

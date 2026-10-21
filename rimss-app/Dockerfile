@@ -11,6 +11,8 @@ RUN npm ci --ignore-scripts
 COPY packages/shared packages/shared
 COPY rimss-app rimss-app
 ENV VITE_API_BASE_URL=/api
+ARG VITE_GA_MEASUREMENT_ID=
+ENV VITE_GA_MEASUREMENT_ID=$VITE_GA_MEASUREMENT_ID
 RUN npm run build -w @rimss/shared && npm run build -w rimss-app
 
 FROM nginxinc/nginx-unprivileged:1.27-alpine

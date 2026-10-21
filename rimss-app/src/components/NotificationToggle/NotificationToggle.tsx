@@ -7,6 +7,7 @@ import {
   subscribeToPush,
   unsubscribeFromPush,
 } from '../../services/pushService';
+import { trackEvent } from '../../services/telemetry';
 
 /** Lets the user opt in/out of push notifications (offers, restocks). */
 export function NotificationToggle() {
@@ -31,6 +32,7 @@ export function NotificationToggle() {
     try {
       if (enabled) await unsubscribeFromPush();
       else await subscribeToPush();
+      trackEvent(enabled ? 'notifications_disabled' : 'notifications_enabled');
       setEnabled(!enabled);
     } catch (e) {
       setError(e instanceof Error ? e.message : t('common.somethingWrong'));

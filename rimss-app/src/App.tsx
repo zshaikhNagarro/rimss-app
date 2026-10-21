@@ -5,8 +5,10 @@ import './modules'; // registers all pluggable functional modules
 import { pluginRegistry } from './plugins/PluginRegistry';
 import { CartDrawer, CartProvider } from './modules/cart';
 import { Chatbot } from './components/Chatbot';
+import { ConsentBanner } from './components/ConsentBanner';
 import { AuthDialog } from './components/AuthDialog';
 import { Header } from './components/Header';
+import { Footer } from './components/Footer';
 import { Loader } from './components/Loader';
 import { ModuleErrorBoundary } from './components/ModuleErrorBoundary';
 import { UpdatePrompt } from './components/UpdatePrompt';
@@ -64,6 +66,8 @@ function App() {
           </Suspense>
         </main>
 
+        <Footer />
+
         <CartDrawer
           open={cartOpen}
           onClose={() => setCartOpen(false)}
@@ -74,6 +78,7 @@ function App() {
           <AuthDialog open onClose={closeAuth} onSuccess={() => resumeCart && setCartOpen(true)} />
         )}
         <UpdatePrompt />
+        <ConsentBanner />
         <Chatbot />
       </div>
     </CartProvider>

@@ -89,7 +89,7 @@ referencePageFurniture('General Document.docx', 'RIMSS')
 
             h2('2.2 Delivery Plan by Phase'),
             p(
-              'Effort per phase is detailed in the Estimation Sheet (about 1,100 person-hours in total); phases overlap where noted.',
+              'Effort per phase is detailed in the Estimation Sheet (about 1,100 person-hours manually, about 620 with AI-assisted delivery, a saving of roughly 45%, in line with published AI-coding productivity gains of 30 to 55%; the sheet also estimates token usage). Phases overlap where noted.',
             ),
             table(
               ['Phase', 'Focus', 'Key Outputs'],

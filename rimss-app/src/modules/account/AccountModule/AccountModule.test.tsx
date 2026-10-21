@@ -54,7 +54,7 @@ describe('AccountModule signed out', () => {
 });
 
 describe('AccountModule signed in', () => {
-  beforeEach(() => setSession({ token: 't', email: 'a@example.com' }));
+  beforeEach(() => setSession({ email: 'a@example.com' }));
 
   it('lists orders with item count and actions for pending orders', async () => {
     render(<AccountModule />);

@@ -12,7 +12,7 @@ import { CartDrawer } from './CartDrawer';
 
 beforeEach(() => {
   vi.resetAllMocks();
-  setSession({ token: 't', email: 'a@example.com' });
+  setSession({ email: 'a@example.com' });
 });
 
 function Seed() {

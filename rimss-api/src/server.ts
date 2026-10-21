@@ -74,6 +74,15 @@ async function main() {
     logger.info({ port: config.port }, 'RIMSS API listening');
   });
 
+  if (config.orderTtlMinutes > 0) {
+    const sweep = () =>
+      deps.orders
+        .expirePending(new Date(Date.now() - config.orderTtlMinutes * 60_000))
+        .then((expired) => expired && logger.info({ expired }, 'expired unpaid orders'))
+        .catch((err) => logger.error({ err }, 'order expiry failed'));
+    setInterval(sweep, 60_000).unref();
+  }
+
   for (const signal of ['SIGINT', 'SIGTERM'] as const) {
     process.on(signal, () => server.close(() => closeDb().finally(() => process.exit(0))));
   }

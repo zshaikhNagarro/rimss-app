@@ -1,4 +1,8 @@
-import { Link, NavLink } from 'react-router-dom';
+import { useEffect, useState, type FormEvent } from 'react';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
+import type { Product } from '../../types/product';
+import { productService } from '../../services/productService';
+import { useDebouncedValue } from '../../hooks/useDebouncedValue';
 import type { ModulePlugin } from '../../plugins/PluginRegistry';
 import { useCart } from '../../modules/cart';
 import { useTheme } from '../../hooks/useTheme';
@@ -10,6 +14,9 @@ import { LanguageMenu } from '../LanguageMenu';
 import { NotificationToggle } from '../NotificationToggle';
 import { Button } from '../ui';
 import './Header.scss';
+
+const IDLE_TIMEOUT_MS = 30 * 60 * 1000;
+const ACTIVITY_EVENTS = ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart'] as const;
 
 export function Header({
   modules,
@@ -24,6 +31,53 @@ export function Header({
   const { itemCount } = useCart();
   const { t } = useI18n();
   const [theme, toggleTheme] = useTheme();
+  const navigate = useNavigate();
+  const [query, setQuery] = useState('');
+  const [suggestions, setSuggestions] = useState<Product[]>([]);
+  const [open, setOpen] = useState(false);
+  const debouncedQuery = useDebouncedValue(query.trim(), 250);
+  const signedIn = Boolean(session);
+
+  useEffect(() => {
+    if (!debouncedQuery) {
+      setSuggestions([]);
+      return;
+    }
+    let cancelled = false;
+    productService
+      .searchPage({ q: debouncedQuery }, 'asc', 0, 6)
+      .then((page) => !cancelled && setSuggestions(page.items))
+      .catch(() => !cancelled && setSuggestions([]));
+    return () => {
+      cancelled = true;
+    };
+  }, [debouncedQuery]);
+
+  useEffect(() => {
+    if (!signedIn) return;
+    let timer: ReturnType<typeof setTimeout>;
+    const reset = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        trackEvent('logout', { reason: 'inactivity' });
+        authService.logout();
+      }, IDLE_TIMEOUT_MS);
+    };
+    reset();
+    ACTIVITY_EVENTS.forEach((e) => window.addEventListener(e, reset, { passive: true }));
+    return () => {
+      clearTimeout(timer);
+      ACTIVITY_EVENTS.forEach((e) => window.removeEventListener(e, reset));
+    };
+  }, [signedIn]);
+
+  const onSearch = (e: FormEvent) => {
+    e.preventDefault();
+    const q = query.trim();
+    trackEvent('header_search', { length: q.length });
+    setOpen(false);
+    void navigate(q ? `/?q=${encodeURIComponent(q)}` : '/');
+  };
 
   return (
     <header className="header">
@@ -40,6 +94,48 @@ export function Header({
             </NavLink>
           ))}
       </nav>
+
+      <form
+        className="header__search"
+        role="search"
+        onSubmit={onSearch}
+        onFocus={() => setOpen(true)}
+        onBlur={(e) => {
+          if (!e.currentTarget.contains(e.relatedTarget)) setOpen(false);
+        }}
+        onKeyDown={(e) => e.key === 'Escape' && setOpen(false)}
+      >
+        <input
+          type="search"
+          className="ui-control"
+          value={query}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setOpen(true);
+          }}
+          placeholder={t('search.placeholder')}
+          aria-label={t('search.byName')}
+          autoComplete="off"
+        />
+        {open && query.trim() && suggestions.length > 0 && (
+          <ul className="header__suggestions">
+            {suggestions.map((p) => (
+              <li key={p.id}>
+                <Link
+                  to={`/product/${p.id}`}
+                  onClick={() => {
+                    trackEvent('header_search_select', { productId: p.id });
+                    setOpen(false);
+                    setQuery('');
+                  }}
+                >
+                  {p.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </form>
 
       <div className="header__actions">
         <LanguageMenu />

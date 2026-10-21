@@ -41,7 +41,7 @@ type Story = StoryObj<typeof meta>;
 
 export const OrderHistory: Story = {
   beforeEach: () => {
-    setSession({ token: 'demo', email: 'shopper@example.com' });
+    setSession({ email: 'shopper@example.com' });
     const restore = stubFetch({ '/orders': orders });
     return () => {
       restore();
@@ -52,7 +52,7 @@ export const OrderHistory: Story = {
 
 export const NoOrders: Story = {
   beforeEach: () => {
-    setSession({ token: 'demo', email: 'shopper@example.com' });
+    setSession({ email: 'shopper@example.com' });
     const restore = stubFetch({ '/orders': [] });
     return () => {
       restore();
@@ -63,7 +63,7 @@ export const NoOrders: Story = {
 
 export const OrdersFailed: Story = {
   beforeEach: () => {
-    setSession({ token: 'demo', email: 'shopper@example.com' });
+    setSession({ email: 'shopper@example.com' });
     const restore = stubFetch({ '/orders': serverError }, 50);
     return () => {
       restore();

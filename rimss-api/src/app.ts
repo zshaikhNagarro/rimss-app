@@ -46,7 +46,13 @@ export function createApp(
   const metrics = createMetrics();
   app.use(metrics.middleware);
   app.use(helmet());
-  app.use(cors({ origin: config.corsOrigins, exposedHeaders: ['X-Total-Count'] }));
+  app.use(
+    cors({
+      origin: config.corsOrigins,
+      credentials: true,
+      exposedHeaders: ['X-Total-Count'],
+    }),
+  );
   app.use(express.json({ limit: '20kb' }));
   app.use(
     rateLimit({
@@ -61,9 +67,12 @@ export function createApp(
   app.get('/api/openapi.json', (_req, res) => res.json(openApiSpec));
   app.get('/metrics', (_req, res) => res.type('text/plain').send(metrics.render()));
   app.use('/api', optionalAuth(config.jwtSecret));
-  app.use('/api', authRoutes(users ?? createMemoryUserStore(), config.jwtSecret));
+  app.use(
+    '/api',
+    authRoutes(users ?? createMemoryUserStore(), config.jwtSecret, config.isProduction),
+  );
   app.use('/api', catalogRoutes(products));
-  app.use('/api', orderRoutes(products, orders));
+  app.use('/api', orderRoutes(products, orders, config.requireAuthForOrders));
   app.use('/api', pushRoutes(push, config.adminApiKey));
   if (telemetryFile) app.use('/api', telemetryRoutes(telemetryFile));
 

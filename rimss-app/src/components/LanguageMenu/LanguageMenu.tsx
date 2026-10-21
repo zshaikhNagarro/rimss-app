@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { LANGUAGES, useI18n, type Lang } from '../../i18n';
+import { trackEvent } from '../../services/telemetry';
 import { Button } from '../ui';
 import './LanguageMenu.scss';
 
@@ -26,6 +27,7 @@ export function LanguageMenu() {
   }, [open]);
 
   const choose = (code: Lang) => {
+    trackEvent('change_language', { lang: code });
     setLang(code);
     setOpen(false);
   };

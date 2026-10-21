@@ -50,14 +50,35 @@ export const signToken = (userId: string, secret: string): string =>
 
 function readUserId(req: Request, secret: string): string | undefined {
   const header = req.header('authorization');
-  if (!header?.startsWith('Bearer ')) return undefined;
+  const token = header?.startsWith('Bearer ') ? header.slice(7) : readCookie(req, AUTH_COOKIE);
+  if (!token) return undefined;
   try {
-    const payload = jwt.verify(header.slice(7), secret, { algorithms: ['HS256'] });
+    const payload = jwt.verify(token, secret, { algorithms: ['HS256'] });
     return typeof payload === 'object' ? payload.sub : undefined;
   } catch {
     return undefined;
   }
 }
+
+export const AUTH_COOKIE = 'rimss_token';
+
+function readCookie(req: Request, name: string): string | undefined {
+  for (const part of (req.header('cookie') ?? '').split(';')) {
+    const [key, ...rest] = part.trim().split('=');
+    if (key === name) return decodeURIComponent(rest.join('='));
+  }
+  return undefined;
+}
+
+// httpOnly keeps the token away from page scripts; Lax blocks cross-site POSTs (CSRF).
+const cookieOptions = (secure: boolean) =>
+  ({ httpOnly: true, sameSite: 'lax', secure, path: '/api' }) as const;
+
+export const setAuthCookie = (res: Response, token: string, secure: boolean) =>
+  res.cookie(AUTH_COOKIE, token, { ...cookieOptions(secure), maxAge: 3_600_000 });
+
+export const clearAuthCookie = (res: Response, secure: boolean) =>
+  res.clearCookie(AUTH_COOKIE, cookieOptions(secure));
 
 declare module 'express-serve-static-core' {
   interface Request {

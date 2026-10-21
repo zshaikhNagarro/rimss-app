@@ -9,6 +9,7 @@ import { getItemLineTotal } from '../cartLogic';
 import { Button, Heading, Input } from '../../../components/ui';
 import './CartDrawer.scss';
 import { useI18n } from '../../../i18n';
+import { apiErrorMessage } from '../../../i18n/errors';
 
 const FOCUSABLE =
   'button:not([disabled]), input:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])';
@@ -28,6 +29,7 @@ export function CartDrawer({
   const { cart, total, removeProduct, setQuantity, clearCart } = useCart();
   const dialogRef = useRef<HTMLElement>(null);
   const [checkout, setCheckout] = useState<'idle' | 'submitting' | 'error'>('idle');
+  const [checkoutMessage, setCheckoutMessage] = useState<string>();
   const [order, setOrder] = useState<Order | null>(null);
   const [payment, setPayment] = useState<'idle' | 'paying' | 'error'>('idle');
   // Latest callback without re-running the focus effect on every parent render.
@@ -70,6 +72,7 @@ export function CartDrawer({
   const handleCheckout = async () => {
     if (!session) return onSignIn?.();
     trackEvent('begin_checkout', { items: cart.items.length, total });
+    setCheckoutMessage(undefined);
     setCheckout('submitting');
     try {
       const created = await orderService.createOrder(cart);
@@ -78,8 +81,9 @@ export function CartDrawer({
       setPayment('idle');
       clearCart();
       setCheckout('idle');
-    } catch {
+    } catch (err) {
       trackEvent('checkout_failed');
+      setCheckoutMessage(apiErrorMessage(err, t));
       setCheckout('error');
     }
   };
@@ -177,7 +181,7 @@ export function CartDrawer({
 
         {checkout === 'error' && (
           <p className="cart-drawer__empty" role="alert">
-            {t('cart.error')}
+            {checkoutMessage ?? t('cart.error')}
           </p>
         )}
 

@@ -5,7 +5,7 @@ import './index.scss';
 import App from './App.tsx';
 import { applyTheme, getInitialTheme } from './hooks/useTheme';
 import { I18nProvider } from './i18n';
-import { initAnalytics } from './services/analytics';
+import { getConsent, GA_ID, initAnalytics } from './services/analytics';
 import { initTelemetry } from './services/telemetry';
 import { reportWebVitals } from './services/webVitals';
 
@@ -15,7 +15,7 @@ initTelemetry(
   import.meta.env.VITE_TELEMETRY_URL ||
     `${import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000/api'}/telemetry`,
 );
-initAnalytics(import.meta.env.VITE_GA_MEASUREMENT_ID);
+if (getConsent() === 'granted') initAnalytics(GA_ID);
 reportWebVitals();
 
 createRoot(document.getElementById('root')!).render(

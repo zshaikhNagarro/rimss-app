@@ -6,6 +6,7 @@ import { useAsyncResource } from '../../../hooks/useAsyncResource';
 import { authService } from '../../../services/authService';
 import { orderService } from '../../../services/orderService';
 import { useSession } from '../../../services/session';
+import { trackEvent } from '../../../services/telemetry';
 import type { Order } from '../../../types/order';
 import { formatPrice } from '../../../utils/price';
 import './AccountModule.scss';
@@ -23,6 +24,7 @@ function OrderHistory({ email }: Readonly<{ email: string }>) {
     setActionError(false);
     try {
       const order = await orderService[action](id);
+      trackEvent(action === 'pay' ? 'payment_success' : 'order_cancelled', { orderId: id });
       setUpdated((u) => ({ ...u, [id]: order }));
     } catch {
       setActionError(true);
@@ -57,7 +59,14 @@ function OrderHistory({ email }: Readonly<{ email: string }>) {
           </Heading>
           <p className="account__email">{email}</p>
         </div>
-        <Button variant="outline" size="sm" onClick={authService.logout}>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            trackEvent('logout');
+            authService.logout();
+          }}
+        >
           {t('account.signOut')}
         </Button>
         {status === 'ready' && (
@@ -159,5 +168,5 @@ export function AccountModule() {
   const session = useSession();
   // Account is only reachable while signed in; sign-in happens in the header dialog.
   if (!session) return <Navigate to="/" replace />;
-  return <OrderHistory key={session.token} email={session.email} />;
+  return <OrderHistory key={session.email} email={session.email} />;
 }

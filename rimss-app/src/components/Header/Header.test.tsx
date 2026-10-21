@@ -41,7 +41,7 @@ describe('Header', () => {
   });
 
   it('shows auth-only modules and no sign-in button once signed in', () => {
-    setSession({ token: 't', email: 'a@example.com' });
+    setSession({ email: 'a@example.com' });
     renderHeader();
     expect(screen.getByRole('link', { name: 'Account' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Sign in' })).toBeNull();

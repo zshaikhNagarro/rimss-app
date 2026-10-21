@@ -1,0 +1,93 @@
+{
+  "greeting": "¡Hola! Soy el asistente de RIMSS. Pídeme que busque un producto o elige una opción.",
+  "fallback": "No estoy seguro de haber entendido. Prueba con chaquetas, suéteres, zapatos, regalos, opciones económicas, o escribe \"soporte\" para hablar con atención al cliente.",
+  "support": "Te pondré en contacto con atención al cliente. Escribe a support@rimss.example o llama al +1 800 555 0199 (lun-vie, 9:00-18:00).",
+  "suggestions": [
+    "Mejores chaquetas",
+    "Ideas de regalo",
+    "Opciones económicas",
+    "Contactar soporte"
+  ],
+  "intents": [
+    {
+      "keywords": [
+        "soporte",
+        "ayuda",
+        "agente",
+        "humano",
+        "atención al cliente",
+        "contactar",
+        "contacto",
+        "queja",
+        "reembolso",
+        "estado del pedido"
+      ],
+      "type": "support"
+    },
+    {
+      "keywords": ["hola", "buenas"],
+      "reply": "¡Hola! ¿Qué te gustaría comprar hoy?"
+    },
+    {
+      "keywords": ["chaqueta", "abrigo", "gabardina"],
+      "reply": "Nuestras mejores prendas de abrigo:",
+      "products": [
+        {
+          "name": "Moleskin Field Jacket",
+          "price": 249,
+          "note": "Favorita duradera para todo el año"
+        },
+        { "name": "Quilted Gilet", "price": 99, "note": "Opción ligera para capas" }
+      ]
+    },
+    {
+      "keywords": ["suéter", "sueter", "jersey", "punto", "lana", "abrigado", "invierno"],
+      "reply": "Para abrigarte, prueba estos:",
+      "products": [
+        { "name": "Heritage Wool Sweater", "price": 129, "note": "Clásico tejido de lana" },
+        { "name": "Cashmere Scarf", "price": 59, "note": "Suave y acogedora" }
+      ]
+    },
+    {
+      "keywords": ["zapato", "bota", "calzado"],
+      "reply": "Mejor calzado:",
+      "products": [{ "name": "Leather Chelsea Boots", "price": 189, "note": "Cuero artesanal" }]
+    },
+    {
+      "keywords": ["camisa", "pantalón", "pantalon", "trabajo", "oficina"],
+      "reply": "Opciones elegantes para el día a día:",
+      "products": [
+        {
+          "name": "Tattersall Check Shirt",
+          "price": 69,
+          "note": "Fácil de vestir de forma formal o informal"
+        },
+        { "name": "Corduroy Trousers", "price": 89, "note": "Cómodos y duraderos" }
+      ]
+    },
+    {
+      "keywords": ["niño", "niña", "nino", "nina", "bebé", "bebe", "hijo", "hija"],
+      "reply": "Para los más pequeños:",
+      "products": [
+        { "name": "Kids Corduroy Dungarees", "price": 45, "note": "Resistente y divertido" }
+      ]
+    },
+    {
+      "keywords": ["regalo", "obsequio", "cumpleaños"],
+      "reply": "Regalos populares:",
+      "products": [
+        { "name": "Cashmere Scarf", "price": 59, "note": "Siempre acierta" },
+        { "name": "Heritage Wool Sweater", "price": 129, "note": "Una elección atemporal" }
+      ]
+    },
+    {
+      "keywords": ["barato", "económic", "economic", "oferta", "rebaja", "mejor", "recomienda"],
+      "reply": "Mejor relación calidad-precio:",
+      "products": [
+        { "name": "Kids Corduroy Dungarees", "price": 45, "note": "El precio más bajo" },
+        { "name": "Cashmere Scarf", "price": 59, "note": "Premium por menos" },
+        { "name": "Tattersall Check Shirt", "price": 69, "note": "Excelente opción versátil" }
+      ]
+    }
+  ]
+}

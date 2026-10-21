@@ -4,9 +4,12 @@ import { authService } from '../../services/authService';
 import { HttpStatusError } from '../../services/httpClient';
 import { trackEvent } from '../../services/telemetry';
 import { useI18n, type TFunction } from '../../i18n';
+import { apiErrorMessage } from '../../i18n/errors';
 import './AuthDialog.scss';
 
 const authErrorMessage = (e: unknown, t: TFunction): string => {
+  const coded = apiErrorMessage(e, t);
+  if (coded && !(e instanceof HttpStatusError && e.code === 'VALIDATION_ERROR')) return coded;
   const status = e instanceof HttpStatusError ? e.status : 0;
   if (status === 401) return t('account.err401');
   if (status === 409) return t('account.err409');

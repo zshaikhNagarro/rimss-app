@@ -1,8 +1,11 @@
 import { expect, test } from '@playwright/test';
 
+// The catalog request now carries sort and paging parameters.
+const CATALOG = /\/api\/products(\?|$)/;
+
 test.describe('Resilience and loading states', () => {
   test('shows skeletons while the catalog loads', async ({ page }) => {
-    await page.route('**/api/products', async (route) => {
+    await page.route(CATALOG, async (route) => {
       await new Promise((r) => setTimeout(r, 1500));
       await route.continue();
     });
@@ -12,20 +15,20 @@ test.describe('Resilience and loading states', () => {
   });
 
   test('recovers from a failing catalog request via retry', async ({ page }) => {
-    await page.route('**/api/products', (route) => route.abort());
+    await page.route(CATALOG, (route) => route.abort());
     await page.goto('/');
     await expect(page.getByRole('alert')).toContainText('Unable to load products', {
       timeout: 20_000,
     });
 
-    await page.unroute('**/api/products');
+    await page.unroute(CATALOG);
     await page.getByRole('button', { name: 'Try again' }).click();
     await expect(page.locator('.product-card')).toHaveCount(8);
   });
 
   test('retries transient 5xx responses transparently', async ({ page }) => {
     let calls = 0;
-    await page.route('**/api/products', async (route) => {
+    await page.route(CATALOG, async (route) => {
       calls++;
       if (calls === 1) return route.fulfill({ status: 503, body: 'unavailable' });
       return route.continue();
