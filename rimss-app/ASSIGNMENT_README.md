@@ -1,7 +1,7 @@
 # RIMSS Working Sample (Frontend)
 
 Working sample for the YCompany RIMSS promotion assignment, by Zibran Shaikh. React + TypeScript
-frontend with a plugin-based architecture, backed by a Node.js mock API server.
+frontend with a plugin-based architecture, backed by the Express API in `../rimss-api`.
 
 ## Structure
 
@@ -14,17 +14,17 @@ frontend with a plugin-based architecture, backed by a Node.js mock API server.
   - `services/orderService.ts` — creates an order from the cart (ids and quantities only; the API prices it)
   - `hooks/` — `useAsyncResource` (load/retry/stale-response handling) and `useDebouncedValue`
   - `utils/price.ts` — discount and currency formatting helpers
-- `mock-server/` — Express server serving static JSON product data (stand-in for
-  YCompany's real backend APIs, which are out of scope per the assignment)
+- `../rimss-api/` — Express + TypeScript API (stand-in for YCompany's real backend APIs,
+  which are out of scope per the assignment)
 
 ## Run locally
 
-Terminal 1 — mock API (http://localhost:4000):
+Terminal 1 — API (http://localhost:4000):
 
 ```
-cd mock-server
+cd ../rimss-api
 npm install
-npm start
+npm run dev
 ```
 
 Terminal 2 — frontend (http://localhost:5173):

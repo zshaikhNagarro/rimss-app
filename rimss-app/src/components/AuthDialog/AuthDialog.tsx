@@ -1,11 +1,16 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useRef, useState, type FormEvent } from 'react';
+import { useModalFocus } from '../../hooks/useModalFocus';
 import { Button, Field, Heading, Input } from '../ui';
 import { authService } from '../../services/authService';
 import { HttpStatusError } from '../../services/httpClient';
+import { trackEvent } from '../../services/telemetry';
 import { useI18n, type TFunction } from '../../i18n';
+import { apiErrorMessage } from '../../i18n/errors';
 import './AuthDialog.scss';
 
 const authErrorMessage = (e: unknown, t: TFunction): string => {
+  const coded = apiErrorMessage(e, t);
+  if (coded && !(e instanceof HttpStatusError && e.code === 'VALIDATION_ERROR')) return coded;
   const status = e instanceof HttpStatusError ? e.status : 0;
   if (status === 401) return t('account.err401');
   if (status === 409) return t('account.err409');
@@ -26,23 +31,8 @@ export function AuthDialog({
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string>();
   const [busy, setBusy] = useState(false);
-  const onCloseRef = useRef(onClose);
-  useEffect(() => {
-    onCloseRef.current = onClose;
-  });
-
-  useEffect(() => {
-    if (!open) return;
-    const previouslyFocused = document.activeElement as HTMLElement | null;
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onCloseRef.current();
-    };
-    document.addEventListener('keydown', onKeyDown);
-    return () => {
-      document.removeEventListener('keydown', onKeyDown);
-      previouslyFocused?.focus?.();
-    };
-  }, [open]);
+  const dialogRef = useRef<HTMLFormElement>(null);
+  useModalFocus(open, onClose, dialogRef);
 
   if (!open) return null;
 
@@ -52,10 +42,12 @@ export function AuthDialog({
     setError(undefined);
     try {
       await authService[mode](email, password);
+      trackEvent(mode === 'login' ? 'login' : 'sign_up');
       setPassword('');
       onSuccess?.();
       onClose();
     } catch (err) {
+      trackEvent(mode === 'login' ? 'login_failed' : 'sign_up_failed');
       setError(authErrorMessage(err, t));
     } finally {
       setBusy(false);
@@ -65,6 +57,7 @@ export function AuthDialog({
   return (
     <div className="auth-dialog-backdrop" onClick={onClose}>
       <form
+        ref={dialogRef}
         className="auth-dialog"
         role="dialog"
         aria-modal="true"

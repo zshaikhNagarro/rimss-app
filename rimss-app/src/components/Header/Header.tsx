@@ -1,28 +1,29 @@
 import { Link, NavLink } from 'react-router-dom';
 import type { ModulePlugin } from '../../plugins/PluginRegistry';
 import { useCart } from '../../modules/cart';
-import { useTheme } from '../../hooks/useTheme';
+import { useIdleLogout } from '../../hooks/useIdleLogout';
 import { useSession } from '../../services/session';
-import { authService } from '../../services/authService';
+import { trackEvent } from '../../services/telemetry';
 import { useI18n } from '../../i18n';
 import { LanguageMenu } from '../LanguageMenu';
-import { NotificationToggle } from '../NotificationToggle';
+import { AccountMenu } from '../AccountMenu';
 import { Button } from '../ui';
+import { HeaderSearch } from './HeaderSearch';
 import './Header.scss';
 
 export function Header({
   modules,
   onCartClick,
   onSignInClick,
-}: {
+}: Readonly<{
   modules: ModulePlugin[];
   onCartClick: () => void;
   onSignInClick?: () => void;
-}) {
+}>) {
   const session = useSession();
   const { itemCount } = useCart();
   const { t } = useI18n();
-  const [theme, toggleTheme] = useTheme();
+  useIdleLogout(Boolean(session));
 
   return (
     <header className="header">
@@ -32,7 +33,7 @@ export function Header({
 
       <nav className="header__nav">
         {modules
-          .filter((m) => !m.hideFromNav && (!m.requiresAuth || session))
+          .filter((m) => !m.hideFromNav && !m.requiresAuth)
           .map((m) => (
             <NavLink key={m.id} to={m.route} end>
               {t(`nav.${m.id}`, undefined, m.navLabel)}
@@ -40,34 +41,24 @@ export function Header({
           ))}
       </nav>
 
+      <HeaderSearch />
+
       <div className="header__actions">
         <LanguageMenu />
 
         <Button
           variant="outline"
-          onClick={toggleTheme}
-          aria-label={theme === 'dark' ? t('header.themeToLight') : t('header.themeToDark')}
-          title={theme === 'dark' ? t('header.themeLight') : t('header.themeDark')}
+          className="header__link"
+          onClick={() => {
+            trackEvent('open_cart', { items: itemCount });
+            onCartClick();
+          }}
+          aria-label={t('header.openCart')}
         >
-          <span aria-hidden="true">{theme === 'dark' ? '\u2600' : '\u263E'}</span>{' '}
-          {theme === 'dark' ? t('header.themeLight') : t('header.themeDark')}
-        </Button>
-
-        <NotificationToggle />
-
-        <Button variant="outline" onClick={onCartClick} aria-label={t('header.openCart')}>
           {t('header.cart', { count: itemCount })}
         </Button>
 
-        {session ? (
-          <Button variant="outline" onClick={authService.logout}>
-            {t('account.signOut')}
-          </Button>
-        ) : (
-          <Button variant="outline" onClick={onSignInClick}>
-            {t('header.signIn')}
-          </Button>
-        )}
+        <AccountMenu modules={modules} onSignInClick={onSignInClick} />
       </div>
     </header>
   );

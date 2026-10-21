@@ -25,7 +25,7 @@ describe('authService', () => {
       email: 'a@example.com',
       password: 'password1',
     });
-    expect(getSession()).toEqual({ token: 'tok', email: 'a@example.com' });
+    expect(getSession()).toEqual({ email: 'a@example.com' });
   });
 
   it('registers through the register endpoint', async () => {

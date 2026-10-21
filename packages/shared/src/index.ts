@@ -82,6 +82,7 @@ export const productFiltersQuerySchema = z.object({
   color: z.string().max(50).optional(),
   maxPrice: z.coerce.number().nonnegative().optional(),
   discountedOnly: z.enum(['true', 'false']).optional(),
+  sort: z.enum(['asc', 'desc']).optional(),
   limit: z.coerce.number().int().min(1).max(100).optional(),
   offset: z.coerce.number().int().min(0).optional(),
 });

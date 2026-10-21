@@ -7,8 +7,13 @@ export function catalogRoutes(products: ProductRepository): Router {
   const router = Router();
 
   router.get('/products', async (req, res) => {
-    const { limit, offset = 0, ...f } = productFiltersQuerySchema.parse(req.query);
+    const { limit, offset = 0, sort, ...f } = productFiltersQuerySchema.parse(req.query);
     const all = await products.search({ ...f, discountedOnly: f.discountedOnly === 'true' });
+    // Sort before slicing so pages are consistent; id breaks price ties.
+    if (sort)
+      all.sort(
+        (a, b) => (sort === 'asc' ? 1 : -1) * (a.price - b.price) || a.id.localeCompare(b.id),
+      );
     res.set('X-Total-Count', String(all.length));
     res.json(limit === undefined ? all.slice(offset) : all.slice(offset, offset + limit));
   });

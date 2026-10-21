@@ -27,8 +27,30 @@ export interface ModulePlugin {
   component: ComponentType;
 }
 
+/** A component rendered inside a named slot of a host page (e.g. offers on the home page). */
+export interface WidgetPlugin {
+  id: string;
+  slot: string;
+  order?: number;
+  component: ComponentType;
+}
+
 class PluginRegistry {
   private plugins = new Map<string, ModulePlugin>();
+  private widgets = new Map<string, WidgetPlugin>();
+
+  registerWidget(widget: WidgetPlugin): void {
+    if (this.widgets.has(widget.id)) {
+      throw new Error(`Widget with id "${widget.id}" is already registered`);
+    }
+    this.widgets.set(widget.id, widget);
+  }
+
+  getWidgets(slot: string): WidgetPlugin[] {
+    return [...this.widgets.values()]
+      .filter((w) => w.slot === slot && !disabledModules.has(w.id))
+      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  }
 
   register(plugin: ModulePlugin): void {
     if (this.plugins.has(plugin.id)) {

@@ -1,13 +1,12 @@
 import { Link } from 'react-router-dom';
 import { ErrorFallback } from '../../components/ErrorFallback';
-import { ProductCard } from '../../components/ProductCard';
+import { ProductGrid } from '../../components/ProductGrid';
 import { ProductGridSkeleton } from '../../components/Skeleton';
 import { Heading } from '../../components/ui';
 import { useAsyncResource } from '../../hooks/useAsyncResource';
 import { productService } from '../../services/productService';
 import { useI18n } from '../../i18n';
 import { useWishlist } from './wishlistStore';
-import './WishlistModule.scss';
 
 export function WishlistModule() {
   const { t } = useI18n();
@@ -31,13 +30,7 @@ export function WishlistModule() {
           {t('wishlist.empty')} <Link to="/">{t('wishlist.browse')}</Link>.
         </p>
       )}
-      {status === 'ready' && saved.length > 0 && (
-        <div className="wishlist__grid">
-          {saved.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      )}
+      {status === 'ready' && saved.length > 0 && <ProductGrid products={saved} />}
     </section>
   );
 }

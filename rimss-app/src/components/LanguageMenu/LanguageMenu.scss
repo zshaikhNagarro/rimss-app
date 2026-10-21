@@ -30,24 +30,10 @@
     animation: fade-up 0.18s ease both;
   }
 
-  &__item {
-    font: inherit;
-    font-size: 0.9rem;
-    padding: 0.45rem 0.9rem;
-    border: 0;
-    border-radius: $radius-sm;
-    background: transparent;
-    color: $color-text;
+  &__item.ui-button {
+    border-color: transparent;
     text-align: left;
     white-space: nowrap;
-    cursor: pointer;
-    transition: background-color $transition-fast;
-
-    @include focus-ring;
-
-    &:hover {
-      background: $color-accent-tint;
-    }
 
     &[aria-checked='true'] {
       color: $color-accent;

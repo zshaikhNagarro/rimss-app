@@ -250,7 +250,7 @@ const doc = new Document({
 
         h2('4.3 Plugin-Based / Pluggable Architecture'),
         p(
-          "RIMSS uses a lightweight Plugin Registry (see src/plugins/PluginRegistry.ts in the working sample). Each functional module (Product Search, Product Showcase, and future modules such as Wishlist or Reviews) self-registers a manifest (id, route, nav label, component) on import. The application shell (App.tsx) never imports feature modules by name - it only renders whatever is registered. This satisfies the requirement that 'any functional module could be plugged into the application' without modifying shell code.",
+          "RIMSS uses a lightweight Plugin Registry (see src/plugins/PluginRegistry.ts in the working sample). Each functional module (Product Search, Product Showcase, and future modules such as Wishlist or Reviews) self-registers a manifest (id, route, nav label, component) on import. The application shell (App.tsx) never imports feature modules by name - it only renders whatever is registered. The registry also supports widgets plugged into named page slots: the Latest Offers banner registers into the home page's 'home-top' slot, can be hidden by the user, themed per environment (VITE_OFFERS_THEME) and disabled per environment (VITE_DISABLED_MODULES=offers). This satisfies the requirement that 'any functional module could be plugged into the application' without modifying shell code.",
         ),
         h2('4.4 Component Interaction Flow'),
         bullet(
@@ -278,10 +278,13 @@ const doc = new Document({
           'Chatbot (components/Chatbot): rule-based assistant driven by responses.json; keyword intents return canned replies and product suggestions, and the conversation is persisted in localStorage. No backend dependency.',
         ),
         bullet(
-          'Design system (styles/ + components/ui): SCSS variables/mixins and reusable Button, Card, Field, Heading and Table primitives keep modules visually consistent. Colour tokens are CSS custom properties, so a header toggle switches light and dark themes (persisted, defaults to the OS preference).',
+          'Design system (styles/ + components/ui): SCSS variables/mixins and reusable Button, Card, Field, Heading and Table primitives keep modules visually consistent. Colour tokens are CSS custom properties, so an avatar-menu toggle switches light and dark themes (persisted, defaults to the OS preference).',
         ),
         bullet(
           'Internationalisation (src/i18n): all UI strings live in a message catalogue (English and Spanish) with a header language menu; the choice is persisted and sets the page language.',
+        ),
+        bullet(
+          'Header search and session safety: a header search box suggests matching products as the user types and links straight to the product page (Enter opens the filtered Shop view). Signed-in users are signed out automatically after 30 minutes without activity.',
         ),
         bullet(
           'Accounts and checkout: guests can browse and fill a cart; checkout asks them to sign in through a modal dialog, then reopens the cart and offers a demo payment. The Account area (order history, pay, cancel) is only shown when signed in.',
@@ -290,7 +293,7 @@ const doc = new Document({
           'Persistence (rimss-api): PostgreSQL with versioned SQL migrations (001_init to 004_users) and seed-on-empty catalog; falls back to JSON files when DATABASE_URL is unset.',
         ),
         bullet(
-          'Orders are idempotent: an optional Idempotency-Key header makes checkout retries return the original order. Creating an order atomically decrements stock (cancelling restores it), so concurrent orders cannot oversell.',
+          'Orders are idempotent: an optional Idempotency-Key header makes checkout retries return the original order. Creating an order atomically decrements stock (cancelling restores it), so concurrent orders cannot oversell. Unpaid orders expire after a configurable TTL (default 30 minutes) and release their stock; in production the order endpoint requires authentication.',
         ),
         bullet(
           'Delivery: multi-stage non-root Dockerfiles for web (nginx proxying /api) and API, plus docker-compose with a Postgres service and a full-stack profile.',
@@ -344,7 +347,7 @@ const doc = new Document({
             ],
             [
               'Engagement / re-engagement',
-              'Opt-in Web Push notifications (VAPID) via the service worker for offers and restocks; user can enable/disable from the header.',
+              'Opt-in Web Push notifications (VAPID) via the service worker for offers and restocks; user can enable/disable from the header avatar menu.',
             ],
             [
               'Feature toggling',

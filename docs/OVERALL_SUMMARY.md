@@ -6,13 +6,13 @@ Quick reference for the panel. Detail lives in [ARCHITECTURE.md](ARCHITECTURE.md
 
 ### Frontend (`rimss-app`, React + TypeScript + Vite)
 
-| Area              | What was done                                                                                                          |
-| ----------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| Product Search    | Search text, category, color, max price, discounted-only and sort; state kept in the URL so views are shareable.       |
-| Product Showcase  | Product cards with discount and currency formatting (`utils/price.ts`).                                                |
-| Cart and checkout | Pure-function cart logic, `localStorage` persistence, accessible drawer; checkout posts ids and quantities only.       |
-| Pluggable modules | `PluginRegistry`: modules self-register and are routed by the shell, so adding or removing one needs no shell changes. |
-| Feature flags     | `VITE_DISABLED_MODULES` disables modules per environment.                                                              |
+| Area              | What was done                                                                                                                                                                                                                                            |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Product Search    | Search text, category, color, max price, discounted-only and sort; state kept in the URL so views are shareable. A header search box suggests matching products and links to their pages. Signed-in users are signed out after 30 minutes of inactivity. |
+| Product Showcase  | Product cards with discount and currency formatting (`utils/price.ts`).                                                                                                                                                                                  |
+| Cart and checkout | Pure-function cart logic, `localStorage` persistence, accessible drawer; checkout posts ids and quantities only.                                                                                                                                         |
+| Pluggable modules | `PluginRegistry`: modules self-register and are routed by the shell, so adding or removing one needs no shell changes.                                                                                                                                   |
+| Feature flags     | `VITE_DISABLED_MODULES` disables modules per environment.                                                                                                                                                                                                |
 
 ### Backend (`rimss-api`, Express + TypeScript)
 
@@ -26,18 +26,18 @@ Quick reference for the panel. Detail lives in [ARCHITECTURE.md](ARCHITECTURE.md
 
 ## 2. Enhancements beyond the requirements
 
-| Enhancement            | FE / BE | Detail                                                                                                                                               |
-| ---------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| PWA and offline        | FE      | Service worker caches the app shell, API (stale-while-revalidate) and images; update prompt.                                                         |
-| Web Push notifications | FE + BE | Subscribe and unsubscribe, VAPID keys, admin-only broadcast via `x-api-key`.                                                                         |
-| Rule-based chatbot     | FE      | Lightweight assistant component (ADR 0008).                                                                                                          |
-| Client resilience      | FE      | HTTP timeout and bounded retry with backoff; request cache with de-duplication; per-module error boundary.                                           |
-| Observability          | FE + BE | Telemetry sink (errors, `page_view`, `add_to_cart`, `checkout_*`) posted to `/api/telemetry`; JSON logs (pino) with request id and secret redaction. |
-| Operational hardening  | BE      | Single error envelope, health and readiness (`/api/health`, `/api/ready`), CORS allowlist, Postgres TLS verification.                                |
-| Accessibility          | FE      | Focus-trapped modal cart, Escape to close; axe WCAG 2.1 A/AA checks in Playwright.                                                                   |
-| Security headers       | FE      | CSP and related headers in `public/_headers`; non-root containers.                                                                                   |
-| Testing                | FE + BE | Vitest, API tests (pg-mem for Postgres), Playwright e2e, Storybook, bundle-size budget.                                                              |
-| Delivery tooling       | Repo    | Turborepo monorepo, Docker Compose (Postgres and full stack), CI, Husky, commitlint, Dependabot.                                                     |
+| Enhancement            | FE / BE | Detail                                                                                                                                                                                                                                                   |
+| ---------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| PWA and offline        | FE      | Service worker caches the app shell, API (stale-while-revalidate) and images; update prompt.                                                                                                                                                             |
+| Web Push notifications | FE + BE | Subscribe and unsubscribe, VAPID keys, admin-only broadcast via `x-api-key`.                                                                                                                                                                             |
+| Rule-based chatbot     | FE      | Lightweight assistant component (ADR 0008).                                                                                                                                                                                                              |
+| Client resilience      | FE      | HTTP timeout and bounded retry with backoff; request cache with de-duplication; per-module error boundary.                                                                                                                                               |
+| Observability          | FE + BE | Telemetry sink (errors, `page_view`, `add_to_cart`, `checkout_*`, auth and wishlist events) posted to `/api/telemetry` and optionally forwarded to Google Analytics 4 (`VITE_GA_MEASUREMENT_ID`); JSON logs (pino) with request id and secret redaction. |
+| Operational hardening  | BE      | Single error envelope, health and readiness (`/api/health`, `/api/ready`), CORS allowlist, Postgres TLS verification.                                                                                                                                    |
+| Accessibility          | FE      | Focus-trapped modal cart, Escape to close; axe WCAG 2.1 A/AA checks in Playwright.                                                                                                                                                                       |
+| Security headers       | FE      | CSP and related headers in `public/_headers`; non-root containers.                                                                                                                                                                                       |
+| Testing                | FE + BE | Vitest, API tests (pg-mem for Postgres), Playwright e2e, Storybook, bundle-size budget.                                                                                                                                                                  |
+| Delivery tooling       | Repo    | Turborepo monorepo, Docker Compose (Postgres and full stack), CI, Husky, commitlint, Dependabot.                                                                                                                                                         |
 
 ## 3. Key decisions (ADRs)
 
@@ -50,6 +50,9 @@ Quick reference for the panel. Detail lives in [ARCHITECTURE.md](ARCHITECTURE.md
 7. [0007](adr/0007-client-resilience.md) client resilience
 8. [0008](adr/0008-rule-based-chatbot.md) rule-based chatbot
 9. [0009](adr/0009-monorepo-tooling.md) monorepo tooling
+10. [0010](adr/0010-stock-reservation.md) stock reservation
+11. [0011](adr/0011-auth-dialog-and-checkout.md) auth dialog and checkout
+12. [0012](adr/0012-theming-and-i18n.md) theming and i18n
 
 ## 4. Likely panel questions
 
@@ -70,19 +73,29 @@ Quick reference for the panel. Detail lives in [ARCHITECTURE.md](ARCHITECTURE.md
 - Authentication: `POST /api/auth/register` and `/login` (scrypt password hashing, HS256 JWT valid 1 h, stricter rate limit). `JWT_SECRET` is required in production.
 - Order history: `GET /api/orders` (own orders only). Orders placed while signed in are hidden from other users (404); guest orders stay reachable by id.
 - Stock quantity (`stock` column, migration 003): quotes and orders return `409 INSUFFICIENT_STOCK` or `OUT_OF_STOCK` when the quantity exceeds stock. Creating an order atomically decrements stock (a conditional `UPDATE` inside the order transaction in Postgres), so concurrent orders cannot oversell; cancelling an order restores it.
-- Frontend: Account module (order history with profile summary, demo pay and cancel; visible and routable only when signed in), Wishlist module, name autocomplete, "Show more" paging and a reset action in search, low-stock message, Web Vitals reported to telemetry, reduced-motion support, dark mode (CSS custom properties, `data-theme`, persisted) and English/Spanish UI strings (`src/i18n`, persisted). Sign-in and register open in a modal (`AuthDialog`); checkout asks signed-out users to sign in, then reopens the cart and offers a demo payment (ADR 0010 to 0012).
+- Frontend: Account module (order history with profile summary, demo pay and cancel; visible and routable only when signed in), Wishlist module, name autocomplete, "Show more" paging and a reset action in search, low-stock message, Web Vitals reported to telemetry, reduced-motion support, dark mode (CSS custom properties, `data-theme`, persisted) and English/Spanish UI strings (`src/i18n`, persisted). Sign-in and register open in a modal (`AuthDialog`); checkout asks signed-out users to sign in, then reopens the cart and offers a demo payment (ADR 0010 to 0012). A site-wide `Footer` (brand, navigation links, current-year copyright, localized) closes every page, and a `ConsentBanner` gates Google Analytics (ADR 0004).
 - Delivery: Trivy image scan workflow (`.github/workflows/image-scan.yml`) and Kubernetes manifests (`k8s/`).
 
 ## 6. Known limitations and roadmap
 
 - No payment gateway; payment is a mock status change.
-- Stock is not reserved at quote time or on payment timeout: unpaid orders hold stock until cancelled.
-- Auth has no refresh tokens, password reset or email verification; the token lives in `sessionStorage`.
-- The UI requires sign-in to check out, but `POST /api/orders` still accepts guest orders from API clients.
+- Stock is reserved when an order is created, not at quote time. Unpaid orders are cancelled and their stock restored after `ORDER_TTL_MINUTES` (default 30; 0 disables).
+- Auth has no refresh tokens, password reset or email verification; the token lives in `sessionStorage` (a deliberate trade-off for a demo; an httpOnly cookie would be the production choice).
+- `POST /api/orders` rejects guests when `REQUIRE_AUTH_FOR_ORDERS=true` (the default in production); in development guest orders from API clients are still accepted.
 - Search paging is client-side because filtering is client-side; the API pagination is not used by the UI yet.
 - i18n covers UI chrome only: chatbot replies, product data and server error messages stay in English.
 - Kubernetes manifests are a starting point: images, host, TLS and secrets must be supplied.
 
-## 7. Related deliverables
+## 7. Demo script
+
+1. Run `npm run dev` and open http://localhost:5173.
+2. Search: type a name, pick a category, set max price, tick discounted only; note the URL updates.
+3. Add two products to the cart, open the drawer, press Checkout.
+4. Register a new account in the dialog (no seeded users; any email and an 8+ character password).
+5. The cart reopens: place the order, then use the demo payment. Open Account to see the order as `PAID`.
+6. Toggle dark mode and the language; go offline in DevTools and reload to show the PWA shell.
+7. Show `http://localhost:4000/api/openapi.json` and `/metrics`.
+
+## 8. Related deliverables
 
 Generated Word and Excel files are in `deliverables/output`: Solution Approach, Architecture Diagrams, Build Strategy (full and one-pager), DAR (Frontend Architecture Selection) and Estimation Sheet.

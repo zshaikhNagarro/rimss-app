@@ -41,11 +41,8 @@
     padding: 2rem 0;
   }
 
-  &__grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 1.25rem;
-
+  // Breakpoint tuning and entrance animation on top of the shared ui Grid.
+  &__grid.ui-grid {
     // Staggered entrance for loaded cards.
     > .product-card:not(.skeleton-card) {
       animation: fade-up 0.45s ease both;

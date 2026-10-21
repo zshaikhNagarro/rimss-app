@@ -7,9 +7,10 @@ import {
   subscribeToPush,
   unsubscribeFromPush,
 } from '../../services/pushService';
+import { trackEvent } from '../../services/telemetry';
 
 /** Lets the user opt in/out of push notifications (offers, restocks). */
-export function NotificationToggle() {
+export function NotificationToggle({ menuItem = false }: Readonly<{ menuItem?: boolean }>) {
   const { t } = useI18n();
   const supported = isPushSupported();
   const [enabled, setEnabled] = useState(false);
@@ -31,6 +32,7 @@ export function NotificationToggle() {
     try {
       if (enabled) await unsubscribeFromPush();
       else await subscribeToPush();
+      trackEvent(enabled ? 'notifications_disabled' : 'notifications_enabled');
       setEnabled(!enabled);
     } catch (e) {
       setError(e instanceof Error ? e.message : t('common.somethingWrong'));
@@ -41,7 +43,10 @@ export function NotificationToggle() {
 
   return (
     <Button
-      variant="outline"
+      variant={menuItem ? 'secondary' : 'outline'}
+      size={menuItem ? 'sm' : undefined}
+      role={menuItem ? 'menuitem' : undefined}
+      className={menuItem ? 'account-menu__item' : undefined}
       onClick={toggle}
       disabled={busy}
       title={error ?? undefined}

@@ -19,6 +19,10 @@ export interface Config {
   vapidSubject: string;
   jwtSecret: string;
   isProduction: boolean;
+  /** When true, POST /orders rejects guests. Defaults to true in production. */
+  requireAuthForOrders: boolean;
+  /** Minutes an unpaid order holds stock before it is cancelled; 0 disables expiry. */
+  orderTtlMinutes: number;
 }
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
@@ -48,5 +52,8 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     vapidSubject: env.VAPID_SUBJECT ?? 'mailto:admin@example.com',
     jwtSecret: env.JWT_SECRET || randomBytes(32).toString('hex'),
     isProduction: env.NODE_ENV === 'production',
+    requireAuthForOrders:
+      (env.REQUIRE_AUTH_FOR_ORDERS ?? String(env.NODE_ENV === 'production')) === 'true',
+    orderTtlMinutes: Number(env.ORDER_TTL_MINUTES ?? 30) || 0,
   };
 }

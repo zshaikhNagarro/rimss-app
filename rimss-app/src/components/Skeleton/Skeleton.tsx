@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
 import { useI18n } from '../../i18n';
-import { Card } from '../ui';
+import { Card, Grid } from '../ui';
 import '../ProductCard/ProductCard.scss';
 import './Skeleton.scss';
 
@@ -32,7 +32,7 @@ export function ProductCardSkeleton() {
 export function ProductGridSkeleton({ count = 6 }: { count?: number }) {
   const { t } = useI18n();
   return (
-    <div
+    <Grid
       className="product-search__grid"
       role="status"
       aria-busy="true"
@@ -41,7 +41,7 @@ export function ProductGridSkeleton({ count = 6 }: { count?: number }) {
       {Array.from({ length: count }, (_, i) => (
         <ProductCardSkeleton key={i} />
       ))}
-    </div>
+    </Grid>
   );
 }
 
