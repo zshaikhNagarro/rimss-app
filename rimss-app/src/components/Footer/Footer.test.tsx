@@ -5,15 +5,15 @@ import { setSession } from '../../services/session';
 import { Footer } from './Footer';
 
 describe('Footer', () => {
-  it('shows branding, navigation links and the current-year copyright', () => {
+  it('shows branding and the current-year copyright without Shop or Wishlist links', () => {
     render(
       <MemoryRouter>
         <Footer />
       </MemoryRouter>,
     );
     expect(screen.getByRole('contentinfo')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Shop' })).toHaveAttribute('href', '/');
-    expect(screen.getByRole('link', { name: 'Wishlist' })).toHaveAttribute('href', '/wishlist');
+    expect(screen.queryByRole('link', { name: 'Shop' })).toBeNull();
+    expect(screen.queryByRole('link', { name: 'Wishlist' })).toBeNull();
     expect(screen.queryByRole('link', { name: 'Account' })).toBeNull();
     expect(
       screen.getByText(`\u00a9 ${new Date().getFullYear()} YCompany. All rights reserved.`),

@@ -3,15 +3,13 @@ import { useI18n } from '../../i18n';
 import { useSession } from '../../services/session';
 import './Footer.scss';
 
-const LINKS = [
-  { to: '/', key: 'nav.product-search' },
-  { to: '/wishlist', key: 'nav.wishlist' },
-  { to: '/account', key: 'nav.account', requiresAuth: true },
-];
+const LINKS = [{ to: '/account', key: 'nav.account', requiresAuth: true }];
 
 export function Footer() {
   const { t } = useI18n();
   const session = useSession();
+
+  const links = LINKS.filter((l) => !l.requiresAuth || session);
 
   return (
     <footer className="footer">
@@ -21,13 +19,15 @@ export function Footer() {
         </strong>
         <p>{t('footer.tagline')}</p>
       </div>
-      <nav className="footer__nav" aria-label={t('footer.links')}>
-        {LINKS.filter((l) => !l.requiresAuth || session).map((l) => (
-          <Link key={l.to} to={l.to}>
-            {t(l.key)}
-          </Link>
-        ))}
-      </nav>
+      {links.length > 0 && (
+        <nav className="footer__nav" aria-label={t('footer.links')}>
+          {links.map((l) => (
+            <Link key={l.to} to={l.to}>
+              {t(l.key)}
+            </Link>
+          ))}
+        </nav>
+      )}
       <p className="footer__copy">{t('footer.copyright', { year: new Date().getFullYear() })}</p>
     </footer>
   );
