@@ -23,6 +23,8 @@ RUN npm ci --omit=dev --ignore-scripts -w @rimss/api -w @rimss/shared
 FROM node:22-alpine
 ENV NODE_ENV=production PORT=4000
 WORKDIR /repo
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack \
+  /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack
 COPY --from=deps /repo/node_modules node_modules
 COPY --from=build /repo/packages/shared/package.json packages/shared/package.json
 COPY --from=build /repo/packages/shared/dist packages/shared/dist

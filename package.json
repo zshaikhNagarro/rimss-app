@@ -21,6 +21,11 @@
     "rimss-app",
     "deliverables/gen"
   ],
+  "overrides": {
+    "exceljs": {
+      "uuid": "^11.1.1"
+    }
+  },
   "scripts": {
     "prepare": "husky || exit 0",
     "dev": "turbo run dev",

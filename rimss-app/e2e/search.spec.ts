@@ -15,7 +15,7 @@ test.describe('Product search', () => {
   });
 
   test('filters by name', async ({ page }) => {
-    await page.getByPlaceholder('e.g. sweater').fill('sweater');
+    await page.getByRole('combobox', { name: 'Search by name' }).fill('sweater');
     await expect(page.locator(CARD)).toHaveCount(1);
     await expect(page.locator(CARD)).toContainText('Heritage Wool Sweater');
   });
@@ -35,7 +35,7 @@ test.describe('Product search', () => {
   });
 
   test('shows an empty state when nothing matches', async ({ page }) => {
-    await page.getByPlaceholder('e.g. sweater').fill('zzzz');
+    await page.getByRole('combobox', { name: 'Search by name' }).fill('zzzz');
     await expect(page.getByText('No products match the selected filters.')).toBeVisible();
   });
 
