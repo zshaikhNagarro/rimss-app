@@ -66,7 +66,9 @@ test.describe('Product showcase and cart', () => {
     await page.getByLabel('Password').fill('correct horse battery');
     await page.getByRole('button', { name: 'Register' }).click();
 
-    await expect(page.getByRole('banner').getByRole('link', { name: 'Account' })).toBeVisible();
+    await expect(
+      page.getByRole('contentinfo').getByRole('link', { name: 'Account' }),
+    ).toBeVisible();
     await page.getByRole('button', { name: /Proceed to Payment/ }).click();
     await expect(page.getByRole('status')).toContainText(/Order .+ placed\. Total \$109\.65/);
     await expect(page.getByRole('button', { name: 'Open cart' })).toContainText('Cart (0)');
